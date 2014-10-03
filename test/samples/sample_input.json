@@ -1,0 +1,9 @@
+{
+  "deployment_code": "test/samples/sample_deployment.py",
+  "test_code": [
+    "test/samples/sample_test1.py",
+    "test/samples/sample_test2.py"
+  ],
+  "perf_code": "test/samples/sample_perf.py",
+  "configs_directory": "test/samples/sample_configs"
+}

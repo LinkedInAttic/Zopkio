@@ -1,0 +1,75 @@
+<div class="container">
+  <div class="content">
+    <div class="row">
+      <div class="span12">
+        <div class="page-title">
+          <h3>Test Summary</h3>
+        </div>
+      </div>
+    </div> <!-- header -->
+    <div class="row">
+      <div class="span12">
+        <div style=overflow-x:auto;">
+          <table class="table table-fitcontent table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Total tests</th>
+                <th>Total passed</th>
+                <th>Total failed</th>
+                <th>Total skipped</th>
+                <th>Total execution time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ summary[0] }}</td>
+                <td>{{ summary[1] }}</td>
+                <td>{{ summary[2] }}</td>
+                <td>{{ summary[3] }}</td>
+                <td>{{ summary[4] }} sec</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- top table -->
+    <hr />
+    <div class="row">
+      <div class="span12">
+        <h3></h3> <!-- creating consistent empty space -->
+      </div>
+    </div>
+    <div class="row">
+      <div class="span12">
+        <div style=overflow-x:auto;">
+          <table class="table table-fitcontent table-striped table-bordered" id="summaryTable">
+            <thead>
+              <tr>
+                <th>Configuration name</th>
+                <th>Skipped?</th>
+                <th>Has failures?</th>
+                <th>Has skipped?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for config_name in report_info.config_to_test_names_map %}
+                <tr>
+                  <td><a href="{{ report_info.resource_dir }}{{ config_name }}/{{ config_name ~ report_info.report_file_sfx }}">{{ config_name }}</a></td>
+                  <td>
+                    {{ 'Yes' if config_fail[config_name] == report_info.results_map["skipped"] else 'No' }}
+                  </td>
+                  <td>
+                    {{ 'Yes' if config_has_fail[config_name] == True else 'No' }}
+                  </td>
+                  <td>
+                    {{ 'Yes' if config_has_skip[config_name] == True else 'No' }}
+                  </td>
+                </tr>
+              {%- endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- summary table row -->
+  </div> <!-- content -->
+</div> <!-- container -->

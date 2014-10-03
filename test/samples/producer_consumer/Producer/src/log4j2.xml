@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+    <appenders>
+        <console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </console>
+        <file name="LogFile" fileName="logs/IntegerProducer.log">
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </file>
+        <file name="PerfFile" fileName="logs/IntegerProducerPerf.csv">
+            <PatternLayout pattern="%d{HH:mm:ss},%msg%n"/>
+        </file>
+    </appenders>
+    <loggers>
+        <Root level="error">
+            <appender-ref ref="Console"/>
+        </Root>
+        <logger name="IntegerProducer" level="trace" additivity="false">
+            <appender-ref ref="LogFile" />
+        </logger>
+        <logger name="perf.IntegerProducer" level="trace" additivity="false">
+            <appender-ref ref="PerfFile" />
+        </logger>
+    </loggers>
+</configuration>

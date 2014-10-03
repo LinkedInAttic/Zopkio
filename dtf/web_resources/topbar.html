@@ -1,0 +1,39 @@
+<div class="topbar navbar navbar-default navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand navbar-brand" href="{{ report_info.project_url }}">dtf</a>
+        <ul class="nav navbar-nav">
+          {%- if active == "summary" %}
+            <li class="active">
+          {%- else %}
+            <li>
+          {%- endif %}
+              <a href="{{ report_info.home_page }}"><span>Summary</span></a>
+            </li>
+          {%- if active == "results" %}
+            <li class="dropdown active">
+          {%- else %}
+            <li class="dropdown">
+          {%- endif %}
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>Results</span><b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                {%- for config_name in report_info.config_to_test_names_map.keys() %}
+                  <li class="dropdown-submenu">
+                    <a href="{{ report_info.resource_dir }}{{ config_name }}/{{ config_name ~ report_info.report_file_sfx }}">{{ config_name }}</a>
+                    {%- if report_info.config_to_test_names_map[config_name]|length > 0 %}
+                      <ul class="dropdown-menu">
+                        {%- for test_name in report_info.config_to_test_names_map[config_name] %}
+                          <li><a href="{{ report_info.resource_dir }}{{ config_name }}/{{ test_name ~ report_info.report_file_sfx }}">{{ test_name }}</a></li>
+                        {%- endfor %}
+                      </ul>
+                    {%- endif %}
+                  </li>
+                {%- endfor %}
+              </ul>
+            </li>
+            <li><a href="#"><span>Diff</span></a></li>
+            <li><a href="{{ report_info.logs_dir }}"><span>Logs</span></a></li>
+        </ul>
+      </div> <!-- container -->
+    </div> <!-- navbar-inner -->
+  </div> <!-- topbar -->

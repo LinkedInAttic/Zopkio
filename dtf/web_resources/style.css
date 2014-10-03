@@ -1,0 +1,175 @@
+.topbar { border-top: 5px solid #009CC7; }
+
+.topbar .navbar-inner {
+  background-color: #474747;
+  box-shadow: 1px 2px 5px 0px rgba(0, 0, 0, 0.2);
+}
+
+.topbar .brand {
+  padding: 16px 20px 22px 60px;
+  font-weight: bold;
+  color: #009CC7;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABPUlEQVR42u2WwcmEMBCF04F2oGV4U7AAKxBvHrwoNmALdqAdWIJWoJ5F0A60g1me4JLN6rI//CZ7cGCQkMH3mfgmYa7rUpqmNI4jyQpoQRPaLAxDUhXQZn3fKwOANiPFcQqwLAvVdU3TNMkH6LqOdF0nxtiWRVHIBTBN8ym+J6CkAYjiyKZp5AHwy7/nVW45BMDX8hB5nst3wbquG8g8z2psqLQPxHFMtm2/5Kd5jBHoG57nPbdun0NP+ROA4zhvPyEfeDE/hzF6xZF7kJqmndr4XwAMwzgV52suA/g2sUWXAcC2ZVluzsHzqJdkWXYdQFVVLzUQE2uCILgOQAwst1gjuukGuAFugN8FSJJkg+BTPA0/ze8XW7FmPzV//z4gFaBtW2Xi0Ga+7ysDgDazLIuiKKJhGKQJQwua0H4AE8Dyy4Wbjx0AAAAASUVORK5CYII=) no-repeat 20px 8px;
+}
+
+.topbar .brand:hover {
+  color: #009CC7;
+}
+
+.topbar .brand:focus {
+  color: #009CC7;
+}
+
+.topbar .nav li a:hover {
+  background-color: #2B2B2B;
+  color: #FFF;
+}
+
+.topbar .nav li a:focus {
+  color: #777;
+}
+
+.topbar .nav li a:focus:hover {
+  color: #FFF;
+}
+
+.topbar .nav li.active > a span {
+  color: #FFF;
+  border-bottom: 1px solid #009CC7;
+}
+
+.topbar .nav li.active > a {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav li.active > a:hover {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav li.active > a:focus {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav .open > a > span {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav .open > a {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav .open > a:hover {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav .open > a:focus {
+  color: #FFF;
+  background-color: #2B2B2B;
+}
+
+.topbar .nav .dropdown-menu > li > a:hover {
+  background-color: #009CC7;
+}
+
+body {
+  padding-top: 60px;
+  background-color: #F0F0F0;
+}
+
+.container > .content {
+  border: 1px solid #CFCFCF;
+  background-color: #FFF;
+  padding: 20px 30px 0px 30px;
+  margin: 0px 21px;
+}
+
+.container > footer {
+  margin: 0px 51px;
+}
+
+.content .table p {
+  margin: 0px 0px 0px;
+}
+
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  -webkit-border-radius: 0 6px 6px 6px;
+  -moz-border-radius: 0 6px 6px;
+  border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #ccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+  border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+  float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  -webkit-border-radius: 6px 0 6px 6px;
+  -moz-border-radius: 6px 0 6px 6px;
+  border-radius: 6px 0 6px 6px;
+}
+
+table.table-bordered > tbody > tr.sla_pass > td {
+  background-color: #ADFFC6;
+}
+
+table.table-bordered > tbody > tr.sla_fail > td {
+  background-color: #FF9999;
+}
+
+table.table-bordered > tbody > tr.test_pass > td {
+  background-color: #ADFFC6;
+}
+
+table.table-bordered > tbody > tr.test_fail > td {
+  background-color: #FF9999;
+}
+
+.page-title {
+  margin-bottom: 30px;
+}
+
+p.error-msg {
+  padding-left: 15px;
+}
+
+.table-fitcontent {
+  width: auto;
+  word-break: break-all;
+}

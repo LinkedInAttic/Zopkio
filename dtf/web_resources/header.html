@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {%- if page_title %}
+      <title>{{ page_title }}</title>
+    {%- endif %}
+    {%- if css_includes %}
+      {%- for css_include in css_includes %}
+        <link rel="stylesheet" href="{{ css_include }}">
+      {%- endfor %}
+    {%- endif %}
+    {%- if js_includes %}
+      {%- for js_include in js_includes %}
+        <script type="text/javascript" src="{{ js_include }}"></script>
+      {%- endfor %}
+    {%- endif %}
+  </head>
+  <body>

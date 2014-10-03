@@ -1,0 +1,173 @@
+<div class="container">
+  <div class="content">
+    <div class="row">
+      <div class="span12">
+        <div class="page-title">
+          <h3><a href="{{ report_info.resource_dir }}{{ config_name }}/{{ config_name ~ report_info.report_file_sfx }}">{{ config_name }}</a> : {{ test_data.name }}</h3>
+        </div>
+      </div>
+    </div> <!-- header -->
+    <div class="row">
+      <div class="span12">
+        <div style=overflow-x:auto;">
+          <table class="table table-fitcontent table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Function execution time</th>
+                <th>Total execution time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  {%- if test_data.result == report_info.results_map["skipped"] %}
+                    Skipped
+                  {%- elif test_data.result == report_info.results_map["passed"] %}
+                    Passed
+                  {%- elif test_data.result == report_info.results_map["failed"] %}
+                    Failed
+                  {%- endif %}
+                </td>
+                <td>
+                  {%- if test_data.func_start_time == None %}
+                    Skipped
+                  {%- elif test_data.func_end_time == None %}
+                    Finished with error
+                  {%- else %}
+                    {{ test_data.func_end_time - test_data.func_start_time }} sec
+                  {%- endif %}
+                </td>
+                <td>
+                  {%- if test_data.result == report_info.results_map["skipped"] %}
+                    Skipped
+                  {%- else %}
+                    {{ test_data.end_time - test_data.start_time }} sec
+                  {%- endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-fitcontent table-bordered">
+            <tbody>
+              {%- if test_data.result == report_info.results_map["failed"] %}
+                <tr>
+                  <td>
+                    Error message:
+                    <p class="error-msg">{{ test_data.exception }}</p>
+                  </td>
+                </tr>
+              {%- endif %}
+              {%- if test_data.message != "" %}
+                <tr>
+                  <td>
+                    Other messages:
+                    <p class="error-msg">{{ test_data.message|replace("\n", "<br>")|replace(" ", "&nbsp;") }}</p>
+                  </td>
+                </tr>
+              {%- endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- top table -->
+    {%- if test_data.result != report_info.results_map["skipped"] %}
+      <div class="row">
+        <div class="span12">
+          <div style=overflow-x:auto;">
+            <table class="table table-fitcontent table-striped table-bordered">
+              <tbody>
+                <tr>
+                  <td><a href="{{ report_info.naarad_dir }}/{{ test_data.naarad_id }}/report.html">Naarad report</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- top table 2 -->
+      {%- set stats = test_data.naarad_stats %}
+      {%- if (stats != None) and (stats|length > 0) %}
+        <hr />
+        <div class="row">
+          <div class="span12">
+            <h3>Metrics</h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span12">
+            <div style=overflow-x:auto;">
+              {%- for metric_name in stats.keys() %}
+                {%- if stats[metric_name]|length > 0 %}
+                  {%- set submetric_dict = stats[metric_name] %}
+                  <div><h4>{{ metric_name }}</h4></div>
+                  <table class="table table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Submetric</th>
+                        {%- set any_submetric = submetric_dict.values()[0] %}
+                        {%- for column_name in any_submetric|sort %}
+                          <th>{{ column_name }}</th>
+                        {%- endfor %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {%- for submetric_name, submetric_map in submetric_dict.items() %}
+                        <tr>
+                          <td>{{ submetric_name }}</td>
+                          {%- for key in submetric_map.keys()|sort %}
+                            <td>{{ submetric_map[key] }}</td>
+                          {%- endfor %}
+                        </tr>
+                      {%- endfor %}
+                    </tbody>
+                  </table>
+                {%- endif %}
+              {%- endfor %}
+            </div>
+          </div>
+        </div> <!-- metrics summary table -->
+      {%- endif %}
+      {%- set slas = test_data.sla_objs %}
+      {%- if (slas != None) and (slas|length > 0) %}
+        <hr />
+        <div class="row">
+          <div class="span12">
+            <h3>SLAs</h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span12">
+            <div style=overflow-x:auto;">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>metric</th>
+                    <th>submetric</th>
+                    <th>sla rule</th>
+                    <th>value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%- for sla in slas %}
+                    {%- if sla.sla_passed == True %}
+                      <tr class="sla_pass">
+                    {%- elif sla.sla_passed == False %}
+                      <tr class="sla_fail">
+                    {%- else %}
+                      <tr>
+                    {%- endif %}
+                        <td>{{ sla.metric }}</td>
+                        <td>{{ sla.sub_metric }}</td>
+                        <td>{{ sla.stat_name }} {{ sla.sla_type }} {{ sla.threshold }}</td>
+                        <td>{{ sla.stat_value }}</td>
+                      </tr>
+                  {%- endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div> <!-- slas summary table -->
+      {%- endif %}
+    {%- endif %}
+  </div> <!-- content -->
+</div> <!-- container -->

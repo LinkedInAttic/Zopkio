@@ -1,0 +1,103 @@
+<div class="container">
+  <div class="content">
+    <div class="row">
+      <div class="span12">
+        <div class="page-title">
+          <h3>{{ config_data.name }}</h3>
+        </div>
+      </div>
+    </div> <!-- header -->
+    <div class="row">
+      <div class="span12">
+        <div style=overflow-x:auto;">
+          <table class="table table-fitcontent table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Total tests</th>
+                <th>Passed</th>
+                <th>Failed</th>
+                <th>Skipped</th>
+                <th>Execution time</th>
+                <th>Naarad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ summary[0] }}</td>
+                <td>{{ summary[1] }}</td>
+                <td>{{ summary[2] }}</td>
+                <td>{{ summary[3] }}</td>
+                <td>{{ summary[4] }} sec</td>
+                <td><a href="{{ report_info.naarad_dir }}/{{ config_data.naarad_id }}/report.html">Report</a></td>
+              </tr>
+            </tbody>
+          </table>
+          {%- if config_data.message != "" %}
+            <table class="table table-fitcontent table-bordered">
+              <tbody>
+                  <tr>
+                    <td>
+                      Messages:
+                      <p class="error-msg">{{ config_data.message|replace("\n", "<br>")|replace(" ", "&nbsp;") }}</p>
+                    </td>
+                  </tr>
+              </tbody>
+            </table>
+          {%- endif %}
+        </div>
+      </div>
+    </div> <!-- top table -->
+    {%- if config_data.result != report_info.results_map["skipped"] %}
+      <hr />
+      <div class="row">
+        <div class="span12">
+          <h3></h3> <!-- creating consistent empty space -->
+        </div>
+      </div>
+      <div class="row">
+        <div class="span12">
+          <div style=overflow-x:auto;">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th>Test Name</th>
+                  <th>Result</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- for test in tests %}
+                  {%- if test.result == report_info.results_map["failed"] %}
+                    <tr class="test_fail">
+                  {%- elif test.result == report_info.results_map["skipped"] %}
+                    <tr>
+                  {%- elif test.result == report_info.results_map["passed"] %}
+                    <tr class="test_pass">
+                  {%- endif %}
+                      <td><a href="{{ report_info.resource_dir }}{{ config_data.name }}/{{ test.name ~ report_info.report_file_sfx }}">{{ test.name }}</a></td>
+                      <td>
+                        {%- if test.result == report_info.results_map["skipped"] %}
+                          Skipped
+                        {%- elif test.result == report_info.results_map["passed"] %}
+                          Passed
+                        {%- elif test.result == report_info.results_map["failed"] %}
+                          Failed
+                        {%- endif %}
+                      </td>
+                      <td>
+                        {%- if test.function.__doc__ == None %}
+                          Test has no docstring :(
+                        {%- else %}
+                          {{ test.function.__doc__ }}
+                        {%- endif %}
+                      </td>
+                    </tr>
+                {%- endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- table -->
+    {%- endif %}
+  </div> <!-- content -->
+</div> <!-- container -->
