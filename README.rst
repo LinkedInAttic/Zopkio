@@ -8,8 +8,8 @@ Installation
 
 To install::
 
-  git checkout https://github.com/linkedin/dtf.git
-  cd dtf
+  git clone git@github.com:linkedin/distributed-test-framework.git
+  cd distributed-test-framework
   sudo python setup.py install
 
 This should install all of the dependencies and allow you to run our sample test::
