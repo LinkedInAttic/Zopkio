@@ -36,7 +36,7 @@ setup(
   long_description = open('README.rst').read(),
   author = 'Joshua Ehrlich',
   author_email = 'jehrlich@linkedin.com',
-  url = 'http://github.com/linkedin/dtf',
+  url = 'http://github.com/linkedin/distributed-test-framework',
   license = 'Apache',
   packages = find_packages(exclude=('test', 'examples')),
   data_files = [
@@ -71,4 +71,4 @@ setup(
       'console_scripts': [
           'dtf = dtf.__main__:main'
       ]
-  })
+      })

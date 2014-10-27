@@ -21,7 +21,7 @@ import os
 
 import perf
 import dtf.runtime as runtime
-import dtf.testutilities as testutilities
+import dtf.test_utils as testutilities
 
 
 SAMPLE = lambda size: [str(i) for i in range(1, size + 1)]

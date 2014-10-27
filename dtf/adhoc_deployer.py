@@ -36,8 +36,8 @@ class SSHDeployer(Deployer):
 
   def __init__(self, service_name, configs=None):
     """
-    :param service_name:
-    :param configs:
+    :param service_name: an arbitrary name that can be used to describe the executable
+    :param configs: default configurations for the other methods
     :return:
     """
     logging.getLogger("paramiko").setLevel(logging.ERROR)
@@ -47,7 +47,7 @@ class SSHDeployer(Deployer):
 
   def install(self, unique_id, configs=None):
     """
-    Copies the executable to the remote machine under install path. Inspects the configs for three possible keys
+    Copies the executable to the remote machine under install path. Inspects the configs for te possible keys
     'hostname': the host to install on
     'install_path': the location on the remote host
     'executable': the executable to copy
@@ -61,6 +61,10 @@ class SSHDeployer(Deployer):
     :param configs:
     :return:
     """
+
+    # the following is necessay to set the configs for this function as the combination of the
+    # default configurations and the parameter with the parameter superceding the defaults but
+    # not modifying the defaults
     if configs is None:
       configs = {}
     tmp = self.default_configs.copy()
@@ -80,7 +84,8 @@ class SSHDeployer(Deployer):
           hostname = prev_hostname
     elif 'hostname' in configs:
       hostname = configs['hostname']
-    else:  # we have not installed this unique_id before and no hostname is provided in the configs so raise an error
+    else:
+      # we have not installed this unique_id before and no hostname is provided in the configs so raise an error
       logger.error("hostname was not provided for unique_id: " + unique_id)
       raise DeploymentError("hostname was not provided for unique_id: " + unique_id)
 
@@ -103,9 +108,9 @@ class SSHDeployer(Deployer):
 
         # only supports tar and zip (because those modules are provided by Python's standard library)
         if configs.get('extract', False) or self.default_configs.get('extract', False):
-          if tarfile.is_tarfile(install_location):
+          if tarfile.is_tarfile(executable):
             better_exec_command(ssh, "tar -xf {0} -C {1}".format(install_location, install_path), "Failed to extract tarfile {0}".format(exec_name))
-          elif zipfile.is_zipfile(install_location):
+          elif zipfile.is_zipfile(executable):
             better_exec_command(ssh, "unzip {0} -d {1}".format(install_location, install_path), "Failed to extract zipfile {0}".format(exec_name))
           else:
             logger.error(executable + " is not a supported filetype for extracting")
@@ -129,6 +134,9 @@ class SSHDeployer(Deployer):
     :return: if the command is executed synchronously return the underlying paramiko channel which can be used to get the stdout
     otherwise return the triple stdin, stdout, stderr
     """
+    # the following is necessay to set the configs for this function as the combination of the
+    # default configurations and the parameter with the parameter superceding the defaults but
+    # not modifying the defaults
     if configs is None:
       configs = {}
     tmp = self.default_configs.copy()
@@ -183,6 +191,9 @@ class SSHDeployer(Deployer):
     :param configs:
     :return:
     """
+    # the following is necessay to set the configs for this function as the combination of the
+    # default configurations and the parameter with the parameter superceding the defaults but
+    # not modifying the defaults
     if configs is None:
       configs = {}
     tmp = self.default_configs.copy()
@@ -218,6 +229,9 @@ class SSHDeployer(Deployer):
     :param configs:
     :return:
     """
+    # the following is necessay to set the configs for this function as the combination of the
+    # default configurations and the parameter with the parameter superceding the defaults but
+    # not modifying the defaults
     if configs is None:
       configs = {}
     tmp = self.default_configs.copy()
@@ -244,6 +258,9 @@ class SSHDeployer(Deployer):
     with `unique_id` then it should return a value of constants.PROCESS_NOT_RUNNING_PID
     """
     RECV_BLOCK_SIZE = 16
+    # the following is necessay to set the configs for this function as the combination of the
+    # default configurations and the parameter with the parameter superceding the defaults but
+    # not modifying the defaults
     if configs is None:
       configs = {}
     tmp = self.default_configs.copy()
