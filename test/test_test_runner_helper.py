@@ -21,10 +21,10 @@ import os
 import shutil
 import unittest
 
-import dtf.constants as constants
-import dtf.test_runner_helper as test_runner_helper
-import dtf.runtime as runtime
-import dtf.utils as utils
+import zopkio.constants as constants
+import zopkio.test_runner_helper as test_runner_helper
+import zopkio.runtime as runtime
+import zopkio.utils as utils
 
 class TestTestRunnerHelper(unittest.TestCase):
   FILE_LOCATION = os.path.dirname(os.path.abspath(__file__))

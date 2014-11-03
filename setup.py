@@ -18,9 +18,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""DTF: A distributed testing framework"""
+"""Zopkio: A distributed testing framework"""
 
-from dtf import __version__
+from zopkio import __version__
 from setuptools import find_packages, setup
 from os import path, listdir
 
@@ -30,23 +30,23 @@ def list_files(directory):
           if not path.isdir(path.join(directory, file))]
 
 setup(
-  name = 'dtf',
+  name = 'zopkio',
   version = __version__,
   description = __doc__,
   long_description = open('README.rst').read(),
   author = 'Joshua Ehrlich',
   author_email = 'jehrlich@linkedin.com',
-  url = 'http://github.com/linkedin/distributed-test-framework',
+  url = 'http://github.com/linkedin/Zopkio',
   license = 'Apache',
   packages = find_packages(exclude=('test', 'examples')),
   data_files = [
-      ('dtf/web_resources/bootstrap/css',
-          list_files('dtf/web_resources/bootstrap/css')),
-      ('dtf/web_resources/bootstrap/fonts',
-          list_files('dtf/web_resources/bootstrap/js')),
-      ('dtf/web_resources/bootstrap/js',
-          list_files('dtf/web_resources/bootstrap/fonts')),
-      ('dtf/web_resources', list_files('dtf/web_resources'))
+      ('zopkio/web_resources/bootstrap/css',
+          list_files('zopkio/web_resources/bootstrap/css')),
+      ('zopkio/web_resources/bootstrap/fonts',
+          list_files('zopkio/web_resources/bootstrap/js')),
+      ('zopkio/web_resources/bootstrap/js',
+          list_files('zopkio/web_resources/bootstrap/fonts')),
+      ('zopkio/web_resources', list_files('zopkio/web_resources'))
   ],
   test_suite = 'test',
   classifiers = [
@@ -69,6 +69,6 @@ setup(
   ],
   entry_points = {
       'console_scripts': [
-          'dtf = dtf.__main__:main'
+          'zopkio = zopkio.__main__:main'
       ]
       })

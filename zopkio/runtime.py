@@ -20,7 +20,7 @@
 from collections import defaultdict
 import os
 
-from dtf.results_collector import ResultsCollector
+from zopkio.results_collector import ResultsCollector
 
 _init_time = None
 _username = None

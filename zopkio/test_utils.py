@@ -23,7 +23,7 @@ from dateutil import parser
 import os
 import threading
 
-import dtf.runtime as runtime
+import zopkio.runtime as runtime
 
 
 def start_threads_and_join(commands):

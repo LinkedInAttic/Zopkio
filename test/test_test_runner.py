@@ -20,7 +20,7 @@
 import os
 import unittest
 
-from dtf.test_runner import TestRunner
+from zopkio.test_runner import TestRunner
 
 class TestTestRunner(unittest.TestCase):
   FILE_LOCATION = os.path.dirname(os.path.abspath(__file__))

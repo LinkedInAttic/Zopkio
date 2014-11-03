@@ -25,7 +25,7 @@ import json
 import os
 import sys
 
-import dtf.constants as constants
+import zopkio.constants as constants
 
 
 def check_dir_with_exception(dirname):
