@@ -94,7 +94,8 @@ class TestRunner(object):
       else:
         runtime.set_active_config(config)
         setup_fail = False
-        config.naarad_id = naarad_obj.signal_start(self.perf_module.naarad_config(config.mapping))
+        if not self.master_config.mapping.get("no_perf", False):
+          config.naarad_id = naarad_obj.signal_start(self.perf_module.naarad_config(config.mapping))
         config.start_time = time.time()
 
         logger.debug("Setting up configuration: " + config.name)
@@ -112,8 +113,9 @@ class TestRunner(object):
           logger.debug("Running tests for configuration: " + config.name)
           self._execute_run(config, naarad_obj)
           self._copy_logs()
-          naarad_obj.signal_stop(config.naarad_id)
-          self._execute_performance(naarad_obj)
+          if not self.master_config.mapping.get("no_perf", False):
+            naarad_obj.signal_stop(config.naarad_id)
+            self._execute_performance(naarad_obj)
           self._execute_verification()
 
         logger.debug("Tearing down configuration: " + config.name)
@@ -192,8 +194,9 @@ class TestRunner(object):
         logger.debug("Skipping" + test.name + "due to too many setup/teardown failures")
       else:
         setup_fail = False
-        test.naarad_config = self.perf_module.naarad_config(config.mapping, test_name=test.name)
-        test.naarad_id = naarad_obj.signal_start(test.naarad_config)
+        if not self.master_config.mapping.get("no-display", False):
+          test.naarad_config = self.perf_module.naarad_config(config.mapping, test_name=test.name)
+          test.naarad_id = naarad_obj.signal_start(test.naarad_config)
         test.start_time = time.time()
         logger.debug("Setting up test: " + test.name)
         try:
@@ -229,7 +232,8 @@ class TestRunner(object):
           logger.debug(test.name + "failed teardown():\n{0}".format(traceback.format_exc()))
 
         test.end_time = time.time()
-        naarad_obj.signal_stop(test.naarad_id)
+        if not self.master_config.mapping.get("no-display", False):
+          naarad_obj.signal_stop(test.naarad_id)
         logger.debug("Execution of test: " + test.name + " complete")
 
   def _execute_verification(self):
