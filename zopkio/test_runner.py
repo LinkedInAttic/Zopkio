@@ -28,12 +28,12 @@ import webbrowser
 
 from naarad import Naarad
 
-import dtf.constants as constants
-import dtf.error_messages as error_messages
-from dtf.reporter import Reporter
-import dtf.runtime as runtime
-import dtf.test_runner_helper as test_runner_helper
-import dtf.utils as utils
+import zopkio.constants as constants
+import zopkio.error_messages as error_messages
+from zopkio.reporter import Reporter
+import zopkio.runtime as runtime
+import zopkio.test_runner_helper as test_runner_helper
+import zopkio.utils as utils
 
 logger = logging.getLogger(__name__)
 

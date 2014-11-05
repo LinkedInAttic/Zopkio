@@ -21,8 +21,8 @@ import os
 import time
 
 import perf
-import dtf.runtime as runtime
-import dtf.test_utils as testutilities
+import zopkio.runtime as runtime
+import zopkio.test_utils as testutilities
 
 
 SAMPLE = lambda size: [str(i) for i in range(1, size + 1)]

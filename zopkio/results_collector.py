@@ -19,7 +19,7 @@
 
 import copy
 
-import dtf.constants as constants
+import zopkio.constants as constants
 
 class Results(object):
   def __init__(self, config, tests):

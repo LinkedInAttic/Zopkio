@@ -22,8 +22,8 @@ import logging
 import os
 import time
 
-import dtf.constants as constants
-from dtf.remote_host_helper import better_exec_command, get_sftp_client, get_ssh_client
+import zopkio.constants as constants
+from zopkio.remote_host_helper import better_exec_command, get_sftp_client, get_ssh_client
 
 logger = logging.getLogger(__name__)
 

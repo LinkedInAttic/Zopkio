@@ -22,8 +22,8 @@ import tarfile
 import zipfile
 import unittest
 
-import dtf.constants as constants
-import dtf.adhoc_deployer as adhoc_deployer
+import zopkio.constants as constants
+import zopkio.adhoc_deployer as adhoc_deployer
 
 class TestAdhocDeployer(unittest.TestCase):
   def setUp(self):

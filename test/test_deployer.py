@@ -19,7 +19,7 @@
 
 import unittest
 
-from dtf.remote_host_helper import ParamikoError, better_exec_command, get_ssh_client
+from zopkio.remote_host_helper import ParamikoError, better_exec_command, get_ssh_client
 
 class TestDeployer(unittest.TestCase):
   def test_better_exec(self):

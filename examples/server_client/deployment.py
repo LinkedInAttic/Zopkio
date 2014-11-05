@@ -19,8 +19,8 @@
 
 import os
 
-import dtf.adhoc_deployer as adhoc_deployer
-import dtf.runtime as runtime
+import zopkio.adhoc_deployer as adhoc_deployer
+import zopkio.runtime as runtime
 
 server_deployer = None
 client_deployer = None

@@ -27,11 +27,11 @@ import os
 import sys
 import time
 
-from dtf.configobj import Config
-import dtf.constants as constants
-import dtf.runtime as runtime
-from dtf.testobj import Test
-import dtf.utils as utils
+from zopkio.configobj import Config
+import zopkio.constants as constants
+import zopkio.runtime as runtime
+from zopkio.testobj import Test
+import zopkio.utils as utils
 
 logger = logging.getLogger(__name__)
 

@@ -23,9 +23,9 @@ Class used to generate the report.
 import os
 from jinja2 import Environment, FileSystemLoader
 
-import dtf.constants as constants
-import dtf.runtime as runtime
-import dtf.utils as utils
+import zopkio.constants as constants
+import zopkio.runtime as runtime
+import zopkio.utils as utils
 
 
 class _ReportInfo(object):

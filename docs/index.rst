@@ -18,13 +18,13 @@ Currently the framework is in developement mode and currently is installed in
 development mode. The following installation process should work most of the
 time but if you have difficulties please open an issue::
 
-  git checkout https://github.com/linkedin/dtf.git
-  cd dtf
+  git checkout https://github.com/linkedin/zopkio.git
+  cd zopkio
   sudo python setup.py install
 
 This should install all of the dependencies and allow you to run our sample test::
 
-  dtf examples/server_client/server_client.py
+  zopkio examples/server_client/server_client.py
 
 Note that much of the example code assumes you can ssh into your own box using your
 ssh keys so if your are having issues with the tests failing check your
@@ -40,9 +40,9 @@ checkout cloud-architecture-evaluator.
 Basic uasge
 ===========
 
-Use the dtf main script::
+Use the zopkio main script::
 
-  dtf testfile
+  zopkio testfile
 
 DTF takes several optional arguments::
 
@@ -61,9 +61,9 @@ DTF takes several optional arguments::
                         Specify the output directory for logs and test results.
                         By default, DTF will write to the current directory.
 
-Alternatively you can import dtf in your code and run specific tests::
+Alternatively you can import zopkio in your code and run specific tests::
 
-  from dtf.testrunner import TestRunner
+  from zopkio.testrunner import TestRunner
   test_runner = TestRunner(testfile, tests, config_overrides)
   test_runner.run()
 
@@ -72,7 +72,7 @@ Testing with DTF
 
 DTF provides the ability to write tests that combine performance and
 functional testing across a distributed service or services. The following
-examples can be found in dtf_trunk/src/linkedin/dtf/test/samples/server_client
+examples can be found in zopkio_trunk/src/linkedin/zopkio/test/samples/server_client
 
 Writing tests using DTF should be nearly as simple as writing tests in xUnit
 or Nose etc.  A test suite will consist of a single file specifying four
@@ -85,7 +85,7 @@ required pieces:
 
 For simplicity in the first iteratation this is assumed to be json or a python
 file with a dictionary called  *test* for example see
-dtf_trunk/src/linkedin/dtf/test/samples/server_client/server_client.py::
+zopkio_trunk/src/linkedin/zopkio/test/samples/server_client/server_client.py::
 
   import os
   test = {
@@ -375,7 +375,7 @@ framework distinguishes between three types of configs:
   #. test configs
   #. application configs
 
-Master configs are properties which affect the way dtf operates. Current properties
+Master configs are properties which affect the way zopkio operates. Current properties
 that are supported include ``max_suite_failures_before_abort`` and
 ``max_failures_per_suite_before_abort``.
 

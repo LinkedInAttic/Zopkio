@@ -31,17 +31,17 @@ import time
 import traceback
 import sys
 
-import dtf.constants as constants
-import dtf.runtime as runtime
-from dtf.test_runner import TestRunner
-import dtf.utils as utils
+import zopkio.constants as constants
+import zopkio.runtime as runtime
+from zopkio.test_runner import TestRunner
+import zopkio.utils as utils
 
 def setup_logging(output_dir):
   date_time = time.strftime("_%Y%m%d_%H%M%S",
                             time.localtime(runtime.get_init_time()))
-  log_dir = os.path.join(output_dir, "logs", "dtf_log" + date_time)
+  log_dir = os.path.join(output_dir, "logs", "zopkio_log" + date_time)
   utils.makedirs(log_dir)
-  log_file = os.path.join(log_dir, "dtf_log" + date_time + ".log")
+  log_file = os.path.join(log_dir, "zopkio_log" + date_time + ".log")
   logging.basicConfig(filename=log_file,
                       filemode='a',
                       format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
@@ -88,8 +88,8 @@ def main():
   # Set up logging.
   runtime.set_init_time(time.time())
   setup_logging(runtime.get_output_dir())
-  logger = logging.getLogger("dtf")
-  logger.info("Starting DTF")
+  logger = logging.getLogger("zopkio")
+  logger.info("Starting zopkio")
 
   try:
     utils.check_file_with_exception(args.testfile)
@@ -113,7 +113,7 @@ def main():
 
   test_runner.run()
 
-  logger.info("Exiting DTF")
+  logger.info("Exiting zopkio")
 
 if __name__ == "__main__":
   main()

@@ -20,7 +20,7 @@
 import os
 
 import perf
-import dtf.runtime as runtime
+import zopkio.runtime as runtime
 
 
 def test_basic():

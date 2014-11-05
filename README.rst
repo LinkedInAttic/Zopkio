@@ -14,7 +14,7 @@ To install::
 
 This should install all of the dependencies and allow you to run our sample test::
 
-  dtf examples/server_client/server_client.py
+  zopkio examples/server_client/server_client.py
 
 Documentation
 =============
