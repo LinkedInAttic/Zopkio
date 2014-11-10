@@ -111,7 +111,7 @@ class SSHDeployer(Deployer):
           if tarfile.is_tarfile(executable):
             better_exec_command(ssh, "tar -xf {0} -C {1}".format(install_location, install_path), "Failed to extract tarfile {0}".format(exec_name))
           elif zipfile.is_zipfile(executable):
-            better_exec_command(ssh, "unzip {0} -d {1}".format(install_location, install_path), "Failed to extract zipfile {0}".format(exec_name))
+            better_exec_command(ssh, "unzip -o {0} -d {1}".format(install_location, install_path), "Failed to extract zipfile {0}".format(exec_name))
           else:
             logger.error(executable + " is not a supported filetype for extracting")
             raise DeploymentError(executable + " is not a supported filetype for extracting")

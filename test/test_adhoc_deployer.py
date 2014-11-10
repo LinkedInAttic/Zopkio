@@ -30,118 +30,119 @@ class TestAdhocDeployer(unittest.TestCase):
     test_dir = os.path.dirname(os.path.abspath(__file__))
     executable = os.path.join(test_dir, "samples/trivial_program")
     install_path = "/tmp/ssh_deployer_test/"
-    start_cmd = "chmod a+x samples/trivial_program; ./samples/trivial_program"
+    start_cmd = "chmod a+x trivial_program; ./trivial_program"
     files_to_clean = ["/tmp/trivial_output"]
-    self.trivial_deployer = adhoc_deployer.SSHDeployer("samples/trivial_program",
+    self.trivial_deployer = adhoc_deployer.SSHDeployer("sample_program",
         {'executable': executable,
          'install_path': install_path,
          'start_command': start_cmd,
-         'directories_to_remove': files_to_clean})
+         'directories_to_remove': files_to_clean,
+         'terminate_only': True,
+         'pid_keyword': 'trivial_program'})
 
   def test_ssh_deployer_install_uninstall(self):
     """
     Test install and uninstall
     """
-    self.trivial_deployer.install("samples/trivial_program", {'hostname': "localhost"})
+    self.trivial_deployer.install("unique_id0", {'hostname': "localhost"})
     self.assertTrue(os.path.isdir("/tmp/ssh_deployer_test/"))
-    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/samples/trivial_program"))
-    self.trivial_deployer.uninstall("samples/trivial_program")
+    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/trivial_program"))
+    self.trivial_deployer.uninstall("unique_id0")
     self.assertFalse(os.path.isdir("/tmp/ssh_deployer_test/"))
 
   def test_ssh_deployer_start_stop(self):
     """
     Test start and stop
     """
-    self.trivial_deployer.install("samples/trivial_program", {'hostname': "localhost"})
+    self.trivial_deployer.install("unique_id0", {'hostname': "localhost"})
     self.assertTrue(os.path.isdir("/tmp/ssh_deployer_test/"))
-    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/samples/trivial_program"))
-    self.trivial_deployer.start("samples/trivial_program")
+    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/trivial_program"))
+    self.trivial_deployer.start("unique_id0")
     self.assertNotEqual(
-        self.trivial_deployer.get_pid("samples/trivial_program",
-                                      {'pid_keyword': 'samples/trivial_program'}),
+        self.trivial_deployer.get_pid("unique_id0",
+                                      {'pid_keyword': 'trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
-    self.trivial_deployer.stop("samples/trivial_program",
-                               {'pid_keyword': 'samples/trivial_program'})
+    self.trivial_deployer.stop("unique_id0")
     self.assertEqual(
-        self.trivial_deployer.get_pid("samples/trivial_program",
-                                      {'pid_keyword': 'samples/trivial_program'}),
+        self.trivial_deployer.get_pid("unique_id0",
+                                      {'pid_keyword': 'trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
-    self.trivial_deployer.uninstall("samples/trivial_program")
+    self.trivial_deployer.uninstall("unique_id0")
     self.assertFalse(os.path.isdir("/tmp/ssh_deployer_test/"))
 
   def test_ssh_deployer_deploy_undeploy(self):
     """
     Test deploy and undeploy
     """
-    self.trivial_deployer.deploy("samples/trivial_program", {'hostname': "localhost"})
+    self.trivial_deployer.deploy("unique_id0", {'hostname': "localhost"})
     self.assertTrue(os.path.isdir("/tmp/ssh_deployer_test/"))
-    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/samples/trivial_program"))
+    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/trivial_program"))
     self.assertNotEqual(
-        self.trivial_deployer.get_pid("samples/trivial_program",
-                                      {'pid_keyword': 'samples/trivial_program'}),
+        self.trivial_deployer.get_pid("unique_id0",
+                                      {'pid_keyword': 'trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
-    self.trivial_deployer.undeploy("samples/trivial_program",
-                                   {'pid_keyword': 'samples/trivial_program'})
+    self.trivial_deployer.undeploy("unique_id0")
     self.assertFalse(os.path.isdir("/tmp/ssh_deployer_test/"))
     self.assertEqual(
-        self.trivial_deployer.get_pid("samples/trivial_program",
-                                      {'pid_keyword': 'samples/trivial_program'}),
+        self.trivial_deployer.get_pid("unique_id0",
+                                      {'pid_keyword': 'trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
 
   def test_ssh_deployer_get_log(self):
     """
     Test get logs
     """
-    self.trivial_deployer.deploy("samples/trivial_program", {'hostname': "localhost"})
+    self.trivial_deployer.deploy("unique_id0", {'hostname': "localhost"})
     self.assertTrue(os.path.isdir("/tmp/ssh_deployer_test/"))
-    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/samples/trivial_program"))
+    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/trivial_program"))
     self.assertNotEqual(
-        self.trivial_deployer.get_pid("samples/trivial_program",
-                                      {'pid_keyword': 'samples/trivial_program'}),
+        self.trivial_deployer.get_pid("unique_id0",
+                                      {'pid_keyword': 'trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
     if not os.path.isdir("/tmp/trivial_output_while_running"):
       os.makedirs("/tmp/trivial_output_while_running")
 
-    self.trivial_deployer.get_logs("samples/trivial_program", ["/tmp/trivial_output"],
+    self.trivial_deployer.get_logs("unique_id0", ["/tmp/trivial_output"],
                                    "/tmp/trivial_output_while_running")
-    self.trivial_deployer.stop("samples/trivial_program",
-                               {'pid_keyword': 'samples/trivial_program'})
+    self.trivial_deployer.stop("unique_id0",
+                               {'pid_keyword': 'trivial_program'})
     self.assertEquals(
-        self.trivial_deployer.get_pid("samples/trivial_program",
-                                      {'pid_keyword': 'samples/trivial_program'}),
+        self.trivial_deployer.get_pid("unique_id0",
+                                      {'pid_keyword': 'trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
     if not os.path.isdir("/tmp/trivial_output_while_not_running"):
       os.makedirs("/tmp/trivial_output_while_not_running")
 
-    self.trivial_deployer.get_logs("samples/trivial_program", ["/tmp/trivial_output"],
+    self.trivial_deployer.get_logs("unique_id0", ["/tmp/trivial_output"],
                                    "/tmp/trivial_output_while_not_running")
-    self.trivial_deployer.uninstall("samples/trivial_program")
+    self.trivial_deployer.uninstall("unique_id0")
     self.assertFalse(os.path.isdir("/tmp/ssh_deployer_test/"))
 
   def test_ssh_deployer_get_pid(self):
     """
     Test get_pid
     """
-    self.trivial_deployer.deploy("samples/trivial_program", {'hostname': "localhost"})
-    self.trivial_deployer.deploy("samples/trivial_program2", {'hostname': "localhost"})
-    self.trivial_deployer.deploy("samples/trivial_program3", {'hostname': "localhost"})
-    self.trivial_deployer.deploy("samples/trivial_program4", {'hostname': "localhost"})
-    self.trivial_deployer.deploy("samples/trivial_program5", {'hostname': "localhost"})
-    pids = self.trivial_deployer.get_pid("samples/trivial_program",
-                                         {'pid_keyword': 'samples/trivial_program'})
+    self.trivial_deployer.deploy("unique_id0", {'hostname': "localhost"})
+    #self.trivial_deployer.deploy("unique_id1", {'hostname': "localhost"})
+    #self.trivial_deployer.deploy("unique_id2", {'hostname': "localhost"})
+    #self.trivial_deployer.deploy("unique_id3", {'hostname': "localhost"})
+    #self.trivial_deployer.deploy("unique_id4", {'hostname': "localhost"})
+    pids = self.trivial_deployer.get_pid("unique_id0",
+                                         {'pid_keyword': 'trivial_program'})
     self.assertGreater(len(pids), 0)
     pid_file = "/tmp/test_ssh_deployer_get_pid_file"
     with open(pid_file, 'w') as f:
       file_str = '\n'.join([str(pid) for pid in pids])
       f.write(file_str)
     self.assertEquals(pids,
-        self.trivial_deployer.get_pid("samples/trivial_program", {'pid_file': pid_file}))
-    self.trivial_deployer.undeploy("samples/trivial_program", {'pid_file': pid_file})
+        self.trivial_deployer.get_pid("unique_id0", {'pid_file': pid_file}))
+    self.trivial_deployer.undeploy("unique_id0")
     self.assertEquals(
-        self.trivial_deployer.get_pid("samples/trivial_program",
+        self.trivial_deployer.get_pid("unique_id0",
                                       {'pid_keyword': 'samples/trivial_program'}),
         constants.PROCESS_NOT_RUNNING_PID)
     os.remove(pid_file)
+    self.trivial_deployer.undeploy("unique_id0")
 
   def test_tar_executable(self):
     test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -180,7 +181,6 @@ class TestAdhocDeployer(unittest.TestCase):
                zipfile.ZIP_DEFLATED)
     finally:
       zf.close()
-
     install_path = "/tmp/zip_test/"
     start_cmd = "chmod a+x samples/trivial_program; ./samples/trivial_program"
     files_to_clean = ["/tmp/trivial_output"]

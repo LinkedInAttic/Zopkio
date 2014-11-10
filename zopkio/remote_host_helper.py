@@ -54,6 +54,16 @@ class ParamikoError(DeploymentError):
     return "{0}\n{1}".format(self.msg, self.errors)
 
 
+def build_os_environment_string(env):
+  """ Creates a string of the form export key0=value0;export key1=value1;... for use in
+  running commands with the specified environment
+
+  :Parameter variables: a dictionay of environmental variables
+  :Returns string: a string that can be prepended to a command to run the command with
+  the environmental variables set
+  """
+  "".join(["export {0}={1}; ".format(key, env[key]) for key in env])
+
 def better_exec_command(ssh, command, msg):
   """Uses paramiko to execute a command but handles failure by raising a ParamikoError if the command fails.
   Note that unlike paramiko.SSHClient.exec_command this is not asynchronous because we wait until the exit status is known
@@ -121,3 +131,20 @@ def get_ssh_client(hostname):
   finally:
     if ssh is not None:
       ssh.close()
+
+@contextmanager
+def get_remote_session(hostname):
+  with get_ssh_client(hostname) as ssh:
+    try:
+      shell = ssh.invoke_shell()
+      yield shell
+    finally:
+      if shell is not None:
+        shell.close()
+
+@contextmanager
+def get_remote_session_with_environment(hostname, env):
+  with get_remote_session(hostname) as shell:
+    shell.send(build_os_environment_string(env))
+    shell.send("\n")
+    yield shell

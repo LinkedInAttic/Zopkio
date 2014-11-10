@@ -104,9 +104,6 @@ class TestTestRunnerHelper(unittest.TestCase):
     """
     master_config, configs = test_runner_helper._load_configs_from_directory(
         os.path.join(self.FILE_LOCATION, "samples/sample_configs"), {})
-    for config in configs:
-      print config.name
-      print config.mapping
     self.assertEqual(len(configs), 2)
     config_names = [config.name for config in configs]
     self.assertTrue("sample_config1" in config_names)
