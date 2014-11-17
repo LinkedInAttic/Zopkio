@@ -34,7 +34,6 @@ import zopkio.error_messages as error_messages
 from zopkio.reporter import Reporter
 import zopkio.runtime as runtime
 import zopkio.test_runner_helper as test_runner_helper
-import zopkio.test_utils as test_utils
 import zopkio.utils as utils
 
 logger = logging.getLogger(__name__)

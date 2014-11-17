@@ -24,6 +24,7 @@ import shutil
 from time import sleep
 __test__ = False  # don't have nose run this as a test
 
+phase = 2
 TEST_DIRECTORY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGS_DIRECTORY = "/tmp/test_with_naarad/collected_logs/"
 OUTPUT_DIRECTORY = "/tmp/test_with_naarad/results/"

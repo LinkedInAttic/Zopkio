@@ -98,7 +98,10 @@ def get_modules(testfile, tests_to_run, config_overrides):
   master_config, configs = _load_configs_from_directory(test_dic["configs_directory"], config_overrides)
   _setup_paths(master_config.mapping.get("additional_paths", []))
   deployment_module = utils.load_module(test_dic["deployment_code"])
-  perf_module = utils.load_module(test_dic["perf_code"])
+  if  "dynamic_configuration_code" in test_dic:
+    perf_module = utils.load_module(test_dic["dynamic_configuration_code"])
+  else:
+    perf_module = utils.load_module(test_dic["perf_code"])
   test_modules = [utils.load_module(testcode) for testcode in test_dic["test_code"]]
   if tests_to_run is not None:
     tests = [test for test in _determine_tests(test_modules) if test.name in tests_to_run]
@@ -191,17 +194,21 @@ def _parse_input(testfile):
     logger.critical("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
     raise ValueError("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
 
-  valid_key_list = ["deployment_code", "test_code", "perf_code", "configs_directory"]
-  if not set(valid_key_list) == set(test_dic.keys()):
-    logger.critical("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
-    raise ValueError("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
+  old_valid_key_list = ["deployment_code", "test_code", "perf_code", "configs_directory"]
+  new_valid_key_list = ["deployment_code", "test_code", "dynamic_configuration_code", "configs_directory"]
+  if not set(old_valid_key_list) == set(test_dic.keys()) and not set(new_valid_key_list) == set(test_dic.keys()):
+    logger.critical("input requires four fields: deployment_code, test_code, dynamic_configuration_code, configs_directory")
+    raise ValueError("input requires four fields: deployment_code, test_code, dynamic_configuration_code, configs_directory")
 
   filename = test_dic["deployment_code"]
   utils.check_file_with_exception(filename)
   filenames = test_dic["test_code"]
   for filename in filenames:
     utils.check_file_with_exception(filename)
-  filename = test_dic["perf_code"]
+  if "dynamic_configuration_code" in test_dic:
+    filename = test_dic["dynamic_configuration_code"]
+  else:
+    filename = test_dic["perf_code"]
   utils.check_file_with_exception(filename)
   dirname = test_dic["configs_directory"]
   utils.check_dir_with_exception(dirname)
