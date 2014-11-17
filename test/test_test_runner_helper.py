@@ -21,7 +21,7 @@ import os
 import shutil
 import unittest
 
-import zopkio.constants as constants
+import zopkio.configobj as configobj
 import zopkio.test_runner_helper as test_runner_helper
 import zopkio.runtime as runtime
 import zopkio.utils as utils
@@ -89,7 +89,7 @@ class TestTestRunnerHelper(unittest.TestCase):
                                                  "samples/sample_perf.py"))
     dir_info = test_runner_helper.directory_setup(
         os.path.join(self.FILE_LOCATION, "samples/sample_input.py"),
-        perf_module)
+        perf_module, configobj.Config("Master", {}))
     self.assertTrue(os.path.isdir(runtime.get_reports_dir()))
     self.assertTrue("sample_input" in dir_info["report_name"])
     self.assertTrue(os.path.isdir(dir_info["results_dir"]))
@@ -104,9 +104,6 @@ class TestTestRunnerHelper(unittest.TestCase):
     """
     master_config, configs = test_runner_helper._load_configs_from_directory(
         os.path.join(self.FILE_LOCATION, "samples/sample_configs"), {})
-    for config in configs:
-      print config.name
-      print config.mapping
     self.assertEqual(len(configs), 2)
     config_names = [config.name for config in configs]
     self.assertTrue("sample_config1" in config_names)

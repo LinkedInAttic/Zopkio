@@ -166,7 +166,11 @@ def get_active_config_name():
 def set_active_tests(tests):
   global _active_tests
   for test in tests:
-    _active_tests[test.name] = test
+    if isinstance(test, list):
+      for individual_test in test:
+        _active_tests[individual_test.name] = individual_test
+    else:
+      _active_tests[test.name] = test
 
 
 def get_active_test_start_time(test_name):

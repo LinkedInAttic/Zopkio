@@ -34,6 +34,15 @@ class TestTestRunner(unittest.TestCase):
     test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
     test_runner.run()
 
+  def test_full_run(self):
+    """
+    Tests a full run with parallel tests
+    """
+    test_file = os.path.join(self.FILE_LOCATION,
+                             "samples/sample_test_with_naarad_run_tests_in_parallel.py")
+    test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
+    test_runner.run()
+
   def test_full_run_with_skip(self):
     """
     Tests failing setup for one test and having it skip

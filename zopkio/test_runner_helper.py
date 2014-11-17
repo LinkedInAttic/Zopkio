@@ -41,10 +41,14 @@ def _determine_tests(test_modules):
   """
   for module in test_modules:
     attrs = dir(module)
+    if hasattr(module, "test_phase"):
+      test_phase = module.test_phase
+    else:
+      test_phase = constants.DEFAULT_TEST_PHASE
     # The following is a way to extract the names of all functions in a module
     # An alternative is to use inspect.isfunction but this has better support for 'duck typing'
     functions = set([fun for fun in attrs if hasattr(getattr(module, fun), '__call__')])
-    tests = dict([(fun.lower(), Test(fun, getattr(module, fun))) for fun in functions if "test" in fun.lower()])
+    tests = dict([(fun.lower(), Test(fun, getattr(module, fun), test_phase)) for fun in functions if "test" in fun.lower()])
     for fun in functions:
       if "validate" in fun.lower():
         test_name = fun.lower().replace("validate", "test")
@@ -54,7 +58,7 @@ def _determine_tests(test_modules):
       yield test
 
 
-def directory_setup(testfile, perf_module):
+def directory_setup(testfile, perf_module, configs):
   """
   Sets up the output directories.
 
@@ -74,7 +78,10 @@ def directory_setup(testfile, perf_module):
   utils.makedirs(results_dir)
   dir_info["results_dir"] = results_dir
 
-  logs_dir = perf_module.LOGS_DIRECTORY
+  if "LOGS_DIRECTORY" in configs.mapping:
+    logs_dir = configs.mapping.get("LOGS_DIRECTORY")
+  else:
+    logs_dir = perf_module.LOGS_DIRECTORY
   utils.makedirs(logs_dir)
   dir_info["logs_dir"] = logs_dir
 
@@ -94,12 +101,21 @@ def get_modules(testfile, tests_to_run, config_overrides):
   master_config, configs = _load_configs_from_directory(test_dic["configs_directory"], config_overrides)
   _setup_paths(master_config.mapping.get("additional_paths", []))
   deployment_module = utils.load_module(test_dic["deployment_code"])
-  perf_module = utils.load_module(test_dic["perf_code"])
+  if  "dynamic_configuration_code" in test_dic:
+    perf_module = utils.load_module(test_dic["dynamic_configuration_code"])
+  else:
+    perf_module = utils.load_module(test_dic["perf_code"])
   test_modules = [utils.load_module(testcode) for testcode in test_dic["test_code"]]
   if tests_to_run is not None:
     tests = [test for test in _determine_tests(test_modules) if test.name in tests_to_run]
   else:
     tests = [test for test in _determine_tests(test_modules)]
+  tests_with_phases = {}
+  for test in tests:
+    tests_with_phases[test.phase] = tests_with_phases.get(test.phase, [])+[test]
+  serial_tests = tests_with_phases.pop(constants.DEFAULT_TEST_PHASE, [])
+  tests = serial_tests+[test_with_phase[1] for test_with_phase in sorted(tests_with_phases.items(), key=lambda pair: pair[0])]
+
 
   return deployment_module, perf_module, tests, master_config, configs
 
@@ -181,17 +197,21 @@ def _parse_input(testfile):
     logger.critical("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
     raise ValueError("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
 
-  valid_key_list = ["deployment_code", "test_code", "perf_code", "configs_directory"]
-  if not set(valid_key_list) == set(test_dic.keys()):
-    logger.critical("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
-    raise ValueError("input requires four fields: deployment_code, test_code, perf_code, configs_directory")
+  old_valid_key_list = ["deployment_code", "test_code", "perf_code", "configs_directory"]
+  new_valid_key_list = ["deployment_code", "test_code", "dynamic_configuration_code", "configs_directory"]
+  if not set(old_valid_key_list) == set(test_dic.keys()) and not set(new_valid_key_list) == set(test_dic.keys()):
+    logger.critical("input requires four fields: deployment_code, test_code, dynamic_configuration_code, configs_directory")
+    raise ValueError("input requires four fields: deployment_code, test_code, dynamic_configuration_code, configs_directory")
 
   filename = test_dic["deployment_code"]
   utils.check_file_with_exception(filename)
   filenames = test_dic["test_code"]
   for filename in filenames:
     utils.check_file_with_exception(filename)
-  filename = test_dic["perf_code"]
+  if "dynamic_configuration_code" in test_dic:
+    filename = test_dic["dynamic_configuration_code"]
+  else:
+    filename = test_dic["perf_code"]
   utils.check_file_with_exception(filename)
   dirname = test_dic["configs_directory"]
   utils.check_dir_with_exception(dirname)

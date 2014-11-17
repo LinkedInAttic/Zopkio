@@ -191,6 +191,7 @@ class Deployer(object):
       hostname = self.processes[unique_id].hostname
       with get_ssh_client(hostname) as ssh:
         better_exec_command(ssh, "kill -15 {0}".format(pid_str), "TERMINATING PROCESS {0}".format(unique_id))
+    pids = self.get_pid(unique_id, configs)
 
   def get_logs(self, unique_id, logs, directory):
     """ Copies logs from the remote host that the process is running on to the provided directory
