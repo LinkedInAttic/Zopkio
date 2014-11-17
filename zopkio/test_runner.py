@@ -71,7 +71,7 @@ class TestRunner(object):
   """
   def __init__(self, testfile, tests_to_run, config_overrides):
     self.testfile = testfile
-    self.deployment_module, self.dynamic_configuration_module, self.tests, self.master_config, self.configs = \
+    self.deployment_module, self.dynamic_config_module, self.tests, self.master_config, self.configs = \
         test_runner_helper.get_modules(testfile, tests_to_run, config_overrides)
 
     self.directory_info = None
@@ -96,7 +96,7 @@ class TestRunner(object):
         runtime.set_active_config(config)
         setup_fail = False
         if not self.master_config.mapping.get("no_perf", False):
-          config.naarad_id = naarad_obj.signal_start(self.dynamic_configuration_module.naarad_config(config.mapping))
+          config.naarad_id = naarad_obj.signal_start(self.dynamic_config_module.naarad_config(config.mapping))
         config.start_time = time.time()
 
         logger.debug("Setting up configuration: " + config.name)
@@ -165,11 +165,15 @@ class TestRunner(object):
     """
     Copy logs from remote machines to local destination
     """
-    utils.makedirs(self.dynamic_configuration_module.LOGS_DIRECTORY)
+    if "LOGS_DIRECTORY" in self.master_config.mapping:
+      logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY")
+    else:
+      logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
+    utils.makedirs(logs_dir)
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
-        logs = self.dynamic_configuration_module.machine_logs()[process.unique_id] + self.dynamic_configuration_module.naarad_logs()[process.unique_id]
-        deployer.get_logs(process.unique_id, logs, self.dynamic_configuration_module.LOGS_DIRECTORY)
+        logs = self.dynamic_config_module.machine_logs()[process.unique_id] + self.dynamic_config_module.naarad_logs()[process.unique_id]
+        deployer.get_logs(process.unique_id, logs, logs_dir)
 
   def _execute_performance(self, naarad_obj):
     """
@@ -178,7 +182,15 @@ class TestRunner(object):
     :param naarad_obj:
     :return:
     """
-    naarad_obj.analyze(self.dynamic_configuration_module.LOGS_DIRECTORY, self.dynamic_configuration_module.OUTPUT_DIRECTORY)
+    if "LOGS_DIRECTORY" in self.master_config.mapping:
+      logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY")
+    else:
+      logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
+    if "OUTPUT_DIRECTORY" in self.master_config.mapping:
+      output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY")
+    else:
+      output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
+    naarad_obj.analyze(logs_dir, output_dir)
 
     tests = [test for test in self.tests if not isinstance(test, list)] +\
             [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
@@ -205,7 +217,7 @@ class TestRunner(object):
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
         for test in tests:
-          test.naarad_config = self.dynamic_configuration_module.naarad_config(config.mapping, test_name=test.name)
+          test.naarad_config = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       for test in tests:
         test.start_time = time.time()
@@ -272,7 +284,7 @@ class TestRunner(object):
     else:
       setup_fail = False
       if not self.master_config.mapping.get("no-display", False):
-        test.naarad_config = self.dynamic_configuration_module.naarad_config(config.mapping, test_name=test.name)
+        test.naarad_config = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
         test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       test.start_time = time.time()
       logger.debug("Setting up test: " + test.name)
@@ -360,8 +372,12 @@ class TestRunner(object):
 
     :return:
     """
+    if "OUTPUT_DIRECTORY" in self.master_config.mapping:
+      output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY")
+    else:
+      output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
     reporter = Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
-                        self.directory_info["logs_dir"], self.dynamic_configuration_module.OUTPUT_DIRECTORY)
+                        self.directory_info["logs_dir"], output_dir)
     return reporter
 
   def _print_debug(self):
@@ -384,7 +400,9 @@ class TestRunner(object):
 
     :return:
     """
-    self.directory_info = test_runner_helper.directory_setup(self.testfile, self.dynamic_configuration_module)
+    self.directory_info = test_runner_helper.directory_setup(self.testfile,
+                                                             self.dynamic_config_module,
+                                                             self.master_config)
     self.reporter = self._get_reporter()
     runtime.set_active_tests(self.tests)
 

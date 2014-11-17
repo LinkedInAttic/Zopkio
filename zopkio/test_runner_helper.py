@@ -58,7 +58,7 @@ def _determine_tests(test_modules):
       yield test
 
 
-def directory_setup(testfile, perf_module):
+def directory_setup(testfile, perf_module, configs):
   """
   Sets up the output directories.
 
@@ -78,7 +78,10 @@ def directory_setup(testfile, perf_module):
   utils.makedirs(results_dir)
   dir_info["results_dir"] = results_dir
 
-  logs_dir = perf_module.LOGS_DIRECTORY
+  if "LOGS_DIRECTORY" in configs.mapping:
+    logs_dir = configs.mapping.get("LOGS_DIRECTORY")
+  else:
+    logs_dir = perf_module.LOGS_DIRECTORY
   utils.makedirs(logs_dir)
   dir_info["logs_dir"] = logs_dir
 
