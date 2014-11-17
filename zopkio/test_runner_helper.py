@@ -41,10 +41,14 @@ def _determine_tests(test_modules):
   """
   for module in test_modules:
     attrs = dir(module)
+    if hasattr(module, "test_phase"):
+      test_phase = module.test_phase
+    else:
+      test_phase = constants.DEFAULT_TEST_PHASE
     # The following is a way to extract the names of all functions in a module
     # An alternative is to use inspect.isfunction but this has better support for 'duck typing'
     functions = set([fun for fun in attrs if hasattr(getattr(module, fun), '__call__')])
-    tests = dict([(fun.lower(), Test(fun, getattr(module, fun))) for fun in functions if "test" in fun.lower()])
+    tests = dict([(fun.lower(), Test(fun, getattr(module, fun), test_phase)) for fun in functions if "test" in fun.lower()])
     for fun in functions:
       if "validate" in fun.lower():
         test_name = fun.lower().replace("validate", "test")
@@ -100,6 +104,12 @@ def get_modules(testfile, tests_to_run, config_overrides):
     tests = [test for test in _determine_tests(test_modules) if test.name in tests_to_run]
   else:
     tests = [test for test in _determine_tests(test_modules)]
+  tests_with_phases = {}
+  for test in tests:
+    tests_with_phases[test.phase] = tests_with_phases.get(test.phase, [])+[test]
+  serial_tests = tests_with_phases.pop(constants.DEFAULT_TEST_PHASE, [])
+  tests = serial_tests+[test_with_phase[1] for test_with_phase in sorted(tests_with_phases.items(), key=lambda pair: pair[0])]
+
 
   return deployment_module, perf_module, tests, master_config, configs
 

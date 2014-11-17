@@ -22,6 +22,7 @@ Runs tests.
 """
 
 import logging
+import threading
 import time
 import traceback
 import webbrowser
@@ -33,6 +34,7 @@ import zopkio.error_messages as error_messages
 from zopkio.reporter import Reporter
 import zopkio.runtime as runtime
 import zopkio.test_runner_helper as test_runner_helper
+import zopkio.test_utils as test_utils
 import zopkio.utils as utils
 
 logger = logging.getLogger(__name__)
@@ -70,7 +72,7 @@ class TestRunner(object):
   """
   def __init__(self, testfile, tests_to_run, config_overrides):
     self.testfile = testfile
-    self.deployment_module, self.perf_module, self.tests, self.master_config, self.configs = \
+    self.deployment_module, self.dynamic_configuration_module, self.tests, self.master_config, self.configs = \
         test_runner_helper.get_modules(testfile, tests_to_run, config_overrides)
 
     self.directory_info = None
@@ -95,7 +97,7 @@ class TestRunner(object):
         runtime.set_active_config(config)
         setup_fail = False
         if not self.master_config.mapping.get("no_perf", False):
-          config.naarad_id = naarad_obj.signal_start(self.perf_module.naarad_config(config.mapping))
+          config.naarad_id = naarad_obj.signal_start(self.dynamic_configuration_module.naarad_config(config.mapping))
         config.start_time = time.time()
 
         logger.debug("Setting up configuration: " + config.name)
@@ -162,11 +164,11 @@ class TestRunner(object):
     """
     Copy logs from remote machines to local destination
     """
-    utils.makedirs(self.perf_module.LOGS_DIRECTORY)
+    utils.makedirs(self.dynamic_configuration_module.LOGS_DIRECTORY)
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
-        logs = self.perf_module.machine_logs()[process.unique_id] + self.perf_module.naarad_logs()[process.unique_id]
-        deployer.get_logs(process.unique_id, logs, self.perf_module.LOGS_DIRECTORY)
+        logs = self.dynamic_configuration_module.machine_logs()[process.unique_id] + self.dynamic_configuration_module.naarad_logs()[process.unique_id]
+        deployer.get_logs(process.unique_id, logs, self.dynamic_configuration_module.LOGS_DIRECTORY)
 
   def _execute_performance(self, naarad_obj):
     """
@@ -175,41 +177,50 @@ class TestRunner(object):
     :param naarad_obj:
     :return:
     """
-    naarad_obj.analyze(self.perf_module.LOGS_DIRECTORY, self.perf_module.OUTPUT_DIRECTORY)
+    naarad_obj.analyze(self.dynamic_configuration_module.LOGS_DIRECTORY, self.dynamic_configuration_module.OUTPUT_DIRECTORY)
 
     for test in self.tests:
       if test.naarad_id is not None:
         test.naarad_stats = naarad_obj.get_stats_data(test.naarad_id)
         test.sla_objs = self._convert_naarad_slas_to_list(naarad_obj.get_sla_data(test.naarad_id))
 
-  def _execute_run(self, config, naarad_obj):
+  def _execute_parallel_tests(self, config, failure_handler, naarad_obj, tests):
     """
-    Executes tests for a single config
+    Evaluates a single test
+    :param config:
+    :param failure_handler:
+    :param naarad_obj:
+    :param test:
+    :return:
     """
-    failure_handler = FailureHandler(config.mapping.get("max_failures_per_suite_before_abort"))
-    for test in self.tests:
-      if not failure_handler.get_abort_status():
+    if not failure_handler.get_abort_status():
+      for test in tests:
         test.result = constants.SKIPPED
         test.message += error_messages.TEST_ABORT
-        logger.debug("Skipping" + test.name + "due to too many setup/teardown failures")
-      else:
-        setup_fail = False
-        if not self.master_config.mapping.get("no-display", False):
-          test.naarad_config = self.perf_module.naarad_config(config.mapping, test_name=test.name)
+      logger.debug("Skipping {0} due to too many setup/teardown failures".format(test.name for test in tests))
+    else:
+      setup_fail = False
+      if not self.master_config.mapping.get("no-perf", False):
+        for test in tests:
+          test.naarad_config = self.dynamic_configuration_module.naarad_config(config.mapping, test_name=test.name)
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
+      for test in tests:
         test.start_time = time.time()
-        logger.debug("Setting up test: " + test.name)
-        try:
-          if hasattr(self.deployment_module, 'setup'):
-            self.deployment_module.setup()
-        except BaseException:
+      logger.debug("Setting up tests: {0}".format([test.name for test in tests]))
+      try:
+        if hasattr(self.deployment_module, 'setup'):
+          self.deployment_module.setup()
+      except BaseException:
+        for test in tests:
           test.result = constants.SKIPPED
           test.message += error_messages.SETUP_FAILED + traceback.format_exc()
-          setup_fail = True
-          failure_handler.notify_failure()
+        setup_fail = True
+        failure_handler.notify_failure()
+        for test in tests:
           logger.debug("Aborting {0} due to setup failure:\n{1}".format(test.name, traceback.format_exc()))
-        else:
-          logger.debug("Executing test: " + test.name)
+      else:
+        logger.debug("Executing tests: {0}".format([test.name for test in tests]))
+        def run_test_command(test):
           try:
             test.func_start_time = time.time()
             test.function()
@@ -219,22 +230,100 @@ class TestRunner(object):
             test.result = constants.FAILED
             test.exception = e
             test.message = traceback.format_exc()
-        logger.debug("Tearing down test: " + test.name)
-        try:
-          if hasattr(self.deployment_module, 'teardown'):
-            self.deployment_module.teardown()
-          if not setup_fail:
-            failure_handler.notify_success()
-        except BaseException:
+        threads = [threading.Thread(target=run_test_command, args=test) for test in tests]
+        for thread in threads:
+          thread.start()
+        for thread in threads:
+          thread.join()
+      logger.debug("Tearing down tests: {0}".format([test.name for test in tests]))
+      try:
+        if hasattr(self.deployment_module, 'teardown'):
+          self.deployment_module.teardown()
+        if not setup_fail:
+          failure_handler.notify_success()
+      except BaseException:
+        for test in tests:
           test.message += error_messages.TEARDOWN_FAILED + traceback.format_exc()
-          if not setup_fail:
-            failure_handler.notify_failure()
-          logger.debug(test.name + "failed teardown():\n{0}".format(traceback.format_exc()))
-
+        if not setup_fail:
+          failure_handler.notify_failure()
+        logger.debug("{0} failed teardown():\n{1}".format([test.name for test in tests], traceback.format_exc()))
+      for test in tests:
         test.end_time = time.time()
-        if not self.master_config.mapping.get("no-display", False):
-          naarad_obj.signal_stop(test.naarad_id)
-        logger.debug("Execution of test: " + test.name + " complete")
+      if not self.master_config.mapping.get("no-display", False):
+        naarad_obj.signal_stop(test.naarad_id)
+      logger.debug("Execution of test: {0} complete".format([test.name for test in tests]))
+
+  def _execute_single_test(self, config, failure_handler, naarad_obj, test):
+    """
+    Evaluates a single test
+    :param config:
+    :param failure_handler:
+    :param naarad_obj:
+    :param test:
+    :return:
+    """
+    if not failure_handler.get_abort_status():
+      test.result = constants.SKIPPED
+      test.message += error_messages.TEST_ABORT
+      logger.debug("Skipping" + test.name + "due to too many setup/teardown failures")
+    else:
+      setup_fail = False
+      if not self.master_config.mapping.get("no-display", False):
+        test.naarad_config = self.dynamic_configuration_module.naarad_config(config.mapping, test_name=test.name)
+        test.naarad_id = naarad_obj.signal_start(test.naarad_config)
+      test.start_time = time.time()
+      logger.debug("Setting up test: " + test.name)
+      try:
+        if hasattr(self.deployment_module, 'setup'):
+          self.deployment_module.setup()
+      except BaseException:
+        test.result = constants.SKIPPED
+        test.message += error_messages.SETUP_FAILED + traceback.format_exc()
+        setup_fail = True
+        failure_handler.notify_failure()
+        logger.debug("Aborting {0} due to setup failure:\n{1}".format(test.name, traceback.format_exc()))
+      else:
+        logger.debug("Executing test: " + test.name)
+        try:
+          test.func_start_time = time.time()
+          test.function()
+          test.func_end_time = time.time()
+          test.result = constants.PASSED
+        except BaseException as e:
+          test.result = constants.FAILED
+          test.exception = e
+          test.message = traceback.format_exc()
+      logger.debug("Tearing down test: " + test.name)
+      try:
+        if hasattr(self.deployment_module, 'teardown'):
+          self.deployment_module.teardown()
+        if not setup_fail:
+          failure_handler.notify_success()
+      except BaseException:
+        test.message += error_messages.TEARDOWN_FAILED + traceback.format_exc()
+        if not setup_fail:
+          failure_handler.notify_failure()
+        logger.debug(test.name + "failed teardown():\n{0}".format(traceback.format_exc()))
+
+      test.end_time = time.time()
+      if not self.master_config.mapping.get("no-display", False):
+        naarad_obj.signal_stop(test.naarad_id)
+      logger.debug("Execution of test: " + test.name + " complete")
+
+  def _execute_run(self, config, naarad_obj):
+    """
+    Executes tests for a single config
+    """
+    failure_handler = FailureHandler(config.mapping.get("max_failures_per_suite_before_abort"))
+    for tests in self.tests:
+      if not isinstance(tests, list) or len(tests) == 1:
+        if isinstance(tests, list):
+          test = tests[0]
+        else:
+          test = tests
+        self._execute_single_test(config, failure_handler, naarad_obj, test)
+      else:
+        self._execute_parallel_tests(config, failure_handler, naarad_obj, tests)
 
   def _execute_verification(self):
     """
@@ -267,7 +356,7 @@ class TestRunner(object):
     :return:
     """
     reporter = Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
-                        self.directory_info["logs_dir"], self.perf_module.OUTPUT_DIRECTORY)
+                        self.directory_info["logs_dir"], self.dynamic_configuration_module.OUTPUT_DIRECTORY)
     return reporter
 
   def _print_debug(self):
@@ -286,7 +375,7 @@ class TestRunner(object):
 
     :return:
     """
-    self.directory_info = test_runner_helper.directory_setup(self.testfile, self.perf_module)
+    self.directory_info = test_runner_helper.directory_setup(self.testfile, self.dynamic_configuration_module)
     self.reporter = self._get_reporter()
     runtime.set_active_tests(self.tests)
 

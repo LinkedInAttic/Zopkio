@@ -21,12 +21,14 @@ class Test(object):
   """
   Structure used to store information about a test during runtime
   """
-  def __init__(self, name, function):
+  def __init__(self, name, function, phase):
     """
     :param name: name of the test
     :param function: callback that will be run during test execution
     """
     self.name = name
+
+    self.phase = phase
 
     self.function = function
     self.validation_function = None
