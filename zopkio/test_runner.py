@@ -133,7 +133,9 @@ class TestRunner(object):
         config.end_time = time.time()
         logger.debug("Execution of configuration: {0} complete".format(config.name))
 
-      runtime.get_collector().collect(config, self.tests)
+      tests = [test for test in self.tests if not isinstance(test, list)] +\
+            [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
+      runtime.get_collector().collect(config, tests)
       # prints result to standard out - delete/comment out when things are working
       # self._print_debug()
 
@@ -178,7 +180,9 @@ class TestRunner(object):
     """
     naarad_obj.analyze(self.dynamic_configuration_module.LOGS_DIRECTORY, self.dynamic_configuration_module.OUTPUT_DIRECTORY)
 
-    for test in self.tests:
+    tests = [test for test in self.tests if not isinstance(test, list)] +\
+            [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
+    for test in tests:
       if test.naarad_id is not None:
         test.naarad_stats = naarad_obj.get_stats_data(test.naarad_id)
         test.sla_objs = self._convert_naarad_slas_to_list(naarad_obj.get_sla_data(test.naarad_id))
@@ -229,7 +233,7 @@ class TestRunner(object):
             test.result = constants.FAILED
             test.exception = e
             test.message = traceback.format_exc()
-        threads = [threading.Thread(target=run_test_command, args=test) for test in tests]
+        threads = [threading.Thread(target=run_test_command, args=[test]) for test in tests]
         for thread in threads:
           thread.start()
         for thread in threads:
@@ -330,7 +334,9 @@ class TestRunner(object):
 
     :return:
     """
-    for test in self.tests:
+    tests = [test for test in self.tests if not isinstance(test, list)] +\
+            [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
+    for test in tests:
       if (test.result != constants.SKIPPED
               and test.validation_function is not None
               and hasattr(test.validation_function, '__call__')):
@@ -366,7 +372,11 @@ class TestRunner(object):
 
   def _reset_tests(self):
     for test in self.tests:
-      test.reset()
+      if isinstance(test, list):
+        for individual_test in test:
+          individual_test.reset()
+      else:
+        test.reset()
 
   def _setup(self):
     """
