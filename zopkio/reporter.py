@@ -43,7 +43,7 @@ class _ReportInfo(object):
     self.report_file_sfx = "_report.html"
 
     self.home_page = os.path.join(output_dir, "report.html")
-    self.project_url = "https://iwww.corp.linkedin.com/wiki/cf/display/ENGS/Distributed+Systems+Peformance+And+Functional+Test+Framework"
+    self.project_url = "https://github.com/linkedin/Zopkio"
 
     self.results_map = {
         "passed": constants.PASSED,
