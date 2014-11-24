@@ -40,12 +40,6 @@ setup(
   license = 'Apache',
   packages = find_packages(exclude=('test', 'examples')),
   data_files = [
-      ('zopkio/web_resources/bootstrap/css',
-          list_files('zopkio/web_resources/bootstrap/css')),
-      ('zopkio/web_resources/bootstrap/fonts',
-          list_files('zopkio/web_resources/bootstrap/js')),
-      ('zopkio/web_resources/bootstrap/js',
-          list_files('zopkio/web_resources/bootstrap/fonts')),
       ('zopkio/web_resources', list_files('zopkio/web_resources'))
   ],
   test_suite = 'test',
