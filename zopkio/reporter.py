@@ -136,14 +136,11 @@ class Reporter(object):
 
   def _generate_header(self):
     CSS_INCLUDES = [
-        "web_resources/bootstrap/css/bootstrap.min.css",
         "web_resources/style.css"
     ]
     CSS_INCLUDES[:] = [os.path.join(constants.PROJECT_ROOT_DIR, css_include) for css_include in CSS_INCLUDES]
 
     JS_INCLUDES = [
-        "web_resources/jquery.min.js",
-        "web_resources/bootstrap/js/bootstrap.min.js",
         "web_resources/script.js"
     ]
     JS_INCLUDES[:] = [os.path.join(constants.PROJECT_ROOT_DIR, js_include) for js_include in JS_INCLUDES]

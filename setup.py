@@ -40,12 +40,6 @@ setup(
   license = 'Apache',
   packages = find_packages(exclude=('test', 'examples')),
   data_files = [
-      ('zopkio/web_resources/bootstrap/css',
-          list_files('zopkio/web_resources/bootstrap/css')),
-      ('zopkio/web_resources/bootstrap/fonts',
-          list_files('zopkio/web_resources/bootstrap/js')),
-      ('zopkio/web_resources/bootstrap/js',
-          list_files('zopkio/web_resources/bootstrap/fonts')),
       ('zopkio/web_resources', list_files('zopkio/web_resources'))
   ],
   test_suite = 'test',
@@ -59,13 +53,11 @@ setup(
       'Programming Language :: Python :: 3.3',
   ],
   install_requires=[
-      'argparse',
-      'paramiko',
-      'nose',
-      'numpy',
-      'naarad',
-      'pytz',
-      'jinja2'
+      'argparse>=1.2.1',
+      'numpy>=1.7.0',
+      'naarad==1.0.8',
+      'pytz>=2014.7',
+      'jinja2>=2.7.3'
   ],
   entry_points = {
       'console_scripts': [

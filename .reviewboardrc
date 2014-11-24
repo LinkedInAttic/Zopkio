@@ -1,4 +1,0 @@
-REPOSITORY = 'dtf'
-REVIEWBOARD_URL='https://rb.corp.linkedin.com'
-TRACKING_BRANCH='origin/master'
-GUESS_FIELDS='true'

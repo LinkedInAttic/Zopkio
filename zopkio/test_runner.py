@@ -408,4 +408,8 @@ class TestRunner(object):
 
   def _skip_all_tests(self):
     for test in self.tests:
-      test.result = constants.SKIPPED
+      if isinstance(test, list):
+        for individual_test in test:
+          individual_test.result = constants.SKIPPED
+      else:
+        test.result = constants.SKIPPED

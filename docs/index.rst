@@ -1,4 +1,4 @@
-DTF - Distributed performance and functional test framework
+ZOPKIO - Distributed performance and functional test framework
 ===========================================================
 
 A performance and functional test framework for distributed systems.
@@ -44,7 +44,7 @@ Use the zopkio main script::
 
   zopkio testfile
 
-DTF takes several optional arguments::
+Zopkio takes several optional arguments::
 
   --test-only [TEST_LIST [TEST_LIST ...]]
                         run only the named tests to help debug broken tests
@@ -59,7 +59,7 @@ DTF takes several optional arguments::
                         highest priority of all configs
   --output-dir OUTPUT_DIR
                         Specify the output directory for logs and test results.
-                        By default, DTF will write to the current directory.
+                        By default, Zopkio will write to the current directory.
 
 Alternatively you can import zopkio in your code and run specific tests::
 
@@ -67,14 +67,14 @@ Alternatively you can import zopkio in your code and run specific tests::
   test_runner = TestRunner(testfile, tests, config_overrides)
   test_runner.run()
 
-Testing with DTF
+Testing with Zopkio
 ================
 
-DTF provides the ability to write tests that combine performance and
+Zopkio provides the ability to write tests that combine performance and
 functional testing across a distributed service or services. The following
 examples can be found in zopkio_trunk/src/linkedin/zopkio/test/samples/server_client
 
-Writing tests using DTF should be nearly as simple as writing tests in xUnit
+Writing tests using Zopkio should be nearly as simple as writing tests in xUnit
 or Nose etc.  A test suite will consist of a single file specifying four
 required pieces:
 
@@ -100,7 +100,7 @@ The rest of this document will describe these other files in more detail.
 Deployment
 ----------
 
-Deplyoment is one of the key features of DTF. Developers can write test in
+Deplyoment is one of the key features of Zopkio. Developers can write test in
 which they bring up arbtrary sets of services on multiple machines and then
 within the tests exercise a considerable degree of control over these machines.
 The deployment section of code will be similar to deployment in other test

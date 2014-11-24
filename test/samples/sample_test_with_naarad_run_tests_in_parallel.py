@@ -17,11 +17,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from nose.tools import assert_equals
 import os
-import paramiko
 import shutil
 from time import sleep
+
+import zopkio.remote_host_helper as remote_host_helper
 __test__ = False  # don't have nose run this as a test
 
 test_phase = 2
@@ -47,7 +47,7 @@ def setup_suite():
   if not os.path.isdir(OUTPUT_DIRECTORY):
     os.makedirs(OUTPUT_DIRECTORY)
   global __ssh__
-  __ssh__ = paramiko.SSHClient()
+  __ssh__ = remote_host_helper.sshclient()
   __ssh__.load_system_host_keys()
   __ssh__.connect("localhost")
   sample_code = os.path.join(TEST_DIRECTORY, "samples/trivial_program_with_timing")
@@ -75,7 +75,7 @@ def test0():
   """
   Yay! Docstring!
   """
-  assert_equals(1, 2)
+  assert 1 == 2
 
 
 def test1():
@@ -99,11 +99,11 @@ def test2():
 
 
 def test3():
-    assert_equals(1, 1)
+    assert 1 == 1
 
 
 def validate2():
-  assert_equals(1, 1)
+  assert 1 == 1
 
 
 def naarad_config(config, test_name=None):

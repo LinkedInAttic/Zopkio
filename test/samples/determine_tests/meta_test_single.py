@@ -17,11 +17,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from nose.tools import assert_equals
 __test__ = False
 
 def test0():
-  assert_equals(0, 0)
+  assert 0 == 0
 
 def validate0():
-  assert_equals(0, 0)
+  assert 0 == 0
