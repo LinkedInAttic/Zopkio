@@ -118,7 +118,7 @@ times the frameworke will skip tests before autmatically skipping the remaining
 tests in that suite.
 
 In addition the entire suite is rerun parameterized by the configurations (See
-:ref:`configs`) there is a second config ``max_suite_failures_before_abort``
+configs_) there is a second config ``max_suite_failures_before_abort``
 which behaves similarly.
 
 Test Files
