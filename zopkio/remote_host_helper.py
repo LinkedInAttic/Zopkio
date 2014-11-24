@@ -20,7 +20,6 @@
 """
 
 """
-import paramiko
 from contextlib import contextmanager
 
 
@@ -122,10 +121,9 @@ def get_sftp_client(hostname):
 
 @contextmanager
 def get_ssh_client(hostname):
-  ssh = paramiko.SSHClient()
   try:
+    ssh = sshclient()
     ssh.load_system_host_keys()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(hostname)
     yield ssh
   finally:
@@ -148,3 +146,12 @@ def get_remote_session_with_environment(hostname, env):
     shell.send(build_os_environment_string(env))
     shell.send("\n")
     yield shell
+
+def sshclient():
+  try:
+    import paramiko
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    return ssh
+  except ImportError:
+    return None

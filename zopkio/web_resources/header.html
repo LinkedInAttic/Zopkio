@@ -8,11 +8,15 @@
       {%- for css_include in css_includes %}
         <link rel="stylesheet" href="{{ css_include }}">
       {%- endfor %}
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     {%- endif %}
     {%- if js_includes %}
       {%- for js_include in js_includes %}
         <script type="text/javascript" src="{{ js_include }}"></script>
       {%- endfor %}
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     {%- endif %}
   </head>
   <body>

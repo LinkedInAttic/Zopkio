@@ -17,9 +17,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from nose.tools import assert_equals
 import os
-import paramiko
+import zopkio.remote_host_helper as remote_host_helper
 from time import sleep
 __test__ = False  # don't have nose run this as a test
 TEST_DIRECTORY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,7 +31,7 @@ __sample_code_in__ = None
 
 def setup_suite():
   global __ssh__
-  __ssh__ = paramiko.SSHClient()
+  __ssh__ = remote_host_helper.sshclient()
   __ssh__.load_system_host_keys()
   __ssh__.connect("localhost")
   sample_code = os.path.join(TEST_DIRECTORY, "samples/trivial_program")
@@ -47,7 +46,7 @@ def teardown_suite():
 
 
 def test0():
-  assert_equals(1, 1)
+  assert 1 == 1
 
 
 def test1():

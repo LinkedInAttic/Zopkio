@@ -17,8 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from nose.tools import assert_equals
 __test__ = False
 
 def foobar():
-  assert_equals(0, 0)
+  assert 0 == 0

@@ -17,18 +17,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from nose.tools import assert_equals
 
 def test0():
-  assert_equals(1, 1)
+  assert 1 == 1
 
 
 def test1():
-  assert_equals(1, 1)
+  assert 1 == 1
 
 
 def test2():
-  assert_equals(1, 2)
+  assert 1 == 2
 
 
 def notat_e_s_t():
@@ -36,16 +35,16 @@ def notat_e_s_t():
 
 
 def test3():
-  assert_equals(1, 1)
+  assert 1 == 1
 
 
 def validate1():
-  assert_equals(2, 2)
+  assert 2 == 2
 
 
 def validate2():
-  assert_equals(1, 1)
+  assert 1 == 1
 
 
 def validate():
-  assert_equals(1, 2)
+  assert 1 == 2
