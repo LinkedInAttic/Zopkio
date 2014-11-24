@@ -141,7 +141,6 @@ class Reporter(object):
     CSS_INCLUDES[:] = [os.path.join(constants.PROJECT_ROOT_DIR, css_include) for css_include in CSS_INCLUDES]
 
     JS_INCLUDES = [
-        "web_resources/jquery.min.js",
         "web_resources/script.js"
     ]
     JS_INCLUDES[:] = [os.path.join(constants.PROJECT_ROOT_DIR, js_include) for js_include in JS_INCLUDES]
