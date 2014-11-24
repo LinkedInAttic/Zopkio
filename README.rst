@@ -32,7 +32,7 @@ Use the zopkio main script::
 
   zopkio testfile
 
-DTF takes several optional arguments::
+Zopkio takes several optional arguments::
 
   --test-only [TEST_LIST [TEST_LIST ...]]
                         run only the named tests to help debug broken tests
@@ -47,7 +47,7 @@ DTF takes several optional arguments::
                         highest priority of all configs
   --output-dir OUTPUT_DIR
                         Specify the output directory for logs and test results.
-                        By default, DTF will write to the current directory.
+                        By default, Zopkio will write to the current directory.
 
 Alternatively you can import zopkio in your code and run specific tests::
 
