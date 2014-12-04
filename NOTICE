@@ -1,11 +1,15 @@
-© 2014 LinkedIn Corp. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at  http://www.apache.org/licenses/LICENSE-2.0
+﻿© 2014 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+As an exception from the above, the Paramiko wrapper file (zopkio/remote_host_helper.py) is licensed under the GNU Lesser General Public License v.2.1 (https://github.com/paramiko/paramiko/blob/master/LICENSE)
  
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-
-List of other open-source software used/depended on by Zopkio:
+List of open-source software used/depended on by Zopkio:
  
+Paramiko
+http://www.paramiko.org/
+Copyright 2014 Jeff Forcier
+License: GNU Lesser General Public License v.2.1 (https://github.com/paramiko/paramiko/blob/master/LICENSE)
+
 jinja2
 jinja.pocoo.org
 Copyright 2009 Jinja Team
@@ -14,18 +18,19 @@ License: BSD
 naarad
 https://github.com/linkedin/naarad
 Copyright 2013 LinkedIn
-License: Apache
+License: Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 numpy
 http://www.numpy.org/
 Copyright 2005-2013 NumPy Developers
-License: BSD
+License: BSD (http://www.numpy.org/license.html#license)
  
 pytz
 http://pytz.sourceforge.net/
 Copyright 2008-2013 Stuart Bishop
-License: MIT
+License: MIT (http://pytz.sourceforge.net/#license)
 
 bootstrap
 http://getbootstrap.com/
 License: Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
