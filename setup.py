@@ -36,7 +36,8 @@ setup(
   long_description = open('README.rst').read(),
   author = 'Joshua Ehrlich',
   author_email = 'jehrlich@linkedin.com',
-  url = 'http://github.com/linkedin/Zopkio',
+  url = 'http://github.com/linkedin/zopkio',
+  download_url = 'https://github.com/linkedin/zopkio/tarball/%s'.format(__version__),
   license = 'Apache',
   packages = find_packages(exclude=('test', 'examples')),
   data_files = [
@@ -56,6 +57,7 @@ setup(
       'argparse>=1.2.1',
       'numpy>=1.7.0',
       'naarad==1.0.8',
+      'paramiko>=1.15.1',
       'pytz>=2014.7',
       'jinja2>=2.7.3'
   ],
