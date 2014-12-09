@@ -37,7 +37,7 @@ setup(
   author = 'Joshua Ehrlich',
   author_email = 'jehrlich@linkedin.com',
   url = 'http://github.com/linkedin/zopkio',
-  download_url = 'https://github.com/linkedin/zopkio/tarball/%s'.format(__version__),
+  download_url = 'https://github.com/linkedin/zopkio/tarball/0.1.1',
   license = 'Apache',
   packages = find_packages(exclude=('test', 'examples')),
   data_files = [
