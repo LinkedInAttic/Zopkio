@@ -129,18 +129,15 @@ class TestAdhocDeployer(unittest.TestCase):
     #self.trivial_deployer.deploy("unique_id4", {'hostname': "localhost"})
     pids = self.trivial_deployer.get_pid("unique_id0",
                                          {'pid_keyword': 'trivial_program'})
-    self.assertGreater(len(pids), 0)
+    assert len(pids) > 0
     pid_file = "/tmp/test_ssh_deployer_get_pid_file"
     with open(pid_file, 'w') as f:
       file_str = '\n'.join([str(pid) for pid in pids])
       f.write(file_str)
-    self.assertEquals(pids,
-        self.trivial_deployer.get_pid("unique_id0", {'pid_file': pid_file}))
+    assert pids == self.trivial_deployer.get_pid("unique_id0", {'pid_file': pid_file})
     self.trivial_deployer.undeploy("unique_id0")
-    self.assertEquals(
-        self.trivial_deployer.get_pid("unique_id0",
-                                      {'pid_keyword': 'samples/trivial_program'}),
-        constants.PROCESS_NOT_RUNNING_PID)
+    assert self.trivial_deployer.get_pid("unique_id0", {'pid_keyword': 'samples/trivial_program'})\
+           == constants.PROCESS_NOT_RUNNING_PID
     os.remove(pid_file)
     self.trivial_deployer.undeploy("unique_id0")
 

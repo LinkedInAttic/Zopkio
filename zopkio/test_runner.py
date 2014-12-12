@@ -26,6 +26,7 @@ import threading
 import time
 import traceback
 import webbrowser
+from pkgutil import iter_modules
 
 from naarad import Naarad
 
@@ -99,7 +100,7 @@ class TestRunner(object):
           config.naarad_id = naarad_obj.signal_start(self.dynamic_config_module.naarad_config(config.mapping))
         config.start_time = time.time()
 
-        logger.debug("Setting up configuration: " + config.name)
+        logger.info("Setting up configuration: " + config.name)
         try:
           if hasattr(self.deployment_module, 'setup_suite'):
             self.deployment_module.setup_suite()
@@ -109,7 +110,7 @@ class TestRunner(object):
           self._skip_all_tests()
           setup_fail = True
           failure_handler.notify_failure()
-          logger.debug("Aborting {0} due to setup_suite failure:\n{1}".format(config.name, traceback.format_exc()))
+          logger.error("Aborting {0} due to setup_suite failure:\n{1}".format(config.name, traceback.format_exc()))
         else:
           logger.debug("Running tests for configuration: " + config.name)
           self._execute_run(config, naarad_obj)
@@ -129,9 +130,9 @@ class TestRunner(object):
           config.message += error_messages.TEARDOWN_SUITE_FAILED + traceback.format_exc()
           if not setup_fail:
             failure_handler.notify_failure()
-          logger.debug("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
+          logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
         config.end_time = time.time()
-        logger.debug("Execution of configuration: {0} complete".format(config.name))
+        logger.info("Execution of configuration: {0} complete".format(config.name))
 
       tests = [test for test in self.tests if not isinstance(test, list)] +\
             [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
@@ -191,6 +192,15 @@ class TestRunner(object):
     else:
       output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
     naarad_obj.analyze(logs_dir, output_dir)
+
+    if ('matplotlib' in [tuple_[1] for tuple_ in iter_modules()]) and len(self.configs) > 1:
+      prevConfig = self.configs[0]
+      if naarad_obj._output_directory is None:
+        naarad_obj._output_directory = output_dir
+      for curConfig in self.configs[1:]:
+        if not curConfig.naarad_id is None:
+          naarad_obj.diff(curConfig.naarad_id, prevConfig.naarad_id)
+          prevConfig = curConfig
 
     tests = [test for test in self.tests if not isinstance(test, list)] +\
             [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
