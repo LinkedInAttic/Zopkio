@@ -36,7 +36,7 @@ import zopkio.runtime as runtime
 from zopkio.test_runner import TestRunner
 import zopkio.utils as utils
 
-def setup_logging(output_dir):
+def setup_logging(output_dir, log_level, console_level):
   date_time = time.strftime("_%Y%m%d_%H%M%S",
                             time.localtime(runtime.get_init_time()))
   log_dir = os.path.join(output_dir, "logs", "zopkio_log" + date_time)
@@ -46,7 +46,24 @@ def setup_logging(output_dir):
                       filemode='a',
                       format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
                       datefmt="%Y-%m-%d %H:%M:%S",
-                      level=logging.INFO)
+                      level=string_to_level(log_level))
+  console = logging.StreamHandler()
+  console.setLevel(string_to_level(console_level))
+  console.setFormatter(logging.Formatter("%(asctime)s %(name)s [%(levelname)s] %(message)s"))
+  logging.getLogger('').addHandler(console)
+
+def string_to_level(log_level):
+  """
+  Converts a string to the corresponding log level
+  """
+  if (log_level.strip().upper() == "DEBUG"):
+    return logging.DEBUG
+  if (log_level.strip().upper() == "INFO"):
+    return logging.INFO
+  if (log_level.strip().upper() == "WARNING"):
+    return logging.WARNING
+  if (log_level.strip().upper() == "ERROR"):
+    return logging.ERROR
 
 def main():
   """
@@ -75,6 +92,10 @@ def main():
       dest='output_dir',
       help='''Directory to write output files and logs. Defaults to the current
               directory.''')
+  parser.add_argument("--log-level", dest="log_level", help="Log level (default INFO)", default="INFO")
+  parser.add_argument("--console-log-level", dest="console_level", help="Console Log level (default ERROR)",
+                      default="ERROR")
+  parser.add_argument("--nopassword", action='store_true', dest="nopassword", help="Disable password prompt")
   args = parser.parse_args()
 
   # Get output directory.
@@ -87,7 +108,7 @@ def main():
 
   # Set up logging.
   runtime.set_init_time(time.time())
-  setup_logging(runtime.get_output_dir())
+  setup_logging(runtime.get_output_dir(), args.log_level, args.console_level)
   logger = logging.getLogger("zopkio")
   logger.info("Starting zopkio")
 
@@ -96,13 +117,15 @@ def main():
     machines = utils.make_machine_mapping(args.machine_list)
     config_overrides = utils.parse_config_list(args.config_overrides)
   except ValueError as e:
-    print("Error in processing command line arguments:\n %s" %
-          traceback.format_exc())
+    print("Error in processing command line arguments:\n %s".format(traceback.format_exc()))
     sys.exit(1)
 
   runtime.set_machines(machines)
   user = getpass.getuser()
-  password = getpass.getpass()
+  if args.nopassword:
+    password = ""
+  else:
+    password = getpass.getpass()
   runtime.set_user(user, password)
 
   try:
