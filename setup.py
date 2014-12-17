@@ -41,7 +41,12 @@ setup(
   license = 'Apache',
   packages = ['zopkio', 'zopkio.web_resources'],
   package_dir = { 'zopkio' : 'zopkio'},
-  package_data = { 'zopkio' : ['web_resources/*.html'] },
+  package_data = {
+    'zopkio' : [
+      'web_resources/*.html',
+      'web_resources/*.js',
+      'web_resources/*.css',
+    ]},
   test_suite = 'test',
   classifiers = [
       'Intended Audience :: Developers',
