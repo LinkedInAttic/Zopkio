@@ -146,14 +146,18 @@ def set_active_config(config):
   _active_config = config
 
 
-def get_active_config(config_option):
+def get_active_config(config_option, default=None):
   """
   gets the config value associated with the config_option or returns an empty string if the config is not found
   :param config_option:
-  :return:
+  :param default: if not None, will be used
+  :return: value of config. If key is not in config, then default will be used if default is not set to None. 
+  Otherwise, KeyError is thrown.
   """
-  return _active_config.mapping[config_option]
-
+  if default == None:
+    return _active_config.mapping[config_option]
+  else:
+    return _active_config.mapping.get(config_option, default)
 
 def get_active_config_name():
   return _active_config.name

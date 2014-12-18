@@ -47,12 +47,14 @@ class SSHDeployer(Deployer):
 
   def install(self, unique_id, configs=None):
     """
-    Copies the executable to the remote machine under install path. Inspects the configs for te possible keys
+    Copies the executable to the remote machine under install path. Inspects the configs for the possible keys
     'hostname': the host to install on
     'install_path': the location on the remote host
     'executable': the executable to copy
     'no_copy': if this config is passed in and true then this method will not copy the executable assuming that it is
     already installed
+    'post_install_cmds': an optional list of commands that should be executed on the remote machine after the
+     executable has been installed. If no_copy is set to true, then the post install commands will not be run.
 
     If the unique_id is already installed on a different host, this will perform the cleanup action first.
     If either 'install_path' or 'executable' are provided the new value will become the default.
@@ -115,7 +117,10 @@ class SSHDeployer(Deployer):
           else:
             logger.error(executable + " is not a supported filetype for extracting")
             raise DeploymentError(executable + " is not a supported filetype for extracting")
-
+        post_install_cmds = configs.get('post_install_cmds', False) or self.default_configs.get('post_install_cmds', [])
+        for cmd in post_install_cmds:
+          relative_cmd = "cd {0}; {1}".format(install_path, cmd)
+          better_exec_command(ssh, relative_cmd, "Failed to execute post install command: {0}".format(relative_cmd))
     self.processes[unique_id] = Process(unique_id, self.service_name, hostname, install_path)
 
   def start(self, unique_id, configs=None):
