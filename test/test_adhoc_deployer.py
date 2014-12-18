@@ -38,7 +38,10 @@ class TestAdhocDeployer(unittest.TestCase):
          'start_command': start_cmd,
          'directories_to_remove': files_to_clean,
          'terminate_only': True,
-         'pid_keyword': 'trivial_program'})
+         'pid_keyword': 'trivial_program',
+         'post_install_cmds': [
+           'touch {0}/trivial-post-cmd'.format(install_path)
+         ]})
 
   def test_ssh_deployer_install_uninstall(self):
     """
@@ -47,6 +50,7 @@ class TestAdhocDeployer(unittest.TestCase):
     self.trivial_deployer.install("unique_id0", {'hostname': "localhost"})
     self.assertTrue(os.path.isdir("/tmp/ssh_deployer_test/"))
     self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/trivial_program"))
+    self.assertTrue(os.path.isfile("/tmp/ssh_deployer_test/trivial-post-cmd"))
     self.trivial_deployer.uninstall("unique_id0")
     self.assertFalse(os.path.isdir("/tmp/ssh_deployer_test/"))
 
