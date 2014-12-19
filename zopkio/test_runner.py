@@ -374,7 +374,7 @@ class TestRunner(object):
 
     :return:
     """
-    webbrowser.open("file:/" + self.reporter.get_report_location())
+    webbrowser.open("file://" + self.reporter.get_report_location())
 
   def _get_reporter(self):
     """
