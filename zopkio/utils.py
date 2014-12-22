@@ -21,12 +21,14 @@
 Utilities class provides general-use functions for all modules
 """
 
+import logging
 import json
 import os
 import sys
 
 import zopkio.constants as constants
 
+logger = logging.getLogger(__name__)
 
 def check_dir_with_exception(dirname):
   """
@@ -111,7 +113,11 @@ def parse_config_file(config_file_path):
     raise ValueError("Skipping .pyc file as config")
   if extension == '.json':
     with open(config_file_path) as config_file:
-      mapping = json.load(config_file)
+      try:
+        mapping = json.load(config_file)
+      except ValueError as e:
+        logger.error("Did not load json configs", e)
+        raise SyntaxError(e)
   elif extension == '.py':
     mapping = {}
     file_dict = load_module(config_file_path)

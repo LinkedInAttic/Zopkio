@@ -25,7 +25,7 @@ import zipfile
 
 import zopkio.constants as constants
 from zopkio.deployer import Deployer, Process
-from zopkio.remote_host_helper import better_exec_command, DeploymentError, get_sftp_client, get_ssh_client, open_remote_file
+from zopkio.remote_host_helper import better_exec_command, DeploymentError, get_sftp_client, get_ssh_client, open_remote_file, log_output
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +97,10 @@ class SSHDeployer(Deployer):
       raise DeploymentError("install_path was not provided for unique_id: " + unique_id)
     if not configs.get('no_copy', False):
       with get_ssh_client(hostname) as ssh:
-        better_exec_command(ssh, "mkdir -p {0}".format(install_path), "Failed to create path {0}".format(install_path))
-        better_exec_command(ssh, "chmod a+w {0}".format(install_path), "Failed to make path {0} writeable".format(install_path))
+        log_output(better_exec_command(ssh, "mkdir -p {0}".format(install_path),
+                                       "Failed to create path {0}".format(install_path)))
+        log_output(better_exec_command(ssh, "chmod a+w {0}".format(install_path),
+                                       "Failed to make path {0} writeable".format(install_path)))
         executable = configs.get('executable') or self.default_configs.get('executable')
         if executable is None:
           logger.error("executable was not provided for unique_id: " + unique_id)
@@ -111,16 +113,19 @@ class SSHDeployer(Deployer):
         # only supports tar and zip (because those modules are provided by Python's standard library)
         if configs.get('extract', False) or self.default_configs.get('extract', False):
           if tarfile.is_tarfile(executable):
-            better_exec_command(ssh, "tar -xf {0} -C {1}".format(install_location, install_path), "Failed to extract tarfile {0}".format(exec_name))
+            log_output(better_exec_command(ssh, "tar -xf {0} -C {1}".format(install_location, install_path),
+                                           "Failed to extract tarfile {0}".format(exec_name)))
           elif zipfile.is_zipfile(executable):
-            better_exec_command(ssh, "unzip -o {0} -d {1}".format(install_location, install_path), "Failed to extract zipfile {0}".format(exec_name))
+            log_output(better_exec_command(ssh, "unzip -o {0} -d {1}".format(install_location, install_path),
+                                           "Failed to extract zipfile {0}".format(exec_name)))
           else:
             logger.error(executable + " is not a supported filetype for extracting")
             raise DeploymentError(executable + " is not a supported filetype for extracting")
         post_install_cmds = configs.get('post_install_cmds', False) or self.default_configs.get('post_install_cmds', [])
         for cmd in post_install_cmds:
           relative_cmd = "cd {0}; {1}".format(install_path, cmd)
-          better_exec_command(ssh, relative_cmd, "Failed to execute post install command: {0}".format(relative_cmd))
+          log_output(better_exec_command(ssh, relative_cmd,
+                                         "Failed to execute post install command: {0}".format(relative_cmd)))
     self.processes[unique_id] = Process(unique_id, self.service_name, hostname, install_path)
 
   def start(self, unique_id, configs=None):
@@ -189,7 +194,7 @@ class SSHDeployer(Deployer):
     """Stop the service.  If the deployer has not started a service with`unique_id` the deployer will raise an Exception
     There are two configs that will be considered:
     'terminate_only': if this config is passed in then this method is the same as terminate(unique_id) (this is also the
-    behvaior if stop_command is None and not overridden)
+    behavior if stop_command is None and not overridden)
     'stop_command': overrides the default stop_command
 
     :param unique_id:
@@ -218,7 +223,8 @@ class SSHDeployer(Deployer):
       if stop_command is not None:
         install_path = self.processes[unique_id].install_path
         with get_ssh_client(hostname) as ssh:
-          better_exec_command(ssh, "cd {0}; {1}".format(install_path, stop_command), "Failed to stop {0}".format(unique_id))
+          log_output(better_exec_command(ssh, "cd {0}; {1}".format(install_path, stop_command),
+                                         "Failed to stop {0}".format(unique_id)))
       else:
         self.terminate(unique_id, configs)
 
@@ -256,7 +262,8 @@ class SSHDeployer(Deployer):
       directories_to_remove.append(install_path)
     with get_ssh_client(hostname) as ssh:
       for directory_to_remove in directories_to_remove:
-        better_exec_command(ssh, "rm -rf {0}".format(directory_to_remove), "Failed to remove {0}".format(directory_to_remove))
+        log_output(better_exec_command(ssh, "rm -rf {0}".format(directory_to_remove),
+                                       "Failed to remove {0}".format(directory_to_remove)))
 
   def get_pid(self, unique_id, configs=None):
     """Gets the pid of the process with `unique_id`.  If the deployer does not know of a process

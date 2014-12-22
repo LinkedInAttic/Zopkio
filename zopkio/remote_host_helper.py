@@ -19,6 +19,10 @@
 
 """
 from contextlib import contextmanager
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class DeploymentError(Exception):
@@ -79,8 +83,26 @@ def better_exec_command(ssh, command, msg):
   chan.exec_command(command)
   exit_status = chan.recv_exit_status()
   if exit_status != 0:
-    raise ParamikoError(msg, chan.recv_stderr(1024))  # TODO Make this configurable
+    str = chan.recv_stderr(1024)
+    err_msgs = []
+    while len(str) > 0:
+      err_msgs.append(str)
+      str = chan.recv_stderr(1024)
+    err_msg = ''.join(err_msgs)
+    logger.error(err_msg)
+    raise ParamikoError(msg, err_msg)
   return chan
+
+def log_output(chan):
+    str = chan.recv(1024)
+    msgs = []
+    while len(str) > 0:
+      msgs.append(str)
+      str = chan.recv(1024)
+    msg = ''.join(msgs)
+    if len(msg) > 0:
+      logger.info(msg)
+
 
 
 @contextmanager

@@ -36,7 +36,7 @@ class TestAdhocDeployer(unittest.TestCase):
         {'executable': executable,
          'install_path': install_path,
          'start_command': start_cmd,
-         'directories_to_remove': files_to_clean,
+         'directories_to_clean': files_to_clean,
          'terminate_only': True,
          'pid_keyword': 'trivial_program',
          'post_install_cmds': [

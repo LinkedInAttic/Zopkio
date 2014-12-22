@@ -112,25 +112,27 @@ class TestRunner(object):
           failure_handler.notify_failure()
           logger.error("Aborting {0} due to setup_suite failure:\n{1}".format(config.name, traceback.format_exc()))
         else:
-          logger.debug("Running tests for configuration: " + config.name)
-          self._execute_run(config, naarad_obj)
-          self._copy_logs()
-          if not self.master_config.mapping.get("no_perf", False):
-            naarad_obj.signal_stop(config.naarad_id)
-            self._execute_performance(naarad_obj)
-          self._execute_verification()
+          try:
+            logger.debug("Running tests for configuration: " + config.name)
+            self._execute_run(config, naarad_obj)
+            self._copy_logs()
+            if not self.master_config.mapping.get("no_perf", False):
+              naarad_obj.signal_stop(config.naarad_id)
+              self._execute_performance(naarad_obj)
+            self._execute_verification()
 
-        logger.debug("Tearing down configuration: " + config.name)
-        try:
-          if hasattr(self.deployment_module, 'teardown_suite'):
-            self.deployment_module.teardown_suite()
-          if not setup_fail:
-            failure_handler.notify_success()
-        except BaseException:
-          config.message += error_messages.TEARDOWN_SUITE_FAILED + traceback.format_exc()
-          if not setup_fail:
-            failure_handler.notify_failure()
-          logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
+            logger.debug("Tearing down configuration: " + config.name)
+          finally:
+            try:
+              if hasattr(self.deployment_module, 'teardown_suite'):
+                self.deployment_module.teardown_suite()
+              if not setup_fail:
+                failure_handler.notify_success()
+            except BaseException:
+              config.message += error_messages.TEARDOWN_SUITE_FAILED + traceback.format_exc()
+              if not setup_fail:
+                failure_handler.notify_failure()
+              logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
         config.end_time = time.time()
         logger.info("Execution of configuration: {0} complete".format(config.name))
 
@@ -173,7 +175,8 @@ class TestRunner(object):
     utils.makedirs(logs_dir)
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
-        logs = self.dynamic_config_module.machine_logs()[process.unique_id] + self.dynamic_config_module.naarad_logs()[process.unique_id]
+        logs = self.dynamic_config_module.machine_logs().get(process.unique_id, []) + \
+               self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
         deployer.get_logs(process.unique_id, logs, logs_dir)
 
   def _execute_performance(self, naarad_obj):

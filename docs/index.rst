@@ -100,8 +100,8 @@ The rest of this document will describe these other files in more detail.
 Deployment
 ----------
 
-Deplyoment is one of the key features of Zopkio. Developers can write test in
-which they bring up arbtrary sets of services on multiple machines and then
+Deployment is one of the key features of Zopkio. Developers can write test in
+which they bring up arbitrary sets of services on multiple machines and then
 within the tests exercise a considerable degree of control over these machines.
 The deployment section of code will be similar to deployment in other test
 frameworks but because of the increased complexity and the expectation of reuse
