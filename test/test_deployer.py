@@ -16,10 +16,12 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import os
+import shutil
 import unittest
 
-from zopkio.remote_host_helper import ParamikoError, better_exec_command, get_ssh_client
+from zopkio.deployer import Deployer, Process
+from zopkio.remote_host_helper import ParamikoError, better_exec_command, get_ssh_client, copy_dir, get_sftp_client
 
 class TestDeployer(unittest.TestCase):
   def test_better_exec(self):
@@ -31,6 +33,56 @@ class TestDeployer(unittest.TestCase):
       better_exec_command(ssh, "true", "This command succeeds")
       self.assertRaises(ParamikoError, better_exec_command, ssh,
                         "false", "This command fails")
+
+  def test_get_logs(self):
+    """
+    Tests that we can successfully copy logs from a remote host
+    :return:
+    """
+    minimial_deployer = Deployer()
+    install_path = '/tmp/test_deployer_get_logs'
+    if not os.path.exists(install_path):
+      os.mkdir(install_path)
+
+    output_path = '/tmp/test_deployer_get_logs_output'
+    if not os.path.exists(output_path):
+      os.mkdir(output_path)
+    with open(os.path.join(install_path, 'test.log'), 'w') as f:
+      f.write('this is the test log')
+    with open(os.path.join(install_path, 'test.out'), 'w') as f:
+      f.write('this is the test out')
+    with open(os.path.join(install_path, 'test.foo'), 'w') as f:
+      f.write('this is the test foo')
+    minimial_deployer.processes['unique_id'] = Process('unique_id', 'service_name', 'localhost', install_path)
+    minimial_deployer.get_logs('unique_id', [os.path.join(install_path, 'test.out')], output_path)
+    assert os.path.exists(os.path.join(output_path, "unique_id-test.out"))
+    shutil.rmtree(output_path)
+    if not os.path.exists(output_path):
+      os.mkdir(output_path)
+    minimial_deployer.get_logs('unique_id', [], output_path, '.*log')
+    assert os.path.exists(os.path.join(output_path, "unique_id-test.log"))
+    shutil.rmtree(install_path)
+
+  def test_copy_logs(self):
+
+    install_path = '/tmp/test_copy_dir'
+    if not os.path.exists(install_path):
+      os.mkdir(install_path)
+
+    output_path = '/tmp/test_copy_dir_output'
+    if not os.path.exists(output_path):
+      os.mkdir(output_path)
+    with open(os.path.join(install_path, 'test.log'), 'w') as f:
+      f.write('this is the test log')
+    with open(os.path.join(install_path, 'test.out'), 'w') as f:
+      f.write('this is the test out')
+    with open(os.path.join(install_path, 'test.foo'), 'w') as f:
+      f.write('this is the test foo')
+    with get_sftp_client('localhost') as ftp:
+      copy_dir(ftp, install_path, output_path, 'prefix', '.*out')
+    assert os.path.exists(os.path.join(output_path, "prefix-test.out"))
+    shutil.rmtree(output_path)
+    shutil.rmtree(install_path)
 
 if __name__ == '__main__':
   unittest.main()

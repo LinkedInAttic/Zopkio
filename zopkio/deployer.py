@@ -20,10 +20,11 @@
 import errno
 import logging
 import os
+import stat
 import time
 
 import zopkio.constants as constants
-from zopkio.remote_host_helper import better_exec_command, get_sftp_client, get_ssh_client
+from zopkio.remote_host_helper import better_exec_command, get_sftp_client, get_ssh_client, copy_dir
 
 logger = logging.getLogger(__name__)
 
@@ -193,27 +194,32 @@ class Deployer(object):
         better_exec_command(ssh, "kill -15 {0}".format(pid_str), "TERMINATING PROCESS {0}".format(unique_id))
     pids = self.get_pid(unique_id, configs)
 
-  def get_logs(self, unique_id, logs, directory):
+  def get_logs(self, unique_id, logs, directory, pattern='^$'):
     """ Copies logs from the remote host that the process is running on to the provided directory
 
     :Parameter unique_id the unique_id of the process in question
     :Parameter logs a list of logs given by absolute path from the remote host
     :Parameter directory the local directory to store the copied logs
+    :Parameter pattern a pattern to apply to files to restrict the set of logs copied
     """
     hostname = self.processes[unique_id].hostname
+    install_path = self.processes[unique_id].install_path
     if hostname is not None:
-      # TODO(jehrlich) make 1 ssh client for use in subclasses
       with get_sftp_client(hostname) as ftp:
         for f in logs:
           try:
-            ftp.stat(f)
+            mode = ftp.stat(f).st_mode
           except IOError, e:
             if e.errno == errno.ENOENT:
               logger.error("Log file " + f + " does not exist on " + hostname)
               pass
           else:
-            new_file = os.path.join(directory, "{0}-{1}".format(unique_id, os.path.basename(f)))
-            ftp.get(f, new_file)
+            copy_dir(ftp, f, directory, unique_id)
+        if install_path is not None:
+          copy_dir(ftp, install_path, directory, unique_id, pattern)
+
+
+
 
 
 class Process(object):

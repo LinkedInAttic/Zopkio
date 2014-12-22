@@ -19,7 +19,11 @@
 
 """
 from contextlib import contextmanager
+import errno
 import logging
+import os
+import re
+import stat
 
 
 logger = logging.getLogger(__name__)
@@ -94,15 +98,44 @@ def better_exec_command(ssh, command, msg):
   return chan
 
 def log_output(chan):
+  """
+  logs the std_out from an open channel
+  :param chan:
+  :return:
+  """
+  str = chan.recv(1024)
+  msgs = []
+  while len(str) > 0:
+    msgs.append(str)
     str = chan.recv(1024)
-    msgs = []
-    while len(str) > 0:
-      msgs.append(str)
-      str = chan.recv(1024)
-    msg = ''.join(msgs)
-    if len(msg) > 0:
-      logger.info(msg)
+  msg = ''.join(msgs)
+  if len(msg) > 0:
+    logger.info(msg)
 
+def copy_dir(ftp, filename, outputdir, prefix, pattern=''):
+  """
+  Recursively copy a directory
+  :param ftp:
+  :param filename:
+  :param outputdir:
+  :param prefix:
+  :param pattern: a regex pattern for files to match (by default matches everything)
+  :return:
+  """
+  try:
+    mode = ftp.stat(filename).st_mode
+  except IOError, e:
+    if e.errno == errno.ENOENT:
+      logger.error("Log file " + filename + " does not exist")
+      pass
+  else:
+    if mode & stat.S_IFREG:
+      if re.match(pattern, filename) is not None:
+        new_file = os.path.join(outputdir, "{0}-{1}".format(prefix, os.path.basename(filename)))
+        ftp.get(filename, new_file)
+    elif mode & stat.S_IFDIR:
+      for f in ftp.listdir(filename):
+        copy_dir(ftp, os.path.join(filename, f), outputdir, prefix, pattern)
 
 
 @contextmanager

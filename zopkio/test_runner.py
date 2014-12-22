@@ -177,7 +177,11 @@ class TestRunner(object):
       for process in deployer.get_processes():
         logs = self.dynamic_config_module.machine_logs().get(process.unique_id, []) + \
                self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
-        deployer.get_logs(process.unique_id, logs, logs_dir)
+        if hasattr(self.dynamic_config_module, 'log_patterns'):
+          pattern = self.dynamic_config_module.log_patterns().get(process.unique_id, '^$')
+        else:
+          pattern = '^$'
+        deployer.get_logs(process.unique_id, logs, logs_dir, pattern)
 
   def _execute_performance(self, naarad_obj):
     """
