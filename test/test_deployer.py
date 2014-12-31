@@ -60,8 +60,9 @@ class TestDeployer(unittest.TestCase):
     if not os.path.exists(output_path):
       os.mkdir(output_path)
     minimial_deployer.get_logs('unique_id', [], output_path, '.*log')
-    assert os.path.exists(os.path.join(output_path, "unique_id-test.log"))
+    assert os.path.exists(os.path.join(output_path, "unique_id_test_deployer_get_logs-test.log"))
     shutil.rmtree(install_path)
+    shutil.rmtree(output_path)
 
   def test_copy_logs(self):
 
@@ -80,7 +81,7 @@ class TestDeployer(unittest.TestCase):
       f.write('this is the test foo')
     with get_sftp_client('localhost') as ftp:
       copy_dir(ftp, install_path, output_path, 'prefix', '.*out')
-    assert os.path.exists(os.path.join(output_path, "prefix-test.out"))
+    assert os.path.exists(os.path.join(output_path, "prefix_test_copy_dir-test.out"))
     shutil.rmtree(output_path)
     shutil.rmtree(install_path)
 

@@ -37,11 +37,9 @@ from zopkio.test_runner import TestRunner
 import zopkio.utils as utils
 
 def setup_logging(output_dir, log_level, console_level):
-  date_time = time.strftime("_%Y%m%d_%H%M%S",
-                            time.localtime(runtime.get_init_time()))
-  log_dir = os.path.join(output_dir, "logs", "zopkio_log" + date_time)
+  log_dir = os.path.join(output_dir, "logs", "zopkio_log")
   utils.makedirs(log_dir)
-  log_file = os.path.join(log_dir, "zopkio_log" + date_time + ".log")
+  log_file = os.path.join(log_dir, "zopkio_log.log")
   logging.basicConfig(filename=log_file,
                       filemode='a',
                       format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
@@ -107,7 +105,6 @@ def main():
     sys.exit(1)
 
   # Set up logging.
-  runtime.set_init_time(time.time())
   setup_logging(runtime.get_output_dir(), args.log_level, args.console_level)
   logger = logging.getLogger("zopkio")
   logger.info("Starting zopkio")

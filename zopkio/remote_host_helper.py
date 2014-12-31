@@ -108,13 +108,14 @@ def log_output(chan):
   while len(str) > 0:
     msgs.append(str)
     str = chan.recv(1024)
-  msg = ''.join(msgs)
+  msg = ''.join(msgs).strip()
   if len(msg) > 0:
     logger.info(msg)
 
 def copy_dir(ftp, filename, outputdir, prefix, pattern=''):
   """
-  Recursively copy a directory
+  Recursively copy a directory flattens the output into a single directory but
+  prefixes the files with the path from the original input directory
   :param ftp:
   :param filename:
   :param outputdir:
@@ -135,18 +136,19 @@ def copy_dir(ftp, filename, outputdir, prefix, pattern=''):
         ftp.get(filename, new_file)
     elif mode & stat.S_IFDIR:
       for f in ftp.listdir(filename):
-        copy_dir(ftp, os.path.join(filename, f), outputdir, prefix, pattern)
+        copy_dir(ftp, os.path.join(filename, f), outputdir,
+                 "{0}_{1}".format(prefix, os.path.basename(filename)), pattern)
 
 
 @contextmanager
-def open_remote_file(hostname, filename, mode='r', bufsize=-1):
+def open_remote_file(hostname, filename, mode='r', bufsize=-1, username=None, password=None):
   """
 
   :param hostname:
   :param filename:
   :return:
   """
-  with get_ssh_client(hostname) as ssh:
+  with get_ssh_client(hostname, username=username, password=password) as ssh:
     sftp = None
     f = None
     try:
@@ -161,8 +163,8 @@ def open_remote_file(hostname, filename, mode='r', bufsize=-1):
 
 
 @contextmanager
-def get_sftp_client(hostname):
-  with get_ssh_client(hostname) as ssh:
+def get_sftp_client(hostname, username=None, password=None):
+  with get_ssh_client(hostname, username=username, password=password) as ssh:
     sftp = None
     try:
       sftp = ssh.open_sftp()
@@ -173,19 +175,19 @@ def get_sftp_client(hostname):
 
 
 @contextmanager
-def get_ssh_client(hostname):
+def get_ssh_client(hostname, username=None, password=None):
   try:
     ssh = sshclient()
     ssh.load_system_host_keys()
-    ssh.connect(hostname)
+    ssh.connect(hostname, username=username, password=password)
     yield ssh
   finally:
     if ssh is not None:
       ssh.close()
 
 @contextmanager
-def get_remote_session(hostname):
-  with get_ssh_client(hostname) as ssh:
+def get_remote_session(hostname, username=None, password=None):
+  with get_ssh_client(hostname, username=username, password=password) as ssh:
     try:
       shell = ssh.invoke_shell()
       yield shell
@@ -194,8 +196,8 @@ def get_remote_session(hostname):
         shell.close()
 
 @contextmanager
-def get_remote_session_with_environment(hostname, env):
-  with get_remote_session(hostname) as shell:
+def get_remote_session_with_environment(hostname, env, username=None, password=None):
+  with get_remote_session(hostname, username=username, password=password) as shell:
     shell.send(build_os_environment_string(env))
     shell.send("\n")
     yield shell

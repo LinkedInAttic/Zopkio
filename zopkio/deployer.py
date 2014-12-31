@@ -25,6 +25,7 @@ import time
 
 import zopkio.constants as constants
 from zopkio.remote_host_helper import better_exec_command, get_sftp_client, get_ssh_client, copy_dir
+import zopkio.runtime as runtime
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +155,7 @@ class Deployer(object):
     if pids != constants.PROCESS_NOT_RUNNING_PID:
       pid_str = ' '.join(str(pid) for pid in pids)
       hostname = self.processes[unique_id].hostname
-      with get_ssh_client(hostname) as ssh:
+      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         better_exec_command(ssh, "kill -SIGSTOP {0}".format(pid_str), "PAUSING PROCESS {0}".format(unique_id))
 
   def resume(self, unique_id, configs=None):
@@ -166,7 +167,7 @@ class Deployer(object):
     if pids != constants.PROCESS_NOT_RUNNING_PID:
       pid_str = ' '.join(str(pid) for pid in pids)
       hostname = self.processes[unique_id].hostname
-      with get_ssh_client(hostname) as ssh:
+      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         better_exec_command(ssh, "kill -SIGCONT {0}".format(pid_str), "RESUMING PROCESS {0}".format(unique_id))
 
   def kill(self, unique_id, configs=None):
@@ -178,7 +179,7 @@ class Deployer(object):
     if pids != constants.PROCESS_NOT_RUNNING_PID:
       pid_str = ' '.join(str(pid) for pid in pids)
       hostname = self.processes[unique_id].hostname
-      with get_ssh_client(hostname) as ssh:
+      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         better_exec_command(ssh, "kill -9 {0}".format(pid_str), "KILLING PROCESS {0}".format(unique_id))
 
   def terminate(self, unique_id, configs=None):
@@ -190,7 +191,7 @@ class Deployer(object):
     if pids != constants.PROCESS_NOT_RUNNING_PID:
       pid_str = ' '.join(str(pid) for pid in pids)
       hostname = self.processes[unique_id].hostname
-      with get_ssh_client(hostname) as ssh:
+      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         better_exec_command(ssh, "kill -15 {0}".format(pid_str), "TERMINATING PROCESS {0}".format(unique_id))
     pids = self.get_pid(unique_id, configs)
 
@@ -205,7 +206,7 @@ class Deployer(object):
     hostname = self.processes[unique_id].hostname
     install_path = self.processes[unique_id].install_path
     if hostname is not None:
-      with get_sftp_client(hostname) as ftp:
+      with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
         for f in logs:
           try:
             mode = ftp.stat(f).st_mode

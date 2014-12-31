@@ -87,6 +87,7 @@ class TestRunner(object):
 
     naarad_obj = Naarad()
     for config in self.configs:
+      config.mapping.iterkeys()
       self._reset_tests()
       if not failure_handler.get_abort_status():
         config.result = constants.SKIPPED
@@ -143,6 +144,7 @@ class TestRunner(object):
       # self._print_debug()
 
     # analysis.generate_diff_reports()
+    self.reporter.data_source.end_time = time.time()
     self.reporter.generate()
 
     if not self.master_config.mapping.get("no-display", False):

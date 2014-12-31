@@ -18,6 +18,8 @@
 # under the License.
 
 import copy
+import datetime
+import time
 
 import zopkio.constants as constants
 
@@ -38,6 +40,8 @@ class ResultsCollector(object):
   """
   def __init__(self):
     self.results = {}
+    self.start_time = time.time()
+    self.end_time = None
 
   def collect(self, config, tests):
     test_results = {}
@@ -69,6 +73,18 @@ class ResultsCollector(object):
       return None
     return test_data.end_time - test_data.start_time
 
+  def get_test_start_time(self, config_name, test_name):
+    test_data = self.results[config_name].test_results[test_name]
+    if test_data.start_time is None:
+      return None
+    return datetime.datetime.fromtimestamp(test_data.start_time).strftime('%Y-%m-%d %H:%M:%S')
+
+  def get_test_end_time(self, config_name, test_name):
+    test_data = self.results[config_name].test_results[test_name]
+    if test_data.end_time is None:
+      return None
+    return datetime.datetime.fromtimestamp(test_data.end_time).strftime('%Y-%m-%d %H:%M:%S')
+
   def count_all_tests(self):
     """
 
@@ -90,6 +106,18 @@ class ResultsCollector(object):
       return None
     return config_data.end_time - config_data.start_time
 
+  def get_config_start_time(self, config_name):
+    config_data = self.results[config_name].config_result
+    if config_data.start_time is None:
+      return None
+    return datetime.datetime.fromtimestamp(config_data.start_time).strftime('%Y-%m-%d %H:%M:%S')
+
+  def get_config_end_time(self, config_name):
+    config_data = self.results[config_name].config_result
+    if config_data.end_time is None:
+      return None
+    return datetime.datetime.fromtimestamp(config_data.end_time).strftime('%Y-%m-%d %H:%M:%S')
+
   def get_total_config_exec_time(self):
     """
 
@@ -102,6 +130,24 @@ class ResultsCollector(object):
         sum_exec_time += exec_time
 
     return sum_exec_time
+
+  def get_summary_start_time(self):
+    """
+
+    :return: start time of test
+    """
+
+    return datetime.datetime.fromtimestamp(self.start_time).strftime('%Y-%m-%d %H:%M:%S')
+
+  def get_summary_end_time(self):
+    """
+
+    :return: end time of test
+    """
+    if self.end_time is None:
+      return None
+    return datetime.datetime.fromtimestamp(self.end_time).strftime('%Y-%m-%d %H:%M:%S')
+
 
   def get_config_result(self, config_name):
     return self.results[config_name].config_result

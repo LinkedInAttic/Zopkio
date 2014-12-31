@@ -55,6 +55,14 @@ def _determine_tests(test_modules):
         if test_name in tests:
           tests[test_name].validation_function = getattr(module, fun)
     for test in tests.values():
+      if test.function.__doc__ is not None:
+        test.description = test.function.__doc__
+      if test.validation_function is not None:
+        if test.validation_function.__doc__ is not None:
+          if test.description is not None:
+            test.description = "{0};\n{1}".format(test.description, test.validation_function.__doc__)
+          else:
+            test.description = test.validation_function.__doc__
       yield test
 
 

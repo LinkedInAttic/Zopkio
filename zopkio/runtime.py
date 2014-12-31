@@ -19,10 +19,11 @@
 
 from collections import defaultdict
 import os
+import time
 
 from zopkio.results_collector import ResultsCollector
 
-_init_time = None
+_init_time = time.time()
 _username = None
 _password = None
 _active_config = None
@@ -30,7 +31,7 @@ _active_tests = {}
 _machine_names = defaultdict()
 _deployers = {}
 _collector = ResultsCollector()
-_output_dir = os.getcwd()
+_output_dir = os.path.join(os.getcwd(), time.strftime("zopkio_%Y%m%d_%H%M%S", time.localtime(_init_time)))
 
 def get_init_time():
   return _init_time
@@ -43,6 +44,7 @@ def get_reports_dir():
   return os.path.join(_output_dir, 'reports')
 
 def get_output_dir():
+  global _output_dir
   return _output_dir
 
 def set_output_dir(output_dir):

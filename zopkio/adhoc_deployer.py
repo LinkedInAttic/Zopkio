@@ -26,6 +26,7 @@ import zipfile
 import zopkio.constants as constants
 from zopkio.deployer import Deployer, Process
 from zopkio.remote_host_helper import better_exec_command, DeploymentError, get_sftp_client, get_ssh_client, open_remote_file, log_output
+import zopkio.runtime as runtime
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ class SSHDeployer(Deployer):
       logger.error("install_path was not provided for unique_id: " + unique_id)
       raise DeploymentError("install_path was not provided for unique_id: " + unique_id)
     if not configs.get('no_copy', False):
-      with get_ssh_client(hostname) as ssh:
+      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         log_output(better_exec_command(ssh, "mkdir -p {0}".format(install_path),
                                        "Failed to create path {0}".format(install_path)))
         log_output(better_exec_command(ssh, "chmod a+w {0}".format(install_path),
@@ -107,7 +108,7 @@ class SSHDeployer(Deployer):
           raise DeploymentError("executable was not provided for unique_id: " + unique_id)
         exec_name = os.path.basename(executable)
         install_location = os.path.join(install_path, exec_name)
-        with get_sftp_client(hostname) as ftp:
+        with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
           ftp.put(executable, install_location)
 
         # only supports tar and zip (because those modules are provided by Python's standard library)
@@ -177,7 +178,7 @@ class SSHDeployer(Deployer):
     else:
       full_start_command = start_command
     command = "cd {0}; {1}".format(install_path, full_start_command)
-    with get_ssh_client(hostname) as ssh:
+    with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
       if configs.get('sync', False):
         chan = better_exec_command(ssh, command, "Failed to start")
       else:
@@ -222,7 +223,7 @@ class SSHDeployer(Deployer):
       stop_command = configs.get('stop_command') or self.default_configs.get('stop_command')
       if stop_command is not None:
         install_path = self.processes[unique_id].install_path
-        with get_ssh_client(hostname) as ssh:
+        with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
           log_output(better_exec_command(ssh, "cd {0}; {1}".format(install_path, stop_command),
                                          "Failed to stop {0}".format(unique_id)))
       else:
@@ -260,7 +261,7 @@ class SSHDeployer(Deployer):
     directories_to_remove.extend(configs.get('additional_directories', []))
     if install_path not in directories_to_remove:
       directories_to_remove.append(install_path)
-    with get_ssh_client(hostname) as ssh:
+    with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
       for directory_to_remove in directories_to_remove:
         log_output(better_exec_command(ssh, "rm -rf {0}".format(directory_to_remove),
                                        "Failed to remove {0}".format(directory_to_remove)))
@@ -288,7 +289,8 @@ class SSHDeployer(Deployer):
       return constants.PROCESS_NOT_RUNNING_PID
 
     if 'pid_file' in configs.keys():
-      with open_remote_file(hostname, configs['pid_file']) as pid_file:
+      with open_remote_file(hostname, configs['pid_file'],
+                            username=runtime.get_username(), password=runtime.get_password()) as pid_file:
         full_output = pid_file.read()
     else:
       pid_keyword = self.processes[unique_id].start_command
@@ -299,7 +301,7 @@ class SSHDeployer(Deployer):
       pid_command = "ps aux | grep '{0}' | grep -v grep | tr -s ' ' | cut -d ' ' -f 2 | grep -Eo '[0-9]+'".format(pid_keyword)
       pid_command = configs.get('pid_command', pid_command)
       non_failing_command = "{0}; if [ $? -le 1 ]; then true;  else false; fi;".format(pid_command)
-      with get_ssh_client(hostname) as ssh:
+      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         chan = better_exec_command(ssh, non_failing_command, "Failed to get PID")
       output = chan.recv(RECV_BLOCK_SIZE)
       full_output = output

@@ -38,6 +38,8 @@
                 <th>Total failed</th>
                 <th>Total skipped</th>
                 <th>Total execution time</th>
+                <th>Start Time</th>
+                <th>End Time</th>
               </tr>
             </thead>
             <tbody>
@@ -47,6 +49,8 @@
                 <td>{{ summary[2] }}</td>
                 <td>{{ summary[3] }}</td>
                 <td>{{ summary[4] }} sec</td>
+                <td>{{ summary[5] }}</td>
+                <td>{{ summary[6] }}</td>
               </tr>
             </tbody>
           </table>
@@ -73,7 +77,15 @@
             </thead>
             <tbody>
               {%- for config_name in report_info.config_to_test_names_map %}
-                <tr>
+                  {%- if config_has_fail[config_name] == True %}
+                    <tr class="test_fail">
+                  {%- elif config_fail[config_name] == report_info.results_map["skipped"] %}
+                    <tr>
+                  {%- elif config_has_skip[config_name] == True %}
+                    <tr>
+                  {%- elif config_has_fail[config_name] == False %}
+                    <tr class="test_pass">
+                  {%- endif %}
                   <td><a href="{{ report_info.resource_dir }}{{ config_name }}/{{ config_name ~ report_info.report_file_sfx }}">{{ config_name }}</a></td>
                   <td>
                     {{ 'Yes' if config_fail[config_name] == report_info.results_map["skipped"] else 'No' }}

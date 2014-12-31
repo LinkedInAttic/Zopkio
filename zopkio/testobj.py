@@ -33,6 +33,8 @@ class Test(object):
     self.function = function
     self.validation_function = None
 
+    self.description = None
+
     self.func_start_time = None
     self.func_end_time = None
     self.start_time = None

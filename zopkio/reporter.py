@@ -43,6 +43,7 @@ class _ReportInfo(object):
     self.report_file_sfx = "_report.html"
 
     self.home_page = os.path.join(output_dir, "report.html")
+    self.log_page = os.path.join(output_dir, "log.html")
     self.project_url = "https://github.com/linkedin/Zopkio"
 
     self.results_map = {
@@ -90,10 +91,15 @@ class Reporter(object):
     footer_html = self._generate_footer()
     results_topbar_html = self._generate_topbar("results")
     summary_topbar_html = self._generate_topbar("summary")
+    logs_topbar_html = self._generate_topbar("logs")
 
     summary_body_html = self._generate_summary_body()
     summary_html = header_html + summary_topbar_html + summary_body_html + footer_html
     Reporter._make_file(summary_html, self.report_info.home_page)
+
+    log_body_html = self._generate_log_body()
+    log_html = header_html + logs_topbar_html + log_body_html+footer_html
+    Reporter._make_file(log_html, self.report_info.log_page)
 
     for config_name in self.report_info.config_to_test_names_map.keys():
       config_dir = os.path.join(self.report_info.resource_dir, config_name)
@@ -116,7 +122,9 @@ class Reporter(object):
         self.data_source.count_tests_with_result(config_name, constants.PASSED),
         self.data_source.count_tests_with_result(config_name, constants.FAILED),
         self.data_source.count_tests_with_result(config_name, constants.SKIPPED),
-        self.data_source.get_config_exec_time(config_name)
+        self.data_source.get_config_exec_time(config_name),
+        self.data_source.get_config_start_time(config_name),
+        self.data_source.get_config_end_time(config_name)
     ]
 
     config_template = self.env.get_template("config_page.html")
@@ -128,6 +136,12 @@ class Reporter(object):
     )
 
     return config_body_html
+
+
+  def _generate_log_body(self):
+    log_template = self.env.get_template("logs_page.html")
+    log_body_html = log_template.render(logs_dir=self.report_info.logs_dir)
+    return log_body_html
 
   def _generate_footer(self):
     footer_template = self.env.get_template("footer.html")
@@ -158,7 +172,9 @@ class Reporter(object):
         self.data_source.count_all_tests_with_result(constants.PASSED),
         self.data_source.count_all_tests_with_result(constants.FAILED),
         self.data_source.count_all_tests_with_result(constants.SKIPPED),
-        self.data_source.get_total_config_exec_time()
+        self.data_source.get_total_config_exec_time(),
+        self.data_source.get_summary_start_time(),
+        self.data_source.get_summary_end_time()
     ]
 
     config_failure_map = {}
