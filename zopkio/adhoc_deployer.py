@@ -23,9 +23,12 @@ import tarfile
 import time
 import zipfile
 
+from subprocess import call
+
 import zopkio.constants as constants
 from zopkio.deployer import Deployer, Process
-from zopkio.remote_host_helper import better_exec_command, DeploymentError, get_sftp_client, get_ssh_client, open_remote_file, log_output
+from zopkio.remote_host_helper import better_exec_command, DeploymentError, get_sftp_client, get_ssh_client,\
+  open_remote_file, log_output, exec_with_env
 import zopkio.runtime as runtime
 
 logger = logging.getLogger(__name__)
@@ -37,6 +40,31 @@ class SSHDeployer(Deployer):
 
   def __init__(self, service_name, configs=None):
     """
+    Creates a new SSHDeployer, typical use case is to create one deployer per service. The functions of the
+    deployer are driven by configs. The configs can be set in the constructor as defaults and subsequently overridden
+    during each invocation. The following configs are currently supported
+      additional_directories: used during uninstall to remove additional directories see directories_to_clean
+      args: used during start to give args to the start command
+      delay: used during start or stop to add a delay before returning in order to allow the service time to start up
+      directories_to_clean: used during uninstall to removed additional directories
+      env: used during install/start/stop/get_pid to run custom commands with the specified environment
+      executable: the executable that defines this service
+      extract: used during install to now if the executable should be extracted
+      hostname: used during each function to specify the host to execute it on,
+       should be passed per call rather than set by default
+      install_path: the path to install the executable
+      no_copy: used during install to skip the installation step if the executable has already been copied
+      pid_command: used during get_pid if this is specified than the command will be used to determine the pid of the executable
+        use this or pid_file or pid_keyword
+      pid_file: used during get_pid if this is specified than the file will be read to determine the pid of the executable
+        use this or pid_command or pid_keyword
+      pid_keyword: used during get_pid if this is specified than the keyword will be used with pgrep to determine the pid of the executable
+        use this or pid_command or pid_file
+      post_install_cmds: used during install to run custom commands prior to running start
+      start_command: used during start, the command to start the service
+      stop_command: used during stop, the command to stop the service
+      sync: used during start, whether the start command is synchronous or not (Default not)
+      terminate_only: used during stop to terminate the process rather than using the stop command
     :param service_name: an arbitrary name that can be used to describe the executable
     :param configs: default configurations for the other methods
     :return:
@@ -92,6 +120,7 @@ class SSHDeployer(Deployer):
       logger.error("hostname was not provided for unique_id: " + unique_id)
       raise DeploymentError("hostname was not provided for unique_id: " + unique_id)
 
+    env = configs.get("env", {})
     install_path = configs.get('install_path') or self.default_configs.get('install_path')
     if install_path is None:
       logger.error("install_path was not provided for unique_id: " + unique_id)
@@ -125,8 +154,8 @@ class SSHDeployer(Deployer):
         post_install_cmds = configs.get('post_install_cmds', False) or self.default_configs.get('post_install_cmds', [])
         for cmd in post_install_cmds:
           relative_cmd = "cd {0}; {1}".format(install_path, cmd)
-          log_output(better_exec_command(ssh, relative_cmd,
-                                         "Failed to execute post install command: {0}".format(relative_cmd)))
+          log_output(exec_with_env(ssh, relative_cmd,
+                                         msg="Failed to execute post install command: {0}".format(relative_cmd), env=env))
     self.processes[unique_id] = Process(unique_id, self.service_name, hostname, install_path)
 
   def start(self, unique_id, configs=None):
@@ -178,11 +207,9 @@ class SSHDeployer(Deployer):
     else:
       full_start_command = start_command
     command = "cd {0}; {1}".format(install_path, full_start_command)
+    env = configs.get("env", {})
     with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-      if configs.get('sync', False):
-        chan = better_exec_command(ssh, command, "Failed to start")
-      else:
-        chan = ssh.exec_command(command)  # this is a bit weird as chan is a triple of channels but it provides the same semantics as in the synchronous case
+      chan = exec_with_env(ssh, command, msg="Failed to start", env=env, sync=configs.get('sync', False))
 
     self.processes[unique_id].start_command = start_command
     self.processes[unique_id].args = args
@@ -221,11 +248,12 @@ class SSHDeployer(Deployer):
       self.terminate(unique_id, configs)
     else:
       stop_command = configs.get('stop_command') or self.default_configs.get('stop_command')
+      env = configs.get("env", {})
       if stop_command is not None:
         install_path = self.processes[unique_id].install_path
         with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-          log_output(better_exec_command(ssh, "cd {0}; {1}".format(install_path, stop_command),
-                                         "Failed to stop {0}".format(unique_id)))
+          log_output(exec_with_env(ssh, "cd {0}; {1}".format(install_path, stop_command),
+                                         msg="Failed to stop {0}".format(unique_id), env=env))
       else:
         self.terminate(unique_id, configs)
 
@@ -301,8 +329,9 @@ class SSHDeployer(Deployer):
       pid_command = "ps aux | grep '{0}' | grep -v grep | tr -s ' ' | cut -d ' ' -f 2 | grep -Eo '[0-9]+'".format(pid_keyword)
       pid_command = configs.get('pid_command', pid_command)
       non_failing_command = "{0}; if [ $? -le 1 ]; then true;  else false; fi;".format(pid_command)
+      env = configs.get("env", {})
       with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-        chan = better_exec_command(ssh, non_failing_command, "Failed to get PID")
+        chan = exec_with_env(ssh, non_failing_command, msg="Failed to get PID", env=env)
       output = chan.recv(RECV_BLOCK_SIZE)
       full_output = output
       while len(output) > 0:

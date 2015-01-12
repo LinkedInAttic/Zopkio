@@ -7,14 +7,23 @@ testing.
 Installation
 ------------
 
+Zopkio is distributed via pip
+
 To install::
+  (sudo) pip install zopkio
 
-  git clone git@github.com:linkedin/distributed-test-framework.git
-  cd distributed-test-framework
-  sudo python setup.py install
+If you want to work with the latest code::
 
-This should install all of the dependencies and allow you to run our sample test::
+  git clone git@github.com:linkedin/zopkio.git
+  cd zopkio
 
+Once you have downloaded the code you can run the zopkio unit tests::
+
+  python setup.py test
+
+Or you can install zopkio and run the sample test::
+
+  (sudo) python setup.py install
   zopkio examples/server_client/server_client.py
 
 N.B the example code assumes you can ssh into your own box using your
@@ -45,15 +54,15 @@ Zopkio takes several optional arguments::
                         config overrides at execution time, each argument is a
                         config with its value separated by a =. This has the
                         highest priority of all configs
-  --output-dir OUTPUT_DIR
+  -d OUTPUT_DIR, --output-dir OUTPUT_DIR
                         Specify the output directory for logs and test results.
                         By default, Zopkio will write to the current directory.
-
-Alternatively you can import zopkio in your code and run specific tests::
-
-  from zopkio.testrunner import TestRunner
-  test_runner = TestRunner(testfile, tests, config_overrides)
-  test_runner.run()
+  --log-level LOG_LEVEL
+                      Log level (default INFO)
+  --console-log-level CONSOLE_LEVEL
+                        Console Log level (default ERROR)
+  --nopassword          Disable password prompt
+  --user USER           user to run the test as (defaults to current user)
 
 Testing with Zopkio
 -------------------

@@ -67,7 +67,25 @@ def build_os_environment_string(env):
   :Returns string: a string that can be prepended to a command to run the command with
   the environmental variables set
   """
-  "".join(["export {0}={1}; ".format(key, env[key]) for key in env])
+  return "".join(["export {0}={1}; ".format(key, env[key]) for key in env])
+
+def exec_with_env(ssh, command, msg='', env={}, **kwargs):
+  """
+
+  :param ssh:
+  :param command:
+  :param msg:
+  :param env:
+  :param synch:
+  :return:
+  """
+  bash_profile_command = "source .bash_profile > /dev/null 2> /dev/null;"
+  env_command = build_os_environment_string(env)
+  new_command = bash_profile_command + env_command + command
+  if kwargs.get('sync', True):
+    return better_exec_command(ssh, new_command, msg)
+  else:
+    return ssh.exec_command(new_command)
 
 def better_exec_command(ssh, command, msg):
   """Uses paramiko to execute a command but handles failure by raising a ParamikoError if the command fails.

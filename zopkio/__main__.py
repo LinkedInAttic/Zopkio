@@ -94,6 +94,7 @@ def main():
   parser.add_argument("--console-log-level", dest="console_level", help="Console Log level (default ERROR)",
                       default="ERROR")
   parser.add_argument("--nopassword", action='store_true', dest="nopassword", help="Disable password prompt")
+  parser.add_argument("--user", dest="user", help="user to run the test as (defaults to current user)")
   args = parser.parse_args()
 
   # Get output directory.
@@ -118,7 +119,10 @@ def main():
     sys.exit(1)
 
   runtime.set_machines(machines)
-  user = getpass.getuser()
+  if args.user is not None:
+    user = args.user
+  else:
+    user = getpass.getuser()
   if args.nopassword:
     password = ""
   else:
