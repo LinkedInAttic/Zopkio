@@ -3,15 +3,15 @@
 # This file is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later 
-# version.  
+# version 2.1 of the License, or (at your option) any later
+# version.
 #
 # This file is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied
-# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-# PURPOSE.  
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE.
 #
-# See the GNU Lesser General Public License for more details. 
+# See the GNU Lesser General Public License for more details.
 # You may obtain a copy of the License at
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
@@ -117,18 +117,22 @@ def better_exec_command(ssh, command, msg):
 
 def log_output(chan):
   """
-  logs the std_out from an open channel
+  logs the output from a remote command
+  the input should be an open channel in  the case of synchronous better_exec_command
+  otherwise this will not log anything and simply return to the caller
   :param chan:
   :return:
   """
-  str = chan.recv(1024)
-  msgs = []
-  while len(str) > 0:
-    msgs.append(str)
+  if hasattr(chan, "recv"):
     str = chan.recv(1024)
-  msg = ''.join(msgs).strip()
-  if len(msg) > 0:
-    logger.info(msg)
+    msgs = []
+    while len(str) > 0:
+      msgs.append(str)
+      str = chan.recv(1024)
+    msg = ''.join(msgs).strip()
+    if len(msg) > 0:
+      logger.info(msg)
+
 
 def copy_dir(ftp, filename, outputdir, prefix, pattern=''):
   """

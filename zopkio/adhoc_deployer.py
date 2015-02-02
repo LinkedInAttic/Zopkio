@@ -129,7 +129,7 @@ class SSHDeployer(Deployer):
       with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         log_output(better_exec_command(ssh, "mkdir -p {0}".format(install_path),
                                        "Failed to create path {0}".format(install_path)))
-        log_output(better_exec_command(ssh, "chmod a+w {0}".format(install_path),
+        log_output(better_exec_command(ssh, "chmod 755 {0}".format(install_path),
                                        "Failed to make path {0} writeable".format(install_path)))
         executable = configs.get('executable') or self.default_configs.get('executable')
         if executable is None:
@@ -209,14 +209,13 @@ class SSHDeployer(Deployer):
     command = "cd {0}; {1}".format(install_path, full_start_command)
     env = configs.get("env", {})
     with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-      chan = exec_with_env(ssh, command, msg="Failed to start", env=env, sync=configs.get('sync', False))
+      exec_with_env(ssh, command, msg="Failed to start", env=env, sync=configs.get('sync', False))
 
     self.processes[unique_id].start_command = start_command
     self.processes[unique_id].args = args
 
     if 'delay' in configs:
       time.sleep(configs['delay'])
-    return chan
 
   def stop(self, unique_id, configs=None):
     """Stop the service.  If the deployer has not started a service with`unique_id` the deployer will raise an Exception
