@@ -105,11 +105,11 @@ def better_exec_command(ssh, command, msg):
   chan.exec_command(command)
   exit_status = chan.recv_exit_status()
   if exit_status != 0:
-    str = chan.recv_stderr(1024)
+    msg_str = chan.recv_stderr(1024)
     err_msgs = []
-    while len(str) > 0:
-      err_msgs.append(str)
-      str = chan.recv_stderr(1024)
+    while len(msg_str) > 0:
+      err_msgs.append(msg_str)
+      msg_str = chan.recv_stderr(1024)
     err_msg = ''.join(err_msgs)
     logger.error(err_msg)
     raise ParamikoError(msg, err_msg)
