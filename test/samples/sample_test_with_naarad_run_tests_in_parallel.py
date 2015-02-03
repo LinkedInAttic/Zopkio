@@ -84,8 +84,8 @@ def test1():
   sleep(5)
   with open("/tmp/trivial_timed_output", "r") as f:
     lines = f.readlines()
-    str = "".join(lines)
-    assert "test1" in str
+    test_str = "".join(lines)
+    assert "test1" in test_str
 
 
 def test2():
