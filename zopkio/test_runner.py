@@ -140,8 +140,8 @@ class TestRunner(object):
       tests = [test for test in self.tests if not isinstance(test, list)] +\
             [individual_test for test in self.tests if isinstance(test, list) for individual_test in test]
       runtime.get_collector().collect(config, tests)
-      # prints result to standard out - delete/comment out when things are working
-      # self._print_debug()
+      # log results of tests so that it can be used easily via command-line
+      self._log_results(tests)
 
     # analysis.generate_diff_reports()
     self.reporter.data_source.end_time = time.time()
@@ -399,11 +399,11 @@ class TestRunner(object):
                         self.directory_info["logs_dir"], output_dir)
     return reporter
 
-  def _print_debug(self):
-    for test in self.tests:
-      print "{0}----{1}".format(test.name, test.result)
+  def _log_results(self, tests):
+    for test in tests:
+      logger.info("{0}----{1}".format(test.name, test.result))
       if test.result == constants.FAILED:
-        print traceback.format_exception_only(type(test.exception), test.exception)
+        logger.info(traceback.format_exception_only(type(test.exception), test.exception))
 
   def _reset_tests(self):
     for test in self.tests:
