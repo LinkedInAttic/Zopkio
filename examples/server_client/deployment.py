@@ -28,8 +28,17 @@ client_deployer = None
 
 def setup_suite():
   client_exec_location = runtime.get_active_config('client_exec_path')
-  client_exec = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+
+  #Clients and server exec can also be in remote location.
+  #if so specify the client_exec as <Remoteserver>:<path>
+  #In that case you can also path a temp_scratch config for the sftp 
+  #else /tmp folder used as default
+  if (":" in client_exec_location):
+    client_exec = client_exec_location
+  else:
+    client_exec = os.path.join(os.path.dirname(os.path.abspath(__file__)),
       client_exec_location)
+
   global client_deployer
   client_deployer = adhoc_deployer.SSHDeployer("AdditionClient",
       {'pid_keyword': "AdditionClient",
@@ -45,8 +54,14 @@ def setup_suite():
       {"hostname": "localhost",
        "install_path": runtime.get_active_config('client_install_path') + 'client2'})
 
-  server_exec = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-      runtime.get_active_config('server_exec_path'))
+  server_exec_location = runtime.get_active_config('server_exec_path')
+
+
+  if (":" in server_exec_location):
+    server_exec = server_exec_location  
+  else:
+    server_exec = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    runtime.get_active_config('server_exec_path'))
 
   global server_deployer
   server_deployer = adhoc_deployer.SSHDeployer("AdditionServer",
