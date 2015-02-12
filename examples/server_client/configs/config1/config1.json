@@ -1,4 +1,5 @@
 {
+  "comment": " client and server exec_path can also be specified as remoteserver:path",
   "client_exec_path": "AdditionClient/out/artifacts/AdditionClient_jar/AdditionClient.jar",
   "server_exec_path": "AdditionServer/out/artifacts/AdditionServer_jar/AdditionServer.jar",
   "client_start_command": "java -jar AdditionClient.jar",

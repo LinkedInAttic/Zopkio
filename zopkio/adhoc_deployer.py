@@ -135,10 +135,34 @@ class SSHDeployer(Deployer):
         if executable is None:
           logger.error("executable was not provided for unique_id: " + unique_id)
           raise DeploymentError("executable was not provided for unique_id: " + unique_id)
-        exec_name = os.path.basename(executable)
-        install_location = os.path.join(install_path, exec_name)
-        with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
-          ftp.put(executable, install_location)
+
+        #if the executable is in remote location copy to local machine
+        copy_from_remote_location = False;
+        if (":" in executable):
+          copy_from_remote_location = True
+          remote_location_server = executable.split(":")[0]
+          remote_file_path = executable.split(":")[1] 
+          remote_file_name = os.path.basename(remote_file_path)
+
+          local_temp_file_name = os.path.join(configs.get("tmp_dir","/tmp"),remote_file_name)
+          
+          if not os.path.exists(local_temp_file_name):
+            with get_sftp_client(remote_location_server,username=runtime.get_username(), password=runtime.get_password()) as ftp:
+              try:
+                ftp.get(remote_file_path, local_temp_file_name)
+                executable = local_temp_file_name
+              except:
+                raise DeploymentError("Unable to load file from remote server " + executable)
+        try:                     
+          exec_name = os.path.basename(executable)
+          install_location = os.path.join(install_path, exec_name)
+          with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
+            ftp.put(executable, install_location)
+        except:
+            raise DeploymentError("Unable to copy executable to install_location:" + install_location)
+        finally:
+          if (copy_from_remote_location and not configs.get('cache',False)):
+            os.remove(executable)       
 
         # only supports tar and zip (because those modules are provided by Python's standard library)
         if configs.get('extract', False) or self.default_configs.get('extract', False):
