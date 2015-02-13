@@ -45,6 +45,15 @@ def check_file_with_exception(filename):
   if not os.path.isfile(filename):
     raise ValueError(filename + " is not a file")
 
+def check_testfile_dir_structure(filename):
+  """
+  Checks if the test file has correct directory structure for importing has module
+  Makes sure there is no directory with same testfile name to cause conflict
+  """
+  dirname =  os.path.splitext(filename)[0]
+  if os.path.isdir(dirname):
+    raise ValueError('incorrect dir structure testfile:%s exist in same level as dir:%s' %(filename,dirname))
+
 
 def load_module(filename):
   """
@@ -117,7 +126,7 @@ def parse_config_file(config_file_path):
         mapping = json.load(config_file)
       except ValueError as e:
         logger.error("Did not load json configs", e)
-        raise SyntaxError(e)
+        raise SyntaxError('Unable to parse config file:%s due to malformed JSON. Aborting' %(config_file_path))
   elif extension == '.py':
     mapping = {}
     file_dict = load_module(config_file_path)

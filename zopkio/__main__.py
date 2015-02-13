@@ -112,9 +112,11 @@ def main():
 
   try:
     utils.check_file_with_exception(args.testfile)
+    utils.check_testfile_dir_structure(args.testfile)
     machines = utils.make_machine_mapping(args.machine_list)
     config_overrides = utils.parse_config_list(args.config_overrides)
   except ValueError as e:
+    logger.error(str(e))
     print("Error in processing command line arguments:\n %s".format(traceback.format_exc()))
     sys.exit(1)
 
