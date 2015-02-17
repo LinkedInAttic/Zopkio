@@ -185,6 +185,10 @@ table.table-bordered > tbody > tr.test_fail > td {
   margin-bottom: 30px;
 }
 
+.tablediff{
+  table-layout:fixed
+}
+
 p.error-msg {
   padding-left: 15px;
 }
