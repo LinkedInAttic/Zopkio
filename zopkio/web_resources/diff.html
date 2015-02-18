@@ -1,0 +1,68 @@
+<!--
+#Copyright 2014 LinkedIn Corp.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+-->
+<div class="container">
+  <div class="content">
+    <div class="row">
+      <div class="span12">
+        <div class="page-title">
+          <h3>Diff Summary</h3>
+        </div>
+      </div>
+    </div> <!-- header -->
+
+    <div class="row">
+        <div class="span12">
+            <div style=overflow-x:auto;">
+            <table class="table table-striped table-bordered tablediff">
+                <thead>
+                <tr>
+                    <th>Test Name</th>
+                    {%- for config in config_names %}
+                    <th>{{config}}</th>
+                    {%- endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {%- for test in test_names%}
+                {% set test_name_loop = loop %}
+                    <tr>
+                    <td>{{ test.name }}</td>
+                    {%- for config in config_names %}
+                    
+                        {%- if config_tests_dict[config][test_name_loop.index0].result == report_info.results_map["skipped"] %}
+                        <td>
+                        <a href="{{ report_info.resource_dir }}{{ config_data_dict[config].name }}/{{ test.name ~ report_info.report_file_sfx }}">Skipped</a>                        
+                        {%- elif config_tests_dict[config][test_name_loop.index0].result == report_info.results_map["passed"] %}
+                        <td bgcolor="#ADFFC6">
+                        <a href="{{ report_info.resource_dir }}{{ config_data_dict[config].name }}/{{ test.name ~ report_info.report_file_sfx }}">Passed</a>                        
+                        {%- elif config_tests_dict[config][test_name_loop.index0].result == report_info.results_map["failed"] %}
+                        <td bgcolor="#FF9999">
+                        <a href="{{ report_info.resource_dir }}{{ config_data_dict[config].name }}/{{ test.name ~ report_info.report_file_sfx }}">Failed</a>
+                        {%- endif %}
+                    </td>
+                    {%- endfor %}
+                </tr>
+                {%- endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>

@@ -43,6 +43,7 @@ class _ReportInfo(object):
     self.report_file_sfx = "_report.html"
 
     self.home_page = os.path.join(output_dir, "report.html")
+    self.diff_page = os.path.join(output_dir, "diff.html")
     self.log_page = os.path.join(output_dir, "log.html")
     self.project_url = "https://github.com/linkedin/Zopkio"
 
@@ -92,10 +93,14 @@ class Reporter(object):
     results_topbar_html = self._generate_topbar("results")
     summary_topbar_html = self._generate_topbar("summary")
     logs_topbar_html = self._generate_topbar("logs")
+    diff_topbar_html = self._generate_topbar("diff")
 
     summary_body_html = self._generate_summary_body()
+    diff_body_html = self._generate_diff_body()
     summary_html = header_html + summary_topbar_html + summary_body_html + footer_html
+    diff_html = header_html + diff_topbar_html + diff_body_html+ footer_html
     Reporter._make_file(summary_html, self.report_info.home_page)
+    Reporter._make_file(diff_html,self.report_info.diff_page)
 
     log_body_html = self._generate_log_body()
     log_html = header_html + logs_topbar_html + log_body_html+footer_html
@@ -165,6 +170,34 @@ class Reporter(object):
         js_includes=JS_INCLUDES
     )
     return header_html
+
+  def _generate_diff_body(self):
+
+    diff_body_html = ""
+    config_tests_dict = {}
+    config_data_dict = {}
+
+    #generate diff page only if multiple configs exist
+    if (len(self.report_info.config_to_test_names_map.keys()) > 1):
+      # get list of test names in sorted order
+      test_names = self.data_source.get_test_results(self.report_info.config_to_test_names_map.keys()[0])
+      test_names.sort(key=lambda x: x.name)
+
+      for config_name in self.report_info.config_to_test_names_map.keys():
+        config_tests = self.data_source.get_test_results(config_name)
+        config_tests.sort(key=lambda x: x.name)
+        config_tests_dict[config_name] = config_tests
+        config_data_dict[config_name] = self.data_source.get_config_result(config_name)
+
+      diff_template = self.env.get_template("diff.html")
+      diff_body_html = diff_template.render(
+        test_names = test_names,
+        report_info = self.report_info,
+        config_names = self.report_info.config_to_test_names_map.keys(),
+        config_tests_dict = config_tests_dict,
+        config_data_dict = config_data_dict
+    )
+    return diff_body_html
 
   def _generate_summary_body(self):
     summary_stats = [
