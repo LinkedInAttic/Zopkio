@@ -241,7 +241,8 @@ class Reporter(object):
     test_body = test_template.render(
         config_name=config_name,
         test_data=self.data_source.get_test_result(config_name, test_name),
-        report_info=self.report_info
+        report_info=self.report_info,
+        config_data=self.data_source.get_config_result(config_name)
     )
     return test_body
 

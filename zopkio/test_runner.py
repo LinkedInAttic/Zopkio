@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -116,11 +116,6 @@ class TestRunner(object):
           try:
             logger.debug("Running tests for configuration: " + config.name)
             self._execute_run(config, naarad_obj)
-            self._copy_logs()
-            if not self.master_config.mapping.get("no_perf", False):
-              naarad_obj.signal_stop(config.naarad_id)
-              self._execute_performance(naarad_obj)
-            self._execute_verification()
 
             logger.debug("Tearing down configuration: " + config.name)
           finally:
@@ -255,21 +250,21 @@ class TestRunner(object):
       else:
         logger.debug("Executing tests: {0}".format([test.name for test in tests]))
         def run_test_command(test):
-          try:
-            test.func_start_time = time.time()
-            test.function()
-            test.func_end_time = time.time()
-            test.result = constants.PASSED
-          except BaseException as e:
-            test.result = constants.FAILED
-            test.exception = e
-            test.message = traceback.format_exc()
+          while (test.current_iteration < test.total_number_iterations):
+            test.current_iteration = test.current_iteration + 1
+            self._run_and_verify_test(test)
+            #if each test is run for number of required iterations before moving to next test
+            #test.total_number_iterations can be 4 if TEST_ITER for test module is set to 2 and loop_all_test is 2
+            #in that case each test will be run twice before moving to next test and the whole suite twice
+            if ((test.current_iteration % (test.total_number_iterations/int(runtime.get_active_config("loop_all_tests",1))))== 0):
+              break
         threads = [threading.Thread(target=run_test_command, args=[test]) for test in tests]
         for thread in threads:
           thread.start()
         for thread in threads:
           thread.join()
-      logger.debug("Tearing down tests: {0}".format([test.name for test in tests]))
+
+        logger.debug("Tearing down tests: {0}".format([test.name for test in tests]))
       try:
         if hasattr(self.deployment_module, 'teardown'):
           self.deployment_module.teardown()
@@ -302,7 +297,7 @@ class TestRunner(object):
       logger.debug("Skipping" + test.name + "due to too many setup/teardown failures")
     else:
       setup_fail = False
-      if not self.master_config.mapping.get("no-display", False):
+      if not self.master_config.mapping.get("no-perf", False):
         test.naarad_config = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
         test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       test.start_time = time.time()
@@ -318,15 +313,17 @@ class TestRunner(object):
         logger.debug("Aborting {0} due to setup failure:\n{1}".format(test.name, traceback.format_exc()))
       else:
         logger.debug("Executing test: " + test.name)
-        try:
-          test.func_start_time = time.time()
-          test.function()
-          test.func_end_time = time.time()
-          test.result = constants.PASSED
-        except BaseException as e:
-          test.result = constants.FAILED
-          test.exception = e
-          test.message = traceback.format_exc()
+
+        # 2 ways of loop 1. loop each test (Default) or 2.loop after the entire suite
+        while (test.current_iteration < test.total_number_iterations):
+          test.current_iteration = test.current_iteration + 1
+          self._run_and_verify_test(test)
+          #if each test is run for number of required iterations before moving to next test
+          #test.total_number_iterations can be 4 if TEST_ITER for test module is set to 2 and loop_all_test is 2
+          #in that case each test will be run twice before moving to next test and the whole suite twice
+          if ((test.current_iteration % (test.total_number_iterations/int(runtime.get_active_config("loop_all_tests",1))))== 0):
+            break
+
       logger.debug("Tearing down test: " + test.name)
       try:
         if hasattr(self.deployment_module, 'teardown'):
@@ -344,20 +341,60 @@ class TestRunner(object):
         naarad_obj.signal_stop(test.naarad_id)
       logger.debug("Execution of test: " + test.name + " complete")
 
+  def _run_and_verify_test(self,test):
+    """
+    Runs a test and performs validation
+    :param test:
+    :return:
+    """
+    if(test.total_number_iterations > 1):
+      logger.debug("Executing iteration:" + str(test.current_iteration))
+    try:
+      test.func_start_time = time.time()
+      test.function()
+      test.func_end_time = time.time()
+      test.iteration_results[test.current_iteration] = constants.PASSED
+      #The final iteration result. Useful to make sure the tests recover in case of error injection
+      test.result = constants.PASSED
+    except BaseException as e:
+      test.result = constants.FAILED
+      test.iteration_results[test.current_iteration] = constants.FAILED
+      test.exception = e
+      test.message = traceback.format_exc()
+    else:
+      #If verify_after_each_test flag is set we can verify after each test even for single iteration
+      if ((test.total_number_iterations > 1) or (runtime.get_active_config("verify_after_each_test",False))):
+        test.end_time = time.time()
+        self._copy_logs()
+        self._execute_singletest_verification(test)
+
   def _execute_run(self, config, naarad_obj):
     """
     Executes tests for a single config
     """
     failure_handler = FailureHandler(config.mapping.get("max_failures_per_suite_before_abort"))
-    for tests in self.tests:
-      if not isinstance(tests, list) or len(tests) == 1:
-        if isinstance(tests, list):
-          test = tests[0]
+    loop_all_tests = int(runtime.get_active_config("loop_all_tests",1))
+
+    self.compute_total_iterations_per_test()
+
+    #iterate through the test_suite based on config settings
+    for i in xrange(loop_all_tests):
+      for tests in self.tests:
+        if not isinstance(tests, list) or len(tests) == 1:
+          if isinstance(tests, list):
+            test = tests[0]
+          else:
+            test = tests
+          self._execute_single_test(config, failure_handler, naarad_obj, test)
         else:
-          test = tests
-        self._execute_single_test(config, failure_handler, naarad_obj, test)
-      else:
-        self._execute_parallel_tests(config, failure_handler, naarad_obj, tests)
+          self._execute_parallel_tests(config, failure_handler, naarad_obj, tests)
+
+    self._copy_logs()
+
+    if not self.master_config.mapping.get("no_perf", False):
+      naarad_obj.signal_stop(config.naarad_id)
+      self._execute_performance(naarad_obj)
+    self._execute_verification()
 
   def _execute_verification(self):
     """
@@ -370,12 +407,52 @@ class TestRunner(object):
     for test in tests:
       if (test.result != constants.SKIPPED
               and test.validation_function is not None
+              and (test.total_number_iterations <= 1)
+              and not (runtime.get_active_config("verify_after_each_test",False))
               and hasattr(test.validation_function, '__call__')):
         try:
           test.validation_function()
         except BaseException as e:
           test.result = constants.FAILED
           test.exception = e
+
+  def _execute_singletest_verification(self,test):
+    """
+    Performs validation for a single test
+    :param test:
+    :return:
+    """
+    if (test.result == constants.PASSED
+            and test.validation_function is not None
+            and hasattr(test.validation_function, '__call__')):
+      try:
+        test.validation_function()
+      except BaseException as e:
+        test.result = constants.FAILED
+        test.exception = e
+        if (test.total_number_iterations > 1):
+          test.iteration_results[test.current_iteration] = constants.FAILED
+
+
+  def compute_total_iterations_per_test(self):
+    """
+    Factor in loop_all_tests config into iteration count of each test
+    Each test has an tests_iteration associated with them from the test module.
+    The loop_all_tests is set in config that repeats the entire suite after each
+    tests necessary iterations is repeated
+
+    :return:
+    """
+    loop_all_tests = int(runtime.get_active_config("loop_all_tests",1))
+    if (loop_all_tests <= 1):
+      return
+    else:
+      for tests in self.tests:
+        if isinstance(tests, list):
+          for test in  tests:
+            test.total_number_iterations = test.total_number_iterations * loop_all_tests
+        else:
+          tests.total_number_iterations = tests.total_number_iterations * loop_all_tests
 
   def _display_results(self):
     """
