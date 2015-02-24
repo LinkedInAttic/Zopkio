@@ -221,18 +221,22 @@ will be run once with the top level config files and overrides.
 Example Tests
 -------------
 1) command : zopkio examples/server_client/server_client.py
-Runs bunch of tests with multiple clients and servers deployed
 
-2)command : zopkio examples/server_client/single_server_multipleiter_inorder.py --nopassword
-The individual tests have the TEST_PHASE set to be 1,2,3 respectively. This enforces order.
-To run multiple iterations set loop_all_tests to be <value> in config.json file
-To validate each run of the test before moving to next one set verify_after_each_test in configs
-To show the pass/fail for each iteration set show_all_iterations to be true in configs
-sample settings to get mulitple runs for this test
-"show_all_iterations":true,
-"verify_after_each_test":true,
-"loop_all_tests":2,
+- Runs bunch of tests with multiple clients and servers deployed
 
-3)command : zopkio examples/server_client/server_client_multiple_iteration.py
-The base_tests_multiple_iteration.py module has TEST_ITER parameter set to 2. This repeats
-all tests twice but does not enforce any ordering.
+2) command : zopkio examples/server_client/single_server_multipleiter_inorder.py --nopassword
+
+
+- The individual tests have the TEST_PHASE set to be 1,2,3 respectively. This enforces order.
+- To run multiple iterations set loop_all_tests to be <value> in config.json file
+- To validate each run of the test before moving to next one set verify_after_each_test in configs
+- To show the pass/fail for each iteration set show_all_iterations to be true in configs
+- sample settings to get mulitple runs for this test
+ #. "show_all_iterations":true,
+ #. "verify_after_each_test":true,
+ #. "loop_all_tests":2,
+
+3) command : zopkio examples/server_client/server_client_multiple_iteration.py
+
+- The base_tests_multiple_iteration.py module has TEST_ITER parameter set to 2.
+- This repeats all the tests twice but does not enfore any ordering
