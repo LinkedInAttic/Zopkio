@@ -211,20 +211,26 @@ class Reporter(object):
     ]
 
     config_failure_map = {}
-    config_has_failure_map = {}
-    config_has_skipped_map = {}
+    config_total_tests_map = {}
+    config_test_failure_map = {}
+    config_test_skipped_map = {}
+    config_test_passed_map = {}
     for config_name in self.report_info.config_to_test_names_map.keys():
+      config_total_tests_map[config_name] = self.data_source.count_tests(config_name)
       config_failure_map[config_name] = self.data_source.get_config_result(config_name).result
-      config_has_failure_map[config_name] = (self.data_source.count_tests_with_result(config_name, constants.FAILED) > 0)
-      config_has_skipped_map[config_name] = (self.data_source.count_tests_with_result(config_name, constants.SKIPPED) > 0)
+      config_test_failure_map[config_name] = self.data_source.count_tests_with_result(config_name, constants.FAILED)
+      config_test_skipped_map[config_name] = self.data_source.count_tests_with_result(config_name, constants.SKIPPED)
+      config_test_passed_map[config_name] = self.data_source.count_tests_with_result(config_name, constants.PASSED)
 
     summary_template = self.env.get_template("landing_page.html")
     summary_body = summary_template.render(
         report_info=self.report_info,
         summary=summary_stats,
         config_fail=config_failure_map,
-        config_has_fail=config_has_failure_map,
-        config_has_skip=config_has_skipped_map
+        config_fail_map=config_test_failure_map,
+        config_skip_map=config_test_skipped_map,
+        config_tests_map = config_total_tests_map,
+        config_pass_map = config_test_passed_map
     )
     return summary_body
 
@@ -241,7 +247,8 @@ class Reporter(object):
     test_body = test_template.render(
         config_name=config_name,
         test_data=self.data_source.get_test_result(config_name, test_name),
-        report_info=self.report_info
+        report_info=self.report_info,
+        config_data=self.data_source.get_config_result(config_name)
     )
     return test_body
 

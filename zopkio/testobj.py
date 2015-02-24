@@ -16,12 +16,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import zopkio.constants as constants
 
 class Test(object):
   """
   Structure used to store information about a test during runtime
   """
-  def __init__(self, name, function, phase):
+  def __init__(self, name, function, phase, iteration):
     """
     :param name: name of the test
     :param function: callback that will be run during test execution
@@ -29,6 +30,10 @@ class Test(object):
     self.name = name
 
     self.phase = phase
+
+    self.repeat_per_loop = iteration
+    self.total_number_iterations = self.repeat_per_loop
+    self.current_iteration = 0
 
     self.function = function
     self.validation_function = None
@@ -41,6 +46,7 @@ class Test(object):
     self.end_time = None
 
     self.result = None
+    self.iteration_results = {}
     self.exception = None
 
     self.naarad_config = None
@@ -49,6 +55,9 @@ class Test(object):
     self.sla_objs = None
 
     self.message = ""
+
+    for i in xrange(self.total_number_iterations):
+        self.iteration_results[i] = constants.SKIPPED
 
   def reset(self):
     """
@@ -69,3 +78,7 @@ class Test(object):
     self.sla_objs = None
 
     self.message = ""
+    self.current_iteration = 0
+    self.total_number_iterations = self.repeat_per_loop
+    for i in xrange(self.total_number_iterations):
+        self.iteration_results[i] = constants.SKIPPED

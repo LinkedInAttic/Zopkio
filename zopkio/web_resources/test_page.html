@@ -91,6 +91,43 @@
         </div>
       </div>
     </div> <!-- top table -->
+
+    <div class="row">
+      <div class="span12">
+        <div style=overflow-x:auto;">
+          {%- if config_data.mapping.get("show_all_iterations",False) %}
+          <table class="table table-fitcontent table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Iteration</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for i in range(test_data.total_number_iterations) %}
+              {% set test_name_loop = loop %}
+              <tr>
+                <td>
+                  {{test_name_loop.index}}
+                </td>
+                <td>
+                  {%- if test_data.result == report_info.results_map["skipped"] %}
+                    Skipped
+                  {%- elif test_data.result == report_info.results_map["passed"] %}
+                    Passed
+                  {%- elif test_data.result == report_info.results_map["failed"] %}
+                    Failed
+                  {%- endif %}
+                </td>
+              </tr>
+              {%- endfor %}
+            </tbody>
+          </table>
+          {%- endif %}
+        </div>
+      </div>
+    </div>
+
     {%- if test_data.result != report_info.results_map["skipped"] %}
       <div class="row">
         <div class="span12">

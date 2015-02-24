@@ -1,9 +1,13 @@
 {
-  "comment": " client and server exec_path can also be specified as remoteserver:path",
+  "tip1": " client and server exec_path can also be specified as remoteserver:path",
   "client_exec_path": "AdditionClient/out/artifacts/AdditionClient_jar/AdditionClient.jar",
   "server_exec_path": "AdditionServer/out/artifacts/AdditionServer_jar/AdditionServer.jar",
   "client_start_command": "java -jar AdditionClient.jar",
   "server_start_command": "java -jar AdditionServer.jar",
   "client_install_path": "/tmp/server_client/AdditionClients/",
-  "server_install_path": "/tmp/server_client/AdditionServers/"
+  "server_install_path": "/tmp/server_client/AdditionServers/",
+  "show_all_iterations":true,
+  "tip2":" the entire suite can be repeated per config by setting loop_all_tests key",
+  "tip3":"setting show_all_iterations show result of each iteration of test run",
+  "tip4":"set verify_after_each_test to be true to force verification before next test"
 }

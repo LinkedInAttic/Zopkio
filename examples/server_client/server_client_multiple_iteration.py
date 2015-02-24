@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -17,23 +17,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-Constants that are used in multiple classes
-"""
 import os
 
-PROJECT_ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-WEB_RESOURCE_DIR = os.path.join(PROJECT_ROOT_DIR, "web_resources/")
-
-PASSED = "passed"
-FAILED = "failed"
-SKIPPED = "skipped"
-
-PROCESS_NOT_RUNNING_PID = None
-
-DEFAULT_TEST_PHASE = -1
-
-DEFAULT_ITERATION = 1
-
-CONFIG_SEPARATOR = '='
-MACHINE_SEPARATOR = '='
+test = {
+  "deployment_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "deployment.py"),
+  "test_code": [
+      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/base_tests_multiple_iteration.py")],
+  "perf_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "perf.py"),
+  "configs_directory": os.path.join(os.path.dirname(os.path.abspath(__file__)), "configs/")
+}
