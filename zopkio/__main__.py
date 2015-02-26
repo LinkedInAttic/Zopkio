@@ -117,7 +117,7 @@ def main():
     config_overrides = utils.parse_config_list(args.config_overrides)
   except ValueError as e:
     logger.error(str(e))
-    print("Error in processing command line arguments:\n %s".format(traceback.format_exc()))
+    print("Error in processing command line arguments:\n {0}".format(traceback.format_exc()))
     sys.exit(1)
 
   runtime.set_machines(machines)
