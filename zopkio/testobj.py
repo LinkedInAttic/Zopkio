@@ -34,6 +34,7 @@ class Test(object):
     self.repeat_per_loop = iteration
     self.total_number_iterations = self.repeat_per_loop
     self.current_iteration = 0
+    self.consecutive_failures = 0
 
     self.function = function
     self.validation_function = None
@@ -71,6 +72,7 @@ class Test(object):
 
     self.result = None
     self.exception = None
+    self.consecutive_failures = 0
 
     self.naarad_config = None
     self.naarad_id = None

@@ -129,6 +129,11 @@ class TestRunner(object):
               if not setup_fail:
                 failure_handler.notify_failure()
               logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
+
+            #kill all orphaned process
+            for deployer in runtime.get_deployers():
+              deployer.kill_all_process()
+
         config.end_time = time.time()
         logger.info("Execution of configuration: {0} complete".format(config.name))
 
@@ -252,7 +257,12 @@ class TestRunner(object):
         def run_test_command(test):
           while (test.current_iteration < test.total_number_iterations):
             test.current_iteration = test.current_iteration + 1
-            self._run_and_verify_test(test)
+            #verify if the test has previously failed. If so then don't try to run again
+            #unless the config asks for it
+            if (  (test.result != constants.FAILED)
+              or (runtime.get_active_config("consecutive_failures_per_test",0) > test.consecutive_failures)
+             ):
+              self._run_and_verify_test(test)
             #if each test is run for number of required iterations before moving to next test
             #test.total_number_iterations can be 4 if TEST_ITER for test module is set to 2 and loop_all_test is 2
             #in that case each test will be run twice before moving to next test and the whole suite twice
@@ -317,7 +327,12 @@ class TestRunner(object):
         # 2 ways of loop 1. loop each test (Default) or 2.loop after the entire suite
         while (test.current_iteration < test.total_number_iterations):
           test.current_iteration = test.current_iteration + 1
-          self._run_and_verify_test(test)
+          #verify if the test has previously failed. If so then don't try to run again
+          #unless the config asks for it
+          if (  (test.result != constants.FAILED)
+             or (runtime.get_active_config("consecutive_failures_per_test",0) > test.consecutive_failures)
+             ):
+            self._run_and_verify_test(test)
           #if each test is run for number of required iterations before moving to next test
           #test.total_number_iterations can be 4 if TEST_ITER for test module is set to 2 and loop_all_test is 2
           #in that case each test will be run twice before moving to next test and the whole suite twice
@@ -367,6 +382,11 @@ class TestRunner(object):
         test.end_time = time.time()
         self._copy_logs()
         self._execute_singletest_verification(test)
+
+    if (test.result == constants.FAILED):
+      test.consecutive_failures = test.consecutive_failures + 1
+    else:
+      test.consecutive_failures = 0
 
   def _execute_run(self, config, naarad_obj):
     """
