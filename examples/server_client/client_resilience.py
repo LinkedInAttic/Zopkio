@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -17,6 +17,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Zopkio test framework"""
+import os
 
-__version__ = '0.1.16'
+test = {
+  "deployment_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "deployment.py"),
+  "test_code": [
+      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/test_resilience.py")],
+  "perf_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "perf.py"),
+  "configs_directory": os.path.join(os.path.dirname(os.path.abspath(__file__)), "configs/")
+}
