@@ -207,6 +207,8 @@ class SSHDeployer(Deployer):
     tmp.update(configs)
     configs = tmp
 
+    logger.debug("starting " + unique_id)
+
     # do not start if already started
     if self.get_pid(unique_id, configs) is not constants.PROCESS_NOT_RUNNING_PID:
       return None
@@ -260,6 +262,8 @@ class SSHDeployer(Deployer):
     tmp = self.default_configs.copy()
     tmp.update(configs)
     configs = tmp
+
+    logger.debug("stopping " + unique_id)
 
     if unique_id in self.processes:
       hostname = self.processes[unique_id].hostname
