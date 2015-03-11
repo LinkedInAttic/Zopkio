@@ -23,7 +23,7 @@ import time
 import perf
 import zopkio.runtime as runtime
 import zopkio.test_utils as testutilities
-import zopkio.test_recipes as testrecipe
+import zopkio.recipes as testrecipe
 
 tests_iteration = 1
 
