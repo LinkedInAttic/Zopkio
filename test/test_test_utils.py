@@ -20,7 +20,6 @@
 import os
 import unittest
 
-import zopkio.test_utils as test_utils
 import zopkio.testobj as testobj
 import datetime
 import time
