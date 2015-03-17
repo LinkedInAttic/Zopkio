@@ -20,7 +20,6 @@
 import os
 import unittest
 
-import zopkio.test_utils as test_utils
 import zopkio.testobj as testobj
 import datetime
 import time
@@ -46,11 +45,7 @@ class TestTestUtils(unittest.TestCase):
     with open(os.path.join(output_path, 'test.log'), 'w') as f:
       f.write('23:59:59 [main] INFO  Testing_Logs')      
     with open(os.path.join(output_path, 'test.log'), 'w') as f:
-      f.write('23:59:59 [main] INFO  TestClientService - Sent 100')
-
-    log_file = os.path.join(output_path, "test.log")
-    logs = test_utils.get_log_for_test("Testing_Logs", log_file, "12:00:00")
-    assert "Sent 100" in logs, "Logs not gathered correctly"     
+      f.write('23:59:59 [main] INFO  TestClientService - Sent 100')  
 
 if __name__ == '__main__':
   unittest.main()
