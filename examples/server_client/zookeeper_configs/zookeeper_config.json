@@ -1,0 +1,15 @@
+{
+  "client_exec_path": "AdditionClient/out/artifacts/AdditionClient_jar/AdditionClient.jar",
+  "server_exec_path": "AdditionServer/out/artifacts/AdditionServer_jar/AdditionServer.jar",
+  "client_start_command": "java -jar AdditionClient.jar",
+  "server_start_command": "java -jar AdditionServer.jar",
+  "zookeeper_stop_command": "zookeeper-3.4.6/bin/zkServer.sh stop",
+  "zookeeper_start_command": "zookeeper-3.4.6/bin/zkServer.sh start  zookeeper-3.4.6/conf/zoo.cfg",
+  "client_install_path": "/tmp/server_client/AdditionClients/",
+  "server_install_path": "/tmp/server_client/AdditionServers/",
+  "cleanup_pending_process" : false,
+  "zookeeper_post_install_cmds": [
+    "cp zookeeper-3.4.6/conf/zoo_sample.cfg zookeeper-3.4.6/conf/zoo.cfg",
+    "sed -i.bak 's/.*dataDir=.*/dataDir=data/g' zookeeper-3.4.6/conf/zoo.cfg"
+  ]
+}
