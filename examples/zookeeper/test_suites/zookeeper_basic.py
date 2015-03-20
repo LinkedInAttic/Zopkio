@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -22,84 +22,56 @@ from kazoo.client import KazooClient
 from multiprocessing import Process
 import time
 
-
-import perf
 import zopkio.runtime as runtime
 import zopkio.test_utils as testutilities
 import zopkio.adhoc_deployer as adhoc_deployer
 
 
 zookeper_deployer = None
-
-def start_zookeeper():
-  print "Starting zookeeper"
-  zookeeper_exec_location = "http://apache.mirrors.pair.com/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz"
-
-  global zookeper_deployer
-  zookeper_deployer = adhoc_deployer.SSHDeployer("zookeeper",
-      {'pid_keyword': "zookeeper",
-       'executable': zookeeper_exec_location,
-       'extract': True,
-       'post_install_cmds':runtime.get_active_config('zookeeper_post_install_cmds'),
-       'stop_command':runtime.get_active_config('zookeeper_stop_command'),
-       'start_command': runtime.get_active_config('zookeeper_start_command')})
-  runtime.set_deployer("zookeeper", zookeper_deployer)
-
-  zookeper_deployer.install("zookeeper",
-      {"hostname": "localhost",
-       "install_path": "/tmp/zookeeper_test"})
-  zookeper_deployer.start("zookeeper",configs={"sync": True})
   
-  #WAit for zookeeper to start so that kazoo client can connect correctly
-  time.sleep(5)
-
 def zookeeper_ephemeral_node(name):
-  zk = KazooClient(hosts='127.0.0.1:2181')
+  zk = KazooClient(hosts=str(runtime.get_active_config('zookeeper_host') + ':2181'))
   zk.start()
+  zk.create("/my/zookeeper_test/node1", b"process1 running", ephemeral=True)
+  #At 10 validate that ephemeral node exist that is the process is still running
+  time.sleep(10)
+  assert zk.exists("/my/zookeeper_test/node1"), "process node is not found at 10 s when it is still running"
 
-  #Create an ephemeral node which will be delete in 30 s
-  zk.create("/my/zookeeper_test/node1", b"process1 running", ephemeral=True) 
-  time.sleep(30)
+  time.sleep(20)
   zk.stop()
 
 def test_zookeeper_process_tracking():
   """
   Tests if process register node correctly with zookeeper and zookeeper deletes it when process terminates
   """
-  start_zookeeper()
+  #Wait for zookeeper to start so that kazoo client can connect correctly
+  time.sleep(5)
+  #"connecting to esnure /my/zookeeper_test"
 
-  # create a ZkClient and ensure zookeper_test node
-  zkclient = KazooClient(hosts='127.0.0.1:2181')
+  kazoo_connection_url = str(runtime.get_active_config('zookeeper_host') + ':2181')
+  zkclient = KazooClient(hosts=kazoo_connection_url)
+
   zkclient.start()
-  zkclient.ensure_path("/my/zookeeper_test")
 
+  zkclient.ensure_path("/my/zookeeper_test")
   #spawn a python multiprocess which creates an ephermeral node
   #once the process ends the node will be deleted.
   p = Process(target=zookeeper_ephemeral_node, args=("process1",))
   p.start()
-
   zkclient.stop()
 
 def validate_zookeeper_process_tracking():
   """
   Verify if process register node correctly with zookeeper and zookeeper deletes it when process terminates
   """
-
-  time.sleep(10)
-  zk = KazooClient(hosts='127.0.0.1:2181')
+  zk = KazooClient(hosts=str(runtime.get_active_config('zookeeper_host') + ':2181'))
   zk.start()
 
-  #At 10 validate that ephemeral node exist that is the process is still running
-  assert zk.exists("/my/zookeeper_test/node1"), "process node is not found at 10 s when it is still running"
-  
   #At 60 validate that process has terminated by looking at the ephemeral node
-  time.sleep(50)
+  time.sleep(60)
   assert not zk.exists("/my/zookeeper_test/node1"), "process node  not found at 60 s when it should have terminated"
 
-  #Terminate Zookeeper
-  zookeper_deployer.undeploy("zookeeper")
-  print "zookeeper terminated"
-
   zk.stop()
+
 
 

@@ -63,7 +63,8 @@ setup(
       'naarad==1.0.8',
       'paramiko>=1.15.1',
       'pytz>=2014.7',
-      'jinja2>=2.7.3'
+      'jinja2>=2.7.3',
+      'kazoo>=2.0'
   ],
   entry_points = {
       'console_scripts': [

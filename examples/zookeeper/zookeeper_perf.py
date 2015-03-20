@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -19,10 +19,19 @@
 
 import os
 
-test = {
-  "deployment_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "deployment.py"),
-  "test_code": [
-      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/zookeeper_test.py")],
-  "perf_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "perf.py"),
-  "configs_directory": os.path.join(os.path.dirname(os.path.abspath(__file__)), "zookeeper_configs/")
-}
+LOGS_DIRECTORY = "/tmp/zopkio_zookeeper/logs/"
+OUTPUT_DIRECTORY = "/tmp/zopkio_zookeeper/results/"
+
+def machine_logs():
+  return {
+    "zookeeper": [os.path.join("/tmp/zookeeper_test", "zookeeper.out")],
+  }
+
+def naarad_logs():
+  return {
+    'zookeeper': [],
+  }
+
+
+def naarad_config(config, test_name=None):
+  return os.path.join(os.path.dirname(os.path.abspath(__file__)), "naarad.cfg")
