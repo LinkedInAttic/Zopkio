@@ -131,8 +131,9 @@ class TestRunner(object):
               logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
 
             #kill all orphaned process
-            for deployer in runtime.get_deployers():
-              deployer.kill_all_process()
+            if (runtime.get_active_config("cleanup_pending_process",True)):
+              for deployer in runtime.get_deployers():
+                deployer.kill_all_process()
 
         config.end_time = time.time()
         logger.info("Execution of configuration: {0} complete".format(config.name))

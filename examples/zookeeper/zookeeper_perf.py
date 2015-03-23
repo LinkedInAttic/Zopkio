@@ -17,3 +17,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import os
+
+LOGS_DIRECTORY = "/tmp/zopkio_zookeeper/logs/"
+OUTPUT_DIRECTORY = "/tmp/zopkio_zookeeper/results/"
+
+def machine_logs():
+  return {
+    "zookeeper": [os.path.join("/tmp/zookeeper_test", "zookeeper.out")],
+  }
+
+def naarad_logs():
+  return {
+    'zookeeper': [],
+  }
+
+
+def naarad_config(config, test_name=None):
+  return os.path.join(os.path.dirname(os.path.abspath(__file__)), "naarad.cfg")
