@@ -35,7 +35,7 @@ setup(
   description = __doc__,
   long_description = open('README.rst').read(),
   author = 'Joshua Ehrlich',
-  author_email = 'jehrlich@linkedin.com',
+  author_email = 'jehrlich@linkedin.com,zopkio@googlegroups.com',
   url = 'http://github.com/linkedin/zopkio',
   download_url = 'https://github.com/linkedin/zopkio/tarball/0.1.16',
   license = 'Apache',
