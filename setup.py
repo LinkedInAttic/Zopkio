@@ -60,10 +60,11 @@ setup(
   install_requires=[
       'argparse>=1.2.1',
       'numpy>=1.7.0',
-      'naarad==1.0.8',
+      'naarad>=1.0.8',
       'paramiko>=1.15.1',
       'pytz>=2014.7',
       'jinja2>=2.7.3',
+      'python-dateutil',
       'kazoo>=2.0'
   ],
   entry_points = {
