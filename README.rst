@@ -34,7 +34,7 @@ In the past there have been issues installing one of our dependencies (Naarad)
 if you encounter errors installing naarad see
 https://github.com/linkedin/naarad/wiki/Installation
 
-Basic uasge
+Basic usage
 -----------
 
 Use the zopkio main script::
@@ -240,3 +240,9 @@ Example Tests
 
 - The base_tests_multiple_iteration.py module has TEST_ITER parameter set to 2.
 - This repeats all the tests twice but does not enfore any ordering
+
+4) command : zopkio examples/server_client/client_resilience.py
+
+- This is an example of the test recipe feature of zopkio. See test_recipes.py for recipe and test_resilience.py for example used here
+- This tests the kill_recovery recipe to which you pass the deployer, process list, optional restart func, recovery func and timeout
+- Zopkio will kill a random process of the deployer and verifies if the system can recover correctly based on recovery function before the timeout value
