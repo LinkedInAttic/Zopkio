@@ -22,6 +22,7 @@ import os
 import tarfile
 import time
 import zipfile
+import urllib
 
 from subprocess import call
 
@@ -103,6 +104,8 @@ class SSHDeployer(Deployer):
     configs = tmp
 
     hostname = None
+    is_tarfile = False
+    is_zipfile = False
     if unique_id in self.processes:
       process = self.processes[unique_id]
       prev_hostname = process.hostname
@@ -135,17 +138,58 @@ class SSHDeployer(Deployer):
         if executable is None:
           logger.error("executable was not provided for unique_id: " + unique_id)
           raise DeploymentError("executable was not provided for unique_id: " + unique_id)
-        exec_name = os.path.basename(executable)
-        install_location = os.path.join(install_path, exec_name)
-        with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
-          ftp.put(executable, install_location)
+
+        #if the executable is in remote location copy to local machine
+        copy_from_remote_location = False;
+
+        if (":" in executable):
+          copy_from_remote_location = True
+
+          if ("http" not in executable):
+            remote_location_server = executable.split(":")[0]
+            remote_file_path = executable.split(":")[1] 
+            remote_file_name = os.path.basename(remote_file_path)
+
+            local_temp_file_name = os.path.join(configs.get("tmp_dir","/tmp"),remote_file_name)
+          
+            if not os.path.exists(local_temp_file_name):
+              with get_sftp_client(remote_location_server,username=runtime.get_username(), password=runtime.get_password()) as ftp:
+                try:
+                  ftp.get(remote_file_path, local_temp_file_name)
+                  executable = local_temp_file_name
+                except:
+                  raise DeploymentError("Unable to load file from remote server " + executable)
+          #use urllib for http copy
+          else:    
+              remote_file_name = executable.split("/")[-1]
+              local_temp_file_name = os.path.join(configs.get("tmp_dir","/tmp"),remote_file_name)
+              if not os.path.exists(local_temp_file_name):
+                try:
+                  urllib.urlretrieve (executable, local_temp_file_name)
+                except:
+                  raise DeploymentError("Unable to load file from remote server " + executable)
+              executable = local_temp_file_name    
+
+        try:                     
+          exec_name = os.path.basename(executable)
+          install_location = os.path.join(install_path, exec_name)
+          with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
+            ftp.put(executable, install_location)
+        except:
+            raise DeploymentError("Unable to copy executable to install_location:" + install_location)
+        finally:
+          #Track if its a tarfile or zipfile before deleting it in case the copy to remote location fails
+          is_tarfile = tarfile.is_tarfile(executable)
+          is_zipfile = zipfile.is_zipfile(executable)
+          if (copy_from_remote_location and not configs.get('cache',False)):
+            os.remove(executable)       
 
         # only supports tar and zip (because those modules are provided by Python's standard library)
         if configs.get('extract', False) or self.default_configs.get('extract', False):
-          if tarfile.is_tarfile(executable):
+          if is_tarfile:
             log_output(better_exec_command(ssh, "tar -xf {0} -C {1}".format(install_location, install_path),
                                            "Failed to extract tarfile {0}".format(exec_name)))
-          elif zipfile.is_zipfile(executable):
+          elif is_zipfile:
             log_output(better_exec_command(ssh, "unzip -o {0} -d {1}".format(install_location, install_path),
                                            "Failed to extract zipfile {0}".format(exec_name)))
           else:
@@ -182,6 +226,8 @@ class SSHDeployer(Deployer):
     tmp = self.default_configs.copy()
     tmp.update(configs)
     configs = tmp
+
+    logger.debug("starting " + unique_id)
 
     # do not start if already started
     if self.get_pid(unique_id, configs) is not constants.PROCESS_NOT_RUNNING_PID:
@@ -236,6 +282,8 @@ class SSHDeployer(Deployer):
     tmp = self.default_configs.copy()
     tmp.update(configs)
     configs = tmp
+
+    logger.debug("stopping " + unique_id)
 
     if unique_id in self.processes:
       hostname = self.processes[unique_id].hostname

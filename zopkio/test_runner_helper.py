@@ -45,10 +45,15 @@ def _determine_tests(test_modules):
       test_phase = module.test_phase
     else:
       test_phase = constants.DEFAULT_TEST_PHASE
+
+    if hasattr(module, "tests_iteration"):
+      tests_iteration = module.tests_iteration
+    else:
+      tests_iteration = constants.DEFAULT_ITERATION
     # The following is a way to extract the names of all functions in a module
     # An alternative is to use inspect.isfunction but this has better support for 'duck typing'
     functions = set([fun for fun in attrs if hasattr(getattr(module, fun), '__call__')])
-    tests = dict([(fun.lower(), Test(fun, getattr(module, fun), test_phase)) for fun in functions if "test" in fun.lower()])
+    tests = dict([(fun.lower(), Test(fun, getattr(module, fun), test_phase, tests_iteration)) for fun in functions if "test" in fun.lower()])
     for fun in functions:
       if "validate" in fun.lower():
         test_name = fun.lower().replace("validate", "test")

@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,24 +16,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-"""
-Constants that are used in multiple classes
-"""
-import os
-
-PROJECT_ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-WEB_RESOURCE_DIR = os.path.join(PROJECT_ROOT_DIR, "web_resources/")
-
-PASSED = "passed"
-FAILED = "failed"
-SKIPPED = "skipped"
-
-PROCESS_NOT_RUNNING_PID = None
-
-DEFAULT_TEST_PHASE = -1
-
-DEFAULT_ITERATION = 1
-
-CONFIG_SEPARATOR = '='
-MACHINE_SEPARATOR = '='
+language: python
+python:
+  - "2.7"
+# install dependencies
+install: "python setup.py install"
+# run tests
+script: 
+ - python setup.py test -s test.test_test_runner
+ - python setup.py test -s test.test_utils
+ - python setup.py test -s test.test_test_runner_helper

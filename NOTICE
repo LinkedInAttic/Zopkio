@@ -34,3 +34,6 @@ bootstrap
 http://getbootstrap.com/
 License: Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
+kazoo
+https://github.com/python-zk/kazoo
+License: Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0)

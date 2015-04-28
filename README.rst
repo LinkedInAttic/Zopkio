@@ -34,7 +34,7 @@ In the past there have been issues installing one of our dependencies (Naarad)
 if you encounter errors installing naarad see
 https://github.com/linkedin/naarad/wiki/Installation
 
-Basic uasge
+Basic usage
 -----------
 
 Use the zopkio main script::
@@ -193,6 +193,14 @@ to the tests test writer and accessible from
 ``runtime.get_config(config_name)`` which will return the stored value or the
 empty string if no property with that name is present. These are the properties
 that can be overrode by the ``config-overrides`` command line flag.
+some of the test configs that zopkio recognizes are:
+  * ``loop_all_tests``
+  * ``show_all_iterations``
+  * ``verify_after_each_test``
+
+'loop_all_tests' repeats the entire test suite for that config for the specified number of times
+'show_all_iterations' shows the result in test page for each iteration of the test.
+'verify_after_each_test' forces the validation before moving onto the next test
 
 Application configs are properties which affect how the remote services are
 configured. There is not currently an official way to copy these configs to remote
@@ -208,3 +216,33 @@ suite will be run using the configs within that folder (plus the defaults and
 config overrides). This is the case in which
 ``max_suite_failures_before_abort`` will be considered. Otherwise the suite
 will be run once with the top level config files and overrides.
+
+
+Example Tests
+-------------
+1) command : zopkio examples/server_client/server_client.py
+
+- Runs bunch of tests with multiple clients and servers deployed
+
+2) command : zopkio examples/server_client/single_server_multipleiter_inorder.py --nopassword
+
+
+- The individual tests have the TEST_PHASE set to be 1,2,3 respectively. This enforces order.
+- To run multiple iterations set loop_all_tests to be <value> in config.json file
+- To validate each run of the test before moving to next one set verify_after_each_test in configs
+- To show the pass/fail for each iteration set show_all_iterations to be true in configs
+- sample settings to get mulitple runs for this test
+ #. "show_all_iterations":true,
+ #. "verify_after_each_test":true,
+ #. "loop_all_tests":2,
+
+3) command : zopkio examples/server_client/server_client_multiple_iteration.py
+
+- The base_tests_multiple_iteration.py module has TEST_ITER parameter set to 2.
+- This repeats all the tests twice but does not enfore any ordering
+
+4) command : zopkio examples/server_client/client_resilience.py
+
+- This is an example of the test recipe feature of zopkio. See test_recipes.py for recipe and test_resilience.py for example used here
+- This tests the kill_recovery recipe to which you pass the deployer, process list, optional restart func, recovery func and timeout
+- Zopkio will kill a random process of the deployer and verifies if the system can recover correctly based on recovery function before the timeout value

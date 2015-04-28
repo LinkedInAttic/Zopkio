@@ -182,6 +182,13 @@ class Deployer(object):
       with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         better_exec_command(ssh, "kill -9 {0}".format(pid_str), "KILLING PROCESS {0}".format(unique_id))
 
+  def kill_all_process(self):
+    """ Terminates all the running processes
+
+    """
+    for process in self.get_processes():
+      self.terminate(process.unique_id)
+
   def terminate(self, unique_id, configs=None):
     """ Issues a kill -15 to the specified process
 
