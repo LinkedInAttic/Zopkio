@@ -22,24 +22,29 @@ class Test(object):
   """
   Structure used to store information about a test during runtime
   """
-  def __init__(self, name, function, phase, iteration):
+  def __init__(self, name, function, **kwargs):
     """
     :param name: name of the test
     :param function: callback that will be run during test execution
     """
     self.name = name
 
-    self.phase = phase
+    self.phase = kwargs.get("phase", constants.DEFAULT_TEST_PHASE)
 
-    self.repeat_per_loop = iteration
+    self.repeat_per_loop = kwargs.get("iteration", constants.DEFAULT_ITERATION)
     self.total_number_iterations = self.repeat_per_loop
     self.current_iteration = 0
     self.consecutive_failures = 0
 
     self.function = function
-    self.validation_function = None
+    self.validation_function = kwargs.get("validate", None)
 
-    self.description = None
+    self.description = function.__doc__
+    if self.validation_function.__doc__  is not None:
+      if self.description is not None:
+        self.description = "{0}; {1}".format(self.description, self.validation_function.__doc__)
+      else:
+        self.description = self.validation_function.__doc__
 
     self.func_start_time = None
     self.func_end_time = None
