@@ -202,9 +202,13 @@ class TestRunner(object):
     utils.makedirs(logs_dir)
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
-        logs = self.dynamic_config_module.machine_logs().get(process.unique_id, []) + \
-               self.dynamic_config_module.naarad_logs().get(process.unique_id, []) + \
-               self.dynamic_config_module.process_logs(process.servicename)
+        logs = []
+        if (hasattr(self.dynamic_config_module, "process_logs")):
+          logs += self.dynamic_config_module.process_logs(process.servicename)
+        if (hasattr(self.dynamic_config_module, "machine_logs")):
+          logs += self.dynamic_config_module.machine_logs().get(process.unique_id, [])
+        if (hasattr(self.dynamic_config_module, "naarad_logs")):
+          logs += self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
         if hasattr(self.dynamic_config_module, 'log_patterns'):
           pattern = self.dynamic_config_module.log_patterns().get(process.unique_id, '^$')
         else:
