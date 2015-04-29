@@ -20,7 +20,7 @@
 import os
 import zopkio.remote_host_helper as remote_host_helper
 import zopkio.runtime as runtime
-from zopkio import ZTest, ZTestSuite
+from zopkio.ztests import ZTest, ZTestSuite
 import shutil
 from time import sleep
 __test__ = False  # don't this as a test
