@@ -53,7 +53,8 @@ def _determine_tests(test_modules):
     # The following is a way to extract the names of all functions in a module
     # An alternative is to use inspect.isfunction but this has better support for 'duck typing'
     functions = set([fun for fun in attrs if hasattr(getattr(module, fun), '__call__')])
-    tests = dict([(fun.lower(), Test(fun, getattr(module, fun), test_phase, tests_iteration)) for fun in functions if "test" in fun.lower()])
+    tests = dict([(fun.lower(), Test(fun, getattr(module, fun), phase=test_phase, iteration=tests_iteration))
+                  for fun in functions if "test" in fun.lower()])
     for fun in functions:
       if "validate" in fun.lower():
         test_name = fun.lower().replace("validate", "test")
@@ -111,7 +112,7 @@ def get_modules(testfile, tests_to_run, config_overrides):
   :return:
   """
   test_dic = _parse_input(testfile)
-  master_config, configs = _load_configs_from_directory(test_dic["configs_directory"], config_overrides)
+  master_config, configs = load_configs_from_directory(test_dic["configs_directory"], config_overrides)
   _setup_paths(master_config.mapping.get("additional_paths", []))
   deployment_module = utils.load_module(test_dic["deployment_code"])
   if  "dynamic_configuration_code" in test_dic:
@@ -133,7 +134,7 @@ def get_modules(testfile, tests_to_run, config_overrides):
   return deployment_module, perf_module, tests, master_config, configs
 
 
-def _load_configs_from_directory(config_dir, overrides):
+def load_configs_from_directory(config_dir, overrides):
   """
   Returns a master configuration object and a list of configuration objects
 

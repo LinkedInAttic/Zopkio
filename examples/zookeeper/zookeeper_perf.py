@@ -33,5 +33,5 @@ def naarad_logs():
   }
 
 
-def naarad_config(config, test_name=None):
+def naarad_config():
   return os.path.join(os.path.dirname(os.path.abspath(__file__)), "naarad.cfg")

@@ -102,7 +102,7 @@ class TestTestRunnerHelper(unittest.TestCase):
     """
     Tests that load_configs_from_directory returns correct config objects
     """
-    master_config, configs = test_runner_helper._load_configs_from_directory(
+    master_config, configs = test_runner_helper.load_configs_from_directory(
         os.path.join(self.FILE_LOCATION, "samples/sample_configs"), {})
     self.assertEqual(len(configs), 2)
     config_names = [config.name for config in configs]
@@ -116,7 +116,7 @@ class TestTestRunnerHelper(unittest.TestCase):
     Tests that load config from directory returns correct config objects with
     overrides.
     """
-    master_config, configs = test_runner_helper._load_configs_from_directory(
+    master_config, configs = test_runner_helper.load_configs_from_directory(
       os.path.join(self.FILE_LOCATION, "samples/sample_configs"), {"a": "z"})
     self.assertEqual(len(configs), 2)
     config_names = [config.name for config in configs]

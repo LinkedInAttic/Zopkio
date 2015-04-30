@@ -137,7 +137,7 @@ def parse_config_file(config_file_path):
           mapping.update(attr)
   else:
     with open(config_file_path) as config_file:
-      lines = [line.rstrip() for line in config_file if line.rstrip() != ""]
+      lines = [line.rstrip() for line in config_file if line.rstrip() != "" and not line.startswith("#")]
       mapping = parse_config_list(lines)
 
   return mapping
