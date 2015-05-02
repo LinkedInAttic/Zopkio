@@ -1,4 +1,6 @@
 Zopkio - A Functional and Performance Test Framework for Distributed Systems
+.. image:: https://travis-ci.org/arpras/Zopkio.svg?branch=master
+    :target: https://travis-ci.org/arpras/Zopkio
 ============================================================================
 
 Zopkio is a test framework built to support at scale performance and functional
