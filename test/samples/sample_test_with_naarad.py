@@ -104,7 +104,7 @@ def validate2():
   assert 1 == 1
 
 
-def naarad_config(config, test_name=None):
+def naarad_config():
   return os.path.join(TEST_DIRECTORY, "samples/naarad_config.cfg")
 
 

@@ -66,7 +66,7 @@ def validate1():
   pass
 
 
-def naarad_config(config, test_name=None):
+def naarad_config():
  return os.path.join(TEST_DIRECTORY, "samples/naarad_config")
 
 
