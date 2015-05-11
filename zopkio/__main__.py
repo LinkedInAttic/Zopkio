@@ -25,15 +25,16 @@ test. Minimal logic will be done in this class.
 
 import argparse
 import getpass
+import inspect
 import logging
 import os
-import time
 import traceback
 import sys
 
 import zopkio.constants as constants
 import zopkio.runtime as runtime
 from zopkio.test_runner import TestRunner
+from zopkio.ztests import ZTestSuite
 import zopkio.utils as utils
 
 def setup_logging(output_dir, log_level, console_level):
@@ -132,7 +133,14 @@ def main():
   runtime.set_user(user, password)
 
   try:
-    test_runner = TestRunner(args.testfile, args.test_list, config_overrides)
+    testmodule = utils.load_module(args.testfile)
+    ztestsuites = [getattr(testmodule, attr)
+               for attr in dir(testmodule)
+               if isinstance(getattr(testmodule, attr), ZTestSuite)]
+    if len(ztestsuites) > 0: #TODO(jehrlich) intelligently handle multiple test suites
+      test_runner = TestRunner(ztestsuite=ztestsuites[0], testlist=args.test_list, config_overrides=config_overrides)
+    else:
+      test_runner = TestRunner(args.testfile, args.test_list, config_overrides)
   except BaseException as e:
     print("Error setting up testrunner:\n%s" % traceback.format_exc())
     sys.exit(1)
