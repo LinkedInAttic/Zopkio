@@ -95,7 +95,7 @@ class TestRunner(object):
     self.testfile = ztestsuite.__class__.__name__
     self.deployment_module = ztestsuite
     self.dynamic_config_module = ztestsuite
-    self.tests = ztestsuite.get_tests()
+    self.tests = ztestsuite.get_tests(**kwargs)
     self.master_config, self.configs = test_runner_helper.load_configs_from_directory(ztestsuite.config_dir,
                                                                                       kwargs.get("config_overrides", {}))
 

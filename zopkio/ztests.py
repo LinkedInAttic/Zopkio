@@ -105,13 +105,17 @@ class ZTestSuite(object):
     """
     pass
 
-  def get_tests(self):
+  def get_tests(self, **kwargs):
     """
     This finds all of the ZTest attributes and creates a Test object for each one
     :return: a list of Test objects
     """
     attrs = dir(self)
-    ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest)]
+    testlist = kwargs.get("testlist", None)
+    if testlist is not None:
+      ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest) and attr in testlist]
+    else:
+      ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest)]
     tests = [Test(name, ztest.test, phase=ztest.phase, iteration=ztest.iteration, validate=ztest.validate)
              for (name, ztest) in ztests]
     return tests
