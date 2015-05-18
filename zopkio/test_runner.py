@@ -70,13 +70,38 @@ class TestRunner(object):
   """
   Runs tests with the information given in the testfile
   """
-  def __init__(self, testfile, tests_to_run, config_overrides):
+
+  def __init__(self, *args, **kwargs):
+    """
+
+    :param kwargs:
+    :return:
+    """
+    if ('ztestsuite' in kwargs):
+      self._new_constuctor(**kwargs)
+    elif (len(args) >= 3):
+      self._old_constructor(args[0], args[1], args[2])
+
+  def _old_constructor(self, testfile, tests_to_run, config_overrides):
     self.testfile = testfile
     self.deployment_module, self.dynamic_config_module, self.tests, self.master_config, self.configs = \
         test_runner_helper.get_modules(testfile, tests_to_run, config_overrides)
 
     self.directory_info = None
     self.reporter = None
+
+  def _new_constuctor(self, **kwargs):
+    ztestsuite = kwargs['ztestsuite']
+    self.testfile = ztestsuite.__class__.__name__
+    self.deployment_module = ztestsuite
+    self.dynamic_config_module = ztestsuite
+    self.tests = ztestsuite.get_tests(**kwargs)
+    self.master_config, self.configs = test_runner_helper.load_configs_from_directory(ztestsuite.config_dir,
+                                                                                      kwargs.get("config_overrides", {}))
+
+    self.directory_info = None
+    self.reporter = None
+
 
   def run(self):
     """
@@ -98,7 +123,7 @@ class TestRunner(object):
         runtime.set_active_config(config)
         setup_fail = False
         if not self.master_config.mapping.get("no_perf", False):
-          config.naarad_id = naarad_obj.signal_start(self.dynamic_config_module.naarad_config(config.mapping))
+          config.naarad_id = naarad_obj.signal_start(self.dynamic_config_module.naarad_config())
         config.start_time = time.time()
 
         logger.info("Setting up configuration: " + config.name)
@@ -116,7 +141,6 @@ class TestRunner(object):
           try:
             logger.debug("Running tests for configuration: " + config.name)
             self._execute_run(config, naarad_obj)
-
             logger.debug("Tearing down configuration: " + config.name)
           finally:
             try:
@@ -178,8 +202,13 @@ class TestRunner(object):
     utils.makedirs(logs_dir)
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
-        logs = self.dynamic_config_module.machine_logs().get(process.unique_id, []) + \
-               self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
+        logs = []
+        if (hasattr(self.dynamic_config_module, "process_logs")):
+          logs += self.dynamic_config_module.process_logs(process.servicename)
+        if (hasattr(self.dynamic_config_module, "machine_logs")):
+          logs += self.dynamic_config_module.machine_logs().get(process.unique_id, [])
+        if (hasattr(self.dynamic_config_module, "naarad_logs")):
+          logs += self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
         if hasattr(self.dynamic_config_module, 'log_patterns'):
           pattern = self.dynamic_config_module.log_patterns().get(process.unique_id, '^$')
         else:
@@ -237,7 +266,7 @@ class TestRunner(object):
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
         for test in tests:
-          test.naarad_config = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
+          test.naarad_config = self.dynamic_config_module.naarad_config()
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       for test in tests:
         test.start_time = time.time()
@@ -309,7 +338,7 @@ class TestRunner(object):
     else:
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
-        test.naarad_config = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
+        test.naarad_config = self.dynamic_config_module.naarad_config()
         test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       test.start_time = time.time()
       logger.debug("Setting up test: " + test.name)
@@ -409,9 +438,8 @@ class TestRunner(object):
           self._execute_single_test(config, failure_handler, naarad_obj, test)
         else:
           self._execute_parallel_tests(config, failure_handler, naarad_obj, tests)
-
+          
     self._copy_logs()
-
     if not self.master_config.mapping.get("no_perf", False):
       naarad_obj.signal_stop(config.naarad_id)
       self._execute_performance(naarad_obj)

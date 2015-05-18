@@ -30,7 +30,7 @@ test = {
 LOGS_DIRECTORY = "/tmp/sample_test_fail_setup_suite/collected_logs/"
 OUTPUT_DIRECTORY = "/tmp/sample_test_fail_setup_suite/results/"
 
-def naarad_config(config, test_name=None):
+def naarad_config():
   return os.path.join(os.path.dirname(os.path.abspath(__file__)),
                       "naarad_config.cfg")
 

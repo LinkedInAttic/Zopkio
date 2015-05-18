@@ -37,7 +37,7 @@ setup(
   author = 'Joshua Ehrlich',
   author_email = 'jehrlich@linkedin.com,zopkio@googlegroups.com',
   url = 'http://github.com/linkedin/zopkio',
-  download_url = 'https://github.com/linkedin/zopkio/tarball/0.1.16',
+  download_url = 'https://github.com/linkedin/zopkio/tarball/0.2.0',
   license = 'Apache',
   packages = ['zopkio', 'zopkio.web_resources'],
   package_dir = { 'zopkio' : 'zopkio'},
@@ -59,12 +59,13 @@ setup(
   ],
   install_requires=[
       'argparse>=1.2.1',
-      'numpy>=1.7.0',
-      'naarad==1.0.8',
-      'paramiko>=1.15.1',
-      'pytz>=2014.7',
+      'numpy>=1.6.2',
+      'naarad>=1.0.15',
+      'paramiko>=1.10.1',
+      'pytz>=2012c',
       'jinja2>=2.7.3',
-      'kazoo>=2.0'
+      'python-dateutil',
+      'kazoo>=1.1'
   ],
   entry_points = {
       'console_scripts': [

@@ -33,7 +33,7 @@ class TestTestUtils(unittest.TestCase):
     Tests if we get the logs for test correctly
     """
 
-    test = testobj.Test("Testing_Logs",None,0,0)
+    test = testobj.Test("Testing_Logs",None,phase=0,iteration=0)
     test.start_time = time.time()
     time.sleep(2)
     test.end_time = time.time()

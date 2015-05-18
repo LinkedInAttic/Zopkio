@@ -16,16 +16,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-language: python
-python:
-  - "2.7"
-before_install:
-  - ssh-keyscan localhost >> ~/.ssh/known_hosts
-  - cat /dev/zero | ssh-keygen -q -N ""
-  - cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-# install dependencies
-install: "python setup.py install"
-# run tests
-script: 
- - python setup.py test
- - zopkio examples/server_client/server_client.py --nopassword
+
+LOGS_DIRECTORY=/tmp/ztestsuite/collected_logs/
+OUTPUT_DIRECTORY=/tmp/ztestsuite/results/

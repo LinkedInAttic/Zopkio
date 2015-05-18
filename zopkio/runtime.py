@@ -133,6 +133,12 @@ def get_collector():
   """
   return _collector
 
+def reset_collector():
+  """
+  Reset the global collector this is used for testing
+  """
+  global _collector
+  _collector = ResultsCollector()
 
 ###
 # Methods dealing with configurations

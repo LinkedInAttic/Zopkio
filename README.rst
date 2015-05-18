@@ -1,5 +1,7 @@
 Zopkio - A Functional and Performance Test Framework for Distributed Systems
 ============================================================================
+  .. image:: https://travis-ci.org/linkedin/Zopkio.svg?branch=master
+      :target: https://travis-ci.org/linkedin/Zopkio
 
 Zopkio is a test framework built to support at scale performance and functional
 testing.
@@ -163,7 +165,7 @@ general performance of a run (beyond rules specific to individual tests).  To
 get the most from Naarad, a Naarad config file can be provided (see
 https://github.com/linkedin/naarad/blob/master/README.md section Usage). In
 order to have Naarad support the module should provide a function
-``naarad_config(configs, test_name)``. There are also two functons
+``naarad_config()``. There are also two functons
 ``machine_logs()`` and ``naarad_logs()`` that should return dictionaries
 from ``unique_ids`` to the list of logs to collect.  Machine logs are the
 set of logs that should not be processed by naarad.

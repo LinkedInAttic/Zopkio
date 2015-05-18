@@ -21,6 +21,8 @@ import os
 import unittest
 
 from zopkio.test_runner import TestRunner
+import zopkio.runtime as runtime
+from samples.sample_ztestsuite import SampleTestSuite
 
 class TestTestRunner(unittest.TestCase):
   FILE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -29,15 +31,17 @@ class TestTestRunner(unittest.TestCase):
     """
     Tests a full run
     """
+    runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_with_naarad.py")
     test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
     test_runner.run()
 
-  def test_full_run(self):
+  def test_full_run_parallel(self):
     """
     Tests a full run with parallel tests
     """
+    runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_with_naarad_run_tests_in_parallel.py")
     test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
@@ -47,6 +51,7 @@ class TestTestRunner(unittest.TestCase):
     """
     Tests failing setup for one test and having it skip
     """
+    runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_fail_first_setup.py")
     test_runner = TestRunner(test_file, None,
@@ -58,6 +63,7 @@ class TestTestRunner(unittest.TestCase):
     Tests failing consecutive setups and having the entire execution of a
     configuration stop.
     """
+    runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_fail_all_setup.py")
     test_runner = TestRunner(test_file, None,
@@ -69,11 +75,22 @@ class TestTestRunner(unittest.TestCase):
     Tests failing consectutive setup_suites and skipping the rest of the
     configurations.
     """
+    runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_fail_setup_suite.py")
     test_runner = TestRunner(test_file, None,
                              {"max_suite_failures_before_abort": 0})
     test_runner.run()
+
+  def test_full_run_ztestsuite(self):
+    """
+    Tests the new use of ztest and zetestsuite
+    :return:
+    """
+    runtime.reset_collector()
+    ztestsuite = SampleTestSuite()
+    ztestsuite.zopkio()
+
 
 if __name__ == '__main__':
   unittest.main()
