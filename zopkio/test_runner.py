@@ -123,7 +123,11 @@ class TestRunner(object):
         runtime.set_active_config(config)
         setup_fail = False
         if not self.master_config.mapping.get("no_perf", False):
-          config.naarad_id = naarad_obj.signal_start(self.dynamic_config_module.naarad_config())
+          try:
+            naarad_config_file = self.dynamic_config_module.naarad_config()
+          except TypeError: # Support backwards compatability
+            naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping)
+          config.naarad_id = naarad_obj.signal_start(naarad_config_file)
         config.start_time = time.time()
 
         logger.info("Setting up configuration: " + config.name)
@@ -266,7 +270,11 @@ class TestRunner(object):
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
         for test in tests:
-          test.naarad_config = self.dynamic_config_module.naarad_config()
+          try:
+            naarad_config_file = self.dynamic_config_module.naarad_config()
+          except TypeError: # Support backwards compatability
+            naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
+          test.naarad_config = naarad_config_file
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       for test in tests:
         test.start_time = time.time()
@@ -338,7 +346,11 @@ class TestRunner(object):
     else:
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
-        test.naarad_config = self.dynamic_config_module.naarad_config()
+        try:
+          naarad_config_file = self.dynamic_config_module.naarad_config()
+        except TypeError: # Support backwards compatability
+          naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
+        test.naarad_config = naarad_config_file
         test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       test.start_time = time.time()
       logger.debug("Setting up test: " + test.name)
