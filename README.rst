@@ -87,7 +87,7 @@ Deployment
 ~~~~~~~~~~
 
 The deployment file should be pointed to by an entry in the dictionary called
-*deployemnet_code*. Deplyoment is one of the key features of Zopkio.
+*deployment_code*. Deplyoment is one of the key features of Zopkio.
 Developers can write test in
 which they bring up arbtrary sets of services on multiple machines and then
 within the tests exercise a considerable degree of control over these machines.
@@ -137,11 +137,11 @@ Test Files
 
 Test files are specified by an entry in the test dictionary called *test_code*,
 which should point to a list of test files.
-Foreach test file, the framework will execute any function with *test* in the
-name and track if the function executes successfully. In addition if there is a
-function ``test_foo`` and a function ``validate_foo``, after all cleanup
-and log collection is done, if ``test_foo`` executed successfully then
-``validate_foo`` will be executed and tested for successful execution if
+For each test file, the framework will execute any function with *test* in the
+name (no matter the case) and track if the function executes successfully. In
+addition if there is a function ``test_foo`` and a function ``validate_foo``,
+after all cleanup and log collection is done, if ``test_foo`` executed successfully
+then ``validate_foo`` will be executed and tested for successful execution if
 it fails, the original test will fail and the logs from the post execution will
 be displayed. Test can be run in either a parallel mode or a serial mode. By
 default tests are run serially without any specified order. However each test file
