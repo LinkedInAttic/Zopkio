@@ -94,3 +94,67 @@ def validate_single_client_perf():
   metrics = runtime.get_active_test_metrics("test_single_client_perf")
   assert metrics["server1-perf"]["qps"]["max"] > 100, "qps too low"
   assert metrics["server1-perf"]["latency"]["max"] < 0.2, "latency too high"
+
+
+def test_multi_client_perf():
+  """
+  Tests the performance of a server when handling multiple clients
+  """
+  client_deployer = runtime.get_deployer("AdditionClient")
+
+  client_deployer.start("client1", configs={"args": "localhost 8000".split() + [str(i) for i in range(1, 2000)], "sync": True})
+  client_deployer.start("client2", configs={"args": "localhost 8000".split() + [str(i) for i in range(1, 2000)], "sync": True})
+
+
+def validate_multi_client_perf():
+  """
+  Validate server max qps is >1000 and mean latency is <1 sec
+  """
+  metrics = runtime.get_active_test_metrics("test_multi_client_perf")
+  assert metrics["server1-perf"]["qps"]["max"] > 1000, "qps too low"
+  assert metrics["server1-perf"]["latency"]["max"] < 1, "latency too high"
+
+
+def _client_timeout(client_deployer, client):
+  client_deployer.pause(client)
+  time.sleep(60)
+  client_deployer.resume(client)
+
+
+def test_client_timeout():
+  """
+  Tests what happens when the client does not finish a full request
+  """
+  client_deployer = runtime.get_deployer("AdditionClient")
+
+  start_client = lambda: client_deployer.start("client1", configs={"args": "localhost 8000".split() + LARGE_SAMPLE, "sync": True})
+  timeout_client = lambda: _client_timeout(client_deployer, "client1")
+  testutilities.start_threads_and_join([start_client, timeout_client])
+
+
+def validate_client_timeout():
+  """
+  Verify that timeout messages are received
+  """
+  server1_log_file = os.path.join(perf.LOGS_DIRECTORY, "server1-AdditionServer.log")
+  server1_logs = testutilities.get_log_for_test("test_client_timeout", server1_log_file, "12:00:00")
+  assert "Client timeout" in server1_logs, "Did not properly handle client timeout"
+
+
+def test_client_isolation():
+  """
+  Tests what happens when the client is faulty
+  """
+  client_deployer = runtime.get_deployer("AdditionClient")
+
+  client_deployer.start("client1", configs={"args": "localhost 8000".split() + LARGE_SAMPLE})
+  client_deployer.stop("client1")
+
+
+def validate_client_isolation():
+  """
+  Verify that timeout messages are received
+  """
+  server1_log_file = os.path.join(perf.LOGS_DIRECTORY, "server1-AdditionServer.log")
+  server1_logs = testutilities.get_log_for_test("test_client_isolation", server1_log_file, "12:00:00")
+  assert "Client blocked" in server1_logs, "Did not properly handle faulty client"
