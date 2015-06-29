@@ -125,6 +125,7 @@ class SSHDeployer(Deployer):
 
     env = configs.get("env", {})
     install_path = configs.get('install_path') or self.default_configs.get('install_path')
+    pid_file = configs.get('pid_file') or self.default_configs.get('pid_file')
     if install_path is None:
       logger.error("install_path was not provided for unique_id: " + unique_id)
       raise DeploymentError("install_path was not provided for unique_id: " + unique_id)
@@ -201,6 +202,7 @@ class SSHDeployer(Deployer):
           log_output(exec_with_env(ssh, relative_cmd,
                                          msg="Failed to execute post install command: {0}".format(relative_cmd), env=env))
     self.processes[unique_id] = Process(unique_id, self.service_name, hostname, install_path)
+    self.processes[unique_id].pid_file = pid_file
 
   def start(self, unique_id, configs=None):
     """
@@ -244,6 +246,7 @@ class SSHDeployer(Deployer):
     # 2. from Process
     # 3. from Deployer
     start_command = configs.get('start_command') or self.processes[unique_id].start_command or self.default_configs.get('start_command')
+    pid_file = configs.get('pid_file') or self.default_configs.get('pid_file')
     if start_command is None:
       logger.error("start_command was not provided for unique_id: " + unique_id)
       raise DeploymentError("start_command was not provided for unique_id: " + unique_id)
@@ -259,6 +262,9 @@ class SSHDeployer(Deployer):
 
     self.processes[unique_id].start_command = start_command
     self.processes[unique_id].args = args
+    # For cases where user pases it with start command
+    if self.processes[unique_id].pid_file is None:
+      self.processes[unique_id].pid_file = pid_file
 
     if 'delay' in configs:
       time.sleep(configs['delay'])
@@ -363,7 +369,11 @@ class SSHDeployer(Deployer):
     if self.processes[unique_id].start_command is None:
       return constants.PROCESS_NOT_RUNNING_PID
 
-    if 'pid_file' in configs.keys():
+    if self.processes[unique_id].pid_file is not None:
+      with open_remote_file(hostname, self.processes[unique_id].pid_file,
+                            username=runtime.get_username(), password=runtime.get_password()) as pid_file:
+        full_output = pid_file.read()
+    elif 'pid_file' in configs.keys():
       with open_remote_file(hostname, configs['pid_file'],
                             username=runtime.get_username(), password=runtime.get_password()) as pid_file:
         full_output = pid_file.read()

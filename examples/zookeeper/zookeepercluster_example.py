@@ -20,9 +20,10 @@
 import os
 
 test = {
-  "deployment_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "deployment.py"),
+  "deployment_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "deploy_zookeepers.py"),
   "test_code": [
-      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/zookeeper_basic.py")],
-  "perf_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "log_naarad.py"),
+      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/zookeeper_cluster_tests.py"),
+      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/zookeeper_test_faulttolerance.py")],
+  "perf_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "zookeepercluster_log_naarad_config.py"),
   "configs_directory": os.path.join(os.path.dirname(os.path.abspath(__file__)), "config/")
 }
