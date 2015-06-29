@@ -158,8 +158,10 @@ class TestRunner(object):
                 failure_handler.notify_failure()
               logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
 
-            #kill all orphaned process
-            if (runtime.get_active_config("cleanup_pending_process",True)):
+            # kill all orphaned process
+            # TODO : Make this true by default once we fix the correct way to get pid
+            # Currently the way we extract pid without any pid_keyword or pid_file can cause bad kills
+            if (runtime.get_active_config("cleanup_pending_process",False)):
               for deployer in runtime.get_deployers():
                 deployer.kill_all_process()
 

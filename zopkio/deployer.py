@@ -100,6 +100,9 @@ class Deployer(object):
   def get_pid(self, unique_id, configs=None):
     """Gets the pid of the process with `unique_id`.  If the deployer does not know of a process
     with `unique_id` then it should return a value of constants.PROCESS_NOT_RUNNING_PID
+    If no pid_file/pid_keyword is specified
+    a generic grep of ps aux command is executed on remote machine based on process parameters
+    which may not be reliable if more process are running with similar name
 
     :Parameter unique_id: the name of the process
     """
@@ -172,6 +175,9 @@ class Deployer(object):
 
   def kill(self, unique_id, configs=None):
     """ Issues a kill -9 to the specified process
+    calls the deployers get_pid function for the process. If no pid_file/pid_keyword is specified
+    a generic grep of ps aux command is executed on remote machine based on process parameters
+    which may not be reliable if more process are running with similar name
 
     :Parameter unique_id: the name of the process
     """
@@ -248,3 +254,4 @@ class Process(object):
     self.install_path = install_path
     self.start_command = None
     self.args = None
+    self.pid_file = None
