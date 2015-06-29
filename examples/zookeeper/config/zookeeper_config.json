@@ -2,13 +2,15 @@
   "zookeeper_host":"localhost",
   "zookeeper_exec_location":"http://apache.mirrors.pair.com/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz",
   "zookeeper_stop_command": "zookeeper-3.4.6/bin/zkServer.sh stop",
-  "zookeeper_start_command": "zookeeper-3.4.6/bin/zkServer.sh start  zookeeper-3.4.6/conf/zoo.cfg",
+  "zookeeper_start_command": "zookeeper-3.4.6/bin/zkServer.sh start zookeeper-3.4.6/conf/zoo.cfg",
   "cleanup_pending_process" : false,
+  "verify_after_each_test": true,
   "zookeeper_logs": [
     "zookeeper.out"
   ],
   "zookeeper_post_install_cmds": [
     "cp zookeeper-3.4.6/conf/zoo_sample.cfg zookeeper-3.4.6/conf/zoo.cfg",
-    "sed -i.bak 's/.*dataDir=.*/dataDir=data/g' zookeeper-3.4.6/conf/zoo.cfg"
+    "sed -i.bak 's/.*dataDir=.*/dataDir=dataDir1/g' zookeeper-3.4.6/conf/zoo.cfg",
+    "sed -i.bak 's/.*clientPort=.*/clientPort=2181/g' zookeeper-3.4.6/conf/zoo.cfg"
   ]
 }
