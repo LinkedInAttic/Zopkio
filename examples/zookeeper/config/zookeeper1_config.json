@@ -1,0 +1,19 @@
+{
+  "zookeeper1_host": "localhost",
+  "zookeeper1_install_path" : "/tmp/zookeeper_test1",
+  "zookeeper1_logs": [
+    "zookeeper.out"
+  ],
+  "zookeeper1_post_install_cmds": [
+    "cp zookeeper-3.4.6/conf/zoo_sample.cfg zookeeper-3.4.6/conf/zoo.cfg",
+    "sed -i.bak 's/.*dataDir=.*/dataDir=dataDir1/g' zookeeper-3.4.6/conf/zoo.cfg",
+    "sed -i.bak 's/.*clientPort=.*/clientPort=2181/g' zookeeper-3.4.6/conf/zoo.cfg",
+    "echo 'server.1=localhost:2888:3888' >> zookeeper-3.4.6/conf/zoo.cfg",
+    "echo 'server.2=localhost:2889:3889' >> zookeeper-3.4.6/conf/zoo.cfg",
+    "echo 'server.3=localhost:2890:3890' >> zookeeper-3.4.6/conf/zoo.cfg",
+    "rm -rf dataDir1",
+    "mkdir dataDir1",    
+    "echo '1' > dataDir1/myid"
+  ],
+  "zookeeper1_pid_file": "/tmp/zookeeper_test1/dataDir1/zookeeper_server.pid"
+}

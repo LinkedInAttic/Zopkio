@@ -19,10 +19,21 @@
 
 import os
 
-test = {
-  "deployment_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "deployment.py"),
-  "test_code": [
-      os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_suites/zookeeper_basic.py")],
-  "perf_code": os.path.join(os.path.dirname(os.path.abspath(__file__)), "log_naarad.py"),
-  "configs_directory": os.path.join(os.path.dirname(os.path.abspath(__file__)), "config/")
-}
+LOGS_DIRECTORY = "/tmp/zopkio_zookeeper/logs/"
+OUTPUT_DIRECTORY = "/tmp/zopkio_zookeeper/results/"
+
+def machine_logs():
+  return {
+    "zookeeper1": [os.path.join("/tmp/zookeeper_test1", "zookeeper.out")],
+    "zookeeper2": [os.path.join("/tmp/zookeeper_test2", "zookeeper.out")],
+    "zookeeper3": [os.path.join("/tmp/zookeeper_test3", "zookeeper.out")],
+  }
+
+def naarad_logs():
+  return {
+    'zookeeper1': [],
+  }
+
+
+def naarad_config():
+  return os.path.join(os.path.dirname(os.path.abspath(__file__)), "naarad.cfg")
