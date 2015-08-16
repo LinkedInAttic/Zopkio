@@ -32,7 +32,8 @@ from naarad import Naarad
 
 import zopkio.constants as constants
 import zopkio.error_messages as error_messages
-from zopkio.reporter import Reporter
+# from zopkio.reporter import Reporter
+from reporters import junit_reporter, html_reporter
 import zopkio.runtime as runtime
 import zopkio.test_runner_helper as test_runner_helper
 import zopkio.utils as utils
@@ -77,17 +78,22 @@ class TestRunner(object):
     :param kwargs:
     :return:
     """
+    # if ('reporter_type' in kwargs):
+    #     reporter_type = kwargs['reporter_type']
     if ('ztestsuite' in kwargs):
       self._new_constuctor(**kwargs)
-    elif (len(args) >= 3):
+    elif (len(args) >= 3 and 'reporter_type' not in kwargs):
       self._old_constructor(args[0], args[1], args[2])
+    elif (len(args) >= 3 and 'reporter_type' in kwargs):
+         self._old_constructor(args[0], args[1], args[2], reporter_type=kwargs['reporter_type'])
 
-  def _old_constructor(self, testfile, tests_to_run, config_overrides):
+  def _old_constructor(self, testfile, tests_to_run, config_overrides, reporter_type=None):
     self.testfile = testfile
     self.deployment_module, self.dynamic_config_module, self.tests, self.master_config, self.configs = \
         test_runner_helper.get_modules(testfile, tests_to_run, config_overrides)
 
     self.directory_info = None
+    self.reporter_type = reporter_type
     self.reporter = None
 
   def _new_constuctor(self, **kwargs):
@@ -95,7 +101,11 @@ class TestRunner(object):
     self.testfile = ztestsuite.__class__.__name__
     self.deployment_module = ztestsuite
     self.dynamic_config_module = ztestsuite
-    self.tests = ztestsuite.get_tests(**kwargs)
+    self.tests = ztestsuite.get_tests()
+    if ('reporter_type' in kwargs):
+        self.reporter_type = kwargs['reporter_type']
+    else:
+        self.reporter_type = None
     self.master_config, self.configs = test_runner_helper.load_configs_from_directory(ztestsuite.config_dir,
                                                                                       kwargs.get("config_overrides", {}))
 
@@ -123,11 +133,7 @@ class TestRunner(object):
         runtime.set_active_config(config)
         setup_fail = False
         if not self.master_config.mapping.get("no_perf", False):
-          try:
-            naarad_config_file = self.dynamic_config_module.naarad_config()
-          except TypeError: # Support backwards compatability
-            naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping)
-          config.naarad_id = naarad_obj.signal_start(naarad_config_file)
+          config.naarad_id = naarad_obj.signal_start(self.dynamic_config_module.naarad_config())
         config.start_time = time.time()
 
         logger.info("Setting up configuration: " + config.name)
@@ -157,10 +163,11 @@ class TestRunner(object):
               if not setup_fail:
                 failure_handler.notify_failure()
               logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
-        finally:
-          # kill all orphaned process
-          for deployer in runtime.get_deployers():
-            deployer.kill_all_process()
+
+            #kill all orphaned process
+            if (runtime.get_active_config("cleanup_pending_process",True)):
+              for deployer in runtime.get_deployers():
+                deployer.kill_all_process()
 
         config.end_time = time.time()
         logger.info("Execution of configuration: {0} complete".format(config.name))
@@ -269,11 +276,7 @@ class TestRunner(object):
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
         for test in tests:
-          try:
-            naarad_config_file = self.dynamic_config_module.naarad_config()
-          except TypeError: # Support backwards compatability
-            naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
-          test.naarad_config = naarad_config_file
+          test.naarad_config = self.dynamic_config_module.naarad_config()
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       for test in tests:
         test.start_time = time.time()
@@ -345,11 +348,7 @@ class TestRunner(object):
     else:
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
-        try:
-          naarad_config_file = self.dynamic_config_module.naarad_config()
-        except TypeError: # Support backwards compatability
-          naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
-        test.naarad_config = naarad_config_file
+        test.naarad_config = self.dynamic_config_module.naarad_config()
         test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       test.start_time = time.time()
       logger.debug("Setting up test: " + test.name)
@@ -532,7 +531,12 @@ class TestRunner(object):
       output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY")
     else:
       output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
-    reporter = Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
+
+    if self.reporter_type == 'junit_reporter':
+      reporter = junit_reporter.Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
+                        self.directory_info["logs_dir"], output_dir)
+    else:
+      reporter = html_reporter.Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
                         self.directory_info["logs_dir"], output_dir)
     return reporter
 

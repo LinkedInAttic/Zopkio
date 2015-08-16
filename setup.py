@@ -39,7 +39,7 @@ setup(
   url = 'http://github.com/linkedin/zopkio',
   download_url = 'https://github.com/linkedin/zopkio/tarball/0.2.3',
   license = 'Apache',
-  packages = ['zopkio', 'zopkio.web_resources'],
+  packages = ['zopkio', 'zopkio.web_resources', 'zopkio.reporters'],
   package_dir = { 'zopkio' : 'zopkio'},
   package_data = {
     'zopkio' : [

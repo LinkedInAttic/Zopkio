@@ -34,7 +34,7 @@ class TestTestRunner(unittest.TestCase):
     runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_with_naarad.py")
-    test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
+    test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {}, reporter_type='junit_reporter')
     test_runner.run()
 
   def test_full_run_parallel(self):
@@ -44,7 +44,7 @@ class TestTestRunner(unittest.TestCase):
     runtime.reset_collector()
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_with_naarad_run_tests_in_parallel.py")
-    test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
+    test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {}, reporter_type='junit_reporter')
     test_runner.run()
 
   def test_full_run_with_skip(self):
@@ -55,7 +55,7 @@ class TestTestRunner(unittest.TestCase):
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_fail_first_setup.py")
     test_runner = TestRunner(test_file, None,
-                             {"max_failures_per_suite_before_abort": -1})
+                             {"max_failures_per_suite_before_abort": -1}, reporter_type='junit_reporter')
     test_runner.run()
 
   def test_full_run_with_skip_and_stop_one_config(self):
@@ -67,7 +67,7 @@ class TestTestRunner(unittest.TestCase):
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_fail_all_setup.py")
     test_runner = TestRunner(test_file, None,
-                             {"max_failures_per_suite_before_abort": 0})
+                             {"max_failures_per_suite_before_abort": 0}, reporter_type='junit_reporter')
     test_runner.run()
 
   def test_full_run_with_skip_and_stop_all_config(self):
@@ -79,7 +79,7 @@ class TestTestRunner(unittest.TestCase):
     test_file = os.path.join(self.FILE_LOCATION,
                              "samples/sample_test_fail_setup_suite.py")
     test_runner = TestRunner(test_file, None,
-                             {"max_suite_failures_before_abort": 0})
+                             {"max_suite_failures_before_abort": 0}, reporter_type='junit_reporter')
     test_runner.run()
 
   def test_full_run_ztestsuite(self):
