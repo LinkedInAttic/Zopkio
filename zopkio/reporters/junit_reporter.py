@@ -76,7 +76,7 @@ class Reporter(object):
     """
     Returns the filename of the landing page
     """
-    return os.path.join(self.report_info.junit_xml_path, self.name+'_reports.xml')
+    return os.path.join(self.report_info.junit_xml_path, '_junit_reports.xml')
 
   def generate(self):
     """
@@ -91,7 +91,7 @@ class Reporter(object):
       testsuite = self._generate_junit_xml(config_name)
       # print "JUNIT TEST FORMAT------------------------------"
       # print(TestSuite.to_xml_string([testsuites]))
-      with open(os.path.join(self.report_info.junit_xml_path, self.name+'_reports.xml'), 'w') as file:
+      with open(os.path.join(self.report_info.junit_xml_path, '_junit_reports.xml'), 'w') as file:
           TestSuite.to_file(file, [testsuite], prettyprint=False)
 
   def _generate_junit_xml(self, config_name):
