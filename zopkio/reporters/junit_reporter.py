@@ -44,7 +44,7 @@ class _ReportInfo(object):
 
     self.results_map = {
         "passed": constants.PASSED,
-        "failure": constants.FAILED,
+        "failed": constants.FAILED,
         "skipped": constants.SKIPPED,
         # "error": constants.ERROR
     }
@@ -111,7 +111,7 @@ class Reporter(object):
           test_time = 0
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
-          testcases.append(TestCase(test.name,'',test_time, test.result, test.message))
+          testcases.append(TestCase(test.name,'',test_time, "failure" if test.result==constants.FAILED else test.result, test.message))
       testsuite = TestSuite(config_name+self.name, testcases)
       # report_info=self.report_info
       # summary=summary_stats
