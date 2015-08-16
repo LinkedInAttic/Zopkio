@@ -111,7 +111,12 @@ class Reporter(object):
           test_time = 0
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
-          testcases.append(TestCase(test.name,'',test_time, "failure" if test.result==constants.FAILED else test.result, test.message))
+          tc = TestCase(test.name,'',test_time, test.result, test.message)
+          if test.result is constants.FAILED:
+              tc.add_failure_info(test.message)
+          elif test.result is constants.SKIPPED:
+              tc.add_skipped_info(test.message)
+          testcases.append(tc)
       testsuite = TestSuite(config_name+self.name, testcases)
       # report_info=self.report_info
       # summary=summary_stats
