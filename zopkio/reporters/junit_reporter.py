@@ -89,8 +89,6 @@ class Reporter(object):
       config_dir = os.path.join(self.report_info.resource_dir, config_name)
       utils.makedirs(config_dir)
       testsuite = self._generate_junit_xml(config_name)
-      # print "JUNIT TEST FORMAT------------------------------"
-      # print(TestSuite.to_xml_string([testsuites]))
       with open(os.path.join(self.report_info.junit_xml_path, '_junit_reports.xml'), 'w') as file:
           TestSuite.to_file(file, [testsuite], prettyprint=False)
 
@@ -111,6 +109,7 @@ class Reporter(object):
           test_time = 0
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
+          print "TEST Description: %s" %(test.description,)
           tc = TestCase(test.name,'',test_time, test.description, test.message)
           if 'failed' in test.result:
               tc.add_failure_info(test.result)
