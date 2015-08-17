@@ -115,11 +115,12 @@ class Reporter(object):
           print "TEST CASE RESULT: %s" %(test.result,)
           if 'failed' in test.result:
               print "TEST FAILED----------------------"
-              tc.add_failure_info(test.message)
+              print "TEST MESSAGE: %s" %(test.message,s)
+              tc.add_failure_info()
               print "Test case with failure: %s" %(tc.is_failure())
           elif 'skipped' in test.result:
               print "TEST SKIPPED----------------------"
-              tc.add_skipped_info(test.message)
+              tc.add_skipped_info()
           testcases.append(tc)
       testsuite = TestSuite(config_name+self.name, testcases)
       # report_info=self.report_info
