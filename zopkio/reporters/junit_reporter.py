@@ -112,10 +112,11 @@ class Reporter(object):
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
           tc = TestCase(test.name,'',test_time, test.result, test.message)
-          if test.result == constants.FAILED:
+          print "TEST CASE RESULT: %s" %(test.result,)
+          if 'failed' is in test.result:
               print "TEST FAILED----------------------"
               tc.add_failure_info(test.message)
-          elif test.result == constants.SKIPPED:
+          elif 'skipped' is in test.result:
               print "TEST SKIPPED----------------------"
               tc.add_skipped_info(test.message)
           testcases.append(tc)
