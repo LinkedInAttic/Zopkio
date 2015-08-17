@@ -113,9 +113,9 @@ class Reporter(object):
               test_time = test.func_end_time - test.func_start_time
           tc = TestCase(test.name,'',test_time, test.result, test.message)
           if 'failed' in test.result:
-              tc.add_failure_info(test.message)
+              tc.add_failure_info(test.result, test.message)
           elif 'skipped' in test.result:
-              tc.add_skipped_info(test.message)
+              tc.add_skipped_info(test.result, test.message)
           testcases.append(tc)
       testsuite = TestSuite(config_name+self.name, testcases)
       # report_info=self.report_info
