@@ -83,8 +83,6 @@ class Reporter(object):
     Generates the report
     """
     self._setup()
-
-    testsuites = []
     for config_name in self.report_info.config_to_test_names_map.keys():
       config_dir = os.path.join(self.report_info.resource_dir, config_name)
       utils.makedirs(config_dir)
@@ -109,7 +107,6 @@ class Reporter(object):
           test_time = 0
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
-          print "TEST Description: %s" %(test.description,)
           tc = TestCase(test.name,'',test_time, test.description, test.message)
           if 'failed' in test.result:
               tc.add_failure_info(test.result)
