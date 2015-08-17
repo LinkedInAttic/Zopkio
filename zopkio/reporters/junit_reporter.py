@@ -115,7 +115,7 @@ class Reporter(object):
           print "TEST CASE RESULT: %s" %(test.result,)
           if 'failed' in test.result:
               print "TEST FAILED----------------------"
-              print "TEST MESSAGE: %s" %(test.message,s)
+              print "TEST MESSAGE: %s" %(test.message,)
               tc.add_failure_info()
               print "Test case with failure: %s" %(tc.is_failure())
           elif 'skipped' in test.result:
