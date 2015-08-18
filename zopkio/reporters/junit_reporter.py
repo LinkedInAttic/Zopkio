@@ -113,7 +113,7 @@ class Reporter(object):
           elif 'skipped' in test.result:
               tc.add_skipped_info(test.result)
           testcases.append(tc)
-      testsuite = TestSuite(config_name+self.name, testcases)
+      testsuite = TestSuite(config_name+'_'+self.name, testcases)
       # report_info=self.report_info
       # summary=summary_stats
       return testsuite
