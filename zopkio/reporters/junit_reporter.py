@@ -107,8 +107,8 @@ class Reporter(object):
           test_time = 0
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
-          report_description = test.description + '\n' + self.report_info.logs_dir
-          tc = TestCase(test.name,'',test_time, report_description, test.message)
+          # report_description = test.description + '\n' + self.report_info.logs_dir
+          tc = TestCase(test.name,'',test_time, test.description, test.message)
           if 'failed' in test.result:
               tc.add_failure_info(test.result)
           elif 'skipped' in test.result:
