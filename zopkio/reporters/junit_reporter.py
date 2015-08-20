@@ -92,22 +92,11 @@ class Reporter(object):
 
   def _generate_junit_xml(self, config_name):
       testcases = []
-      summary_stats = [
-        self.data_source.count_tests(config_name),
-        self.data_source.count_tests_with_result(config_name, constants.PASSED),
-        self.data_source.count_tests_with_result(config_name, constants.FAILED),
-        self.data_source.count_tests_with_result(config_name, constants.SKIPPED),
-        self.data_source.get_config_exec_time(config_name),
-        self.data_source.get_config_start_time(config_name),
-        self.data_source.get_config_end_time(config_name)
-      ]
-      config_data=self.data_source.get_config_result(config_name)
       tests=self.data_source.get_test_results(config_name)
       for test in tests:
           test_time = 0
           if test.func_end_time != None and test.func_start_time != None:
               test_time = test.func_end_time - test.func_start_time
-          # report_description = test.description + '\n' + self.report_info.logs_dir
           tc = TestCase(test.name,'',test_time, test.description, test.message)
           if 'failed' in test.result:
               tc.add_failure_info(test.result)
@@ -115,8 +104,6 @@ class Reporter(object):
               tc.add_skipped_info(test.result)
           testcases.append(tc)
       testsuite = TestSuite(config_name+'_'+self.name, testcases)
-      # report_info=self.report_info
-      # summary=summary_stats
       return testsuite
 
   def _setup(self):
