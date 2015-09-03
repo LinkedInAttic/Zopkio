@@ -17,9 +17,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from abc import ABCMeta,abstractmethod
 import errno
 import logging
 import os
+import signal
 import stat
 import time
 
@@ -35,10 +37,12 @@ class Deployer(object):
   A deployer implements both the basic contracts for deployment as well as keeping
   track of the state of deployed applications
   """
+  __metaclass__ = ABCMeta
 
   def __init__(self):
     self.processes = {}
 
+  @abstractmethod
   def install(self, unique_id, configs=None):
     """Install the service. The deployer should use the configs to determine where to install the host
 
@@ -46,8 +50,9 @@ class Deployer(object):
     :Parameter configs: a map of configs the deployer may use to determine where to install the service and any
      modifications
     """
-    raise NotImplementedError
+    pass
 
+  @abstractmethod
   def start(self, unique_id, configs=None):
     """Start the service.  If `unique_id` has already been installed  it is expected that the service is started on the
     host specified by the previous instance of install.  Otherwise the deployer may use the configs to determine where
@@ -56,8 +61,9 @@ class Deployer(object):
     :Parameter unique_id: the name of the process
     :Parameter configs: a map of configs the deployer may use to modify the start
     """
-    raise NotImplementedError
+    pass
 
+  @abstractmethod
   def stop(self, unique_id, configs=None):
     """Stop the service.  If the deployer has not started a service with
     `unique_id` the deployer may take any action.
@@ -65,7 +71,7 @@ class Deployer(object):
     :Parameter unique_id: the name of the process
     :Parameter configs: a map of configs the deployer may use to modify the stop
     """
-    raise NotImplementedError
+    pass
 
   def deploy(self, unique_id, configs=None):
     """Deploys the service to the host.  This should at least perform the same actions as install and start
@@ -87,6 +93,7 @@ class Deployer(object):
     self.stop(unique_id, configs)
     self.uninstall(unique_id, configs)
 
+  @abstractmethod
   def uninstall(self, unique_id, configs=None):
     """uninstall the service.  If the deployer has not started a service with
     `unique_id` the deployer may take any action. The uninstall is assumed to clean any
@@ -95,8 +102,9 @@ class Deployer(object):
     :Parameter unique_id: the name of the process
     :Parameter configs: a map of configs the deployer may use
     """
-    raise NotImplementedError
+    pass
 
+  @abstractmethod
   def get_pid(self, unique_id, configs=None):
     """Gets the pid of the process with `unique_id`.  If the deployer does not know of a process
     with `unique_id` then it should return a value of constants.PROCESS_NOT_RUNNING_PID
@@ -106,31 +114,34 @@ class Deployer(object):
 
     :Parameter unique_id: the name of the process
     """
-    raise NotImplementedError
+    pass
 
+  @abstractmethod
   def get_host(self, unique_id):
     """Gets the host of the process with `unique_id`.  If the deployer does not know of a process
     with `unique_id` then it should return a value of SOME_SENTINAL_VALUE
 
     :Parameter unique_id: the name of the process
     """
-    raise NotImplementedError
+    pass
 
+  @abstractmethod
   def get_processes(self):
     """ Gets all processes that have been started by this deployer
 
     :Returns: An iteratable of Processes
     """
-    raise NotImplementedError
+    pass
 
+  @abstractmethod
   def kill_all_process(self):
     """ Terminates all the running processes
 
     """
-    raise NotImplementedError
+    pass
 
   def soft_bounce(self, unique_id, configs=None):
-    """ Performs a soft bouce (stop and start) for the specified process
+    """ Performs a soft bounce (stop and start) for the specified process
 
     :Parameter unique_id: the name of the process
     """
@@ -167,8 +178,8 @@ class Deployer(object):
       with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
         better_exec_command(ssh, "kill -SIGSTOP {0}".format(pid_str), "PAUSING PROCESS {0}".format(unique_id))
 
-  def resume(self, unique_id, configs=None):
-    """ Issues a sigcont for the specified process
+  def _send_signal(self, unique_id, signalno, configs):
+    """ Issues a signal for the specified process
 
     :Parameter unique_id: the name of the process
     """
@@ -177,7 +188,15 @@ class Deployer(object):
       pid_str = ' '.join(str(pid) for pid in pids)
       hostname = self.processes[unique_id].hostname
       with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-        better_exec_command(ssh, "kill -SIGCONT {0}".format(pid_str), "RESUMING PROCESS {0}".format(unique_id))
+        better_exec_command(ssh, "kill -{0} {1}".format(signalno, pid_str), "RESUMING PROCESS {0}".format(unique_id))
+
+
+  def resume(self, unique_id, configs=None):
+    """ Issues a sigcont for the specified process
+
+    :Parameter unique_id: the name of the process
+    """
+    self._send_signal(unique_id, signal.SIGCONT,configs)
 
   def kill(self, unique_id, configs=None):
     """ Issues a kill -9 to the specified process
@@ -187,25 +206,22 @@ class Deployer(object):
 
     :Parameter unique_id: the name of the process
     """
-    pids = self.get_pid(unique_id, configs)
-    if pids != constants.PROCESS_NOT_RUNNING_PID:
-      pid_str = ' '.join(str(pid) for pid in pids)
-      hostname = self.processes[unique_id].hostname
-      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-        better_exec_command(ssh, "kill -9 {0}".format(pid_str), "KILLING PROCESS {0}".format(unique_id))
+    self._send_signal(unique_id, signal.SIGKILL, configs)
 
   def terminate(self, unique_id, configs=None):
     """ Issues a kill -15 to the specified process
 
     :Parameter unique_id: the name of the process
     """
-    pids = self.get_pid(unique_id, configs)
-    if pids != constants.PROCESS_NOT_RUNNING_PID:
-      pid_str = ' '.join(str(pid) for pid in pids)
-      hostname = self.processes[unique_id].hostname
-      with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-        better_exec_command(ssh, "kill -15 {0}".format(pid_str), "TERMINATING PROCESS {0}".format(unique_id))
-    pids = self.get_pid(unique_id, configs)
+    self._send_signal(unique_id, signal.SIGTERM, configs)
+
+  def hangup(self, unique_id, configs=None):
+    """
+    Issue a signal to hangup the specified process
+
+    :Parameter unique_id: the name of the process
+    """
+    self._send_signal(unique_id, signal.SIGHUP, configs)
 
   def get_logs(self, unique_id, logs, directory, pattern='^$'):
     """ Copies logs from the remote host that the process is running on to the provided directory
@@ -230,8 +246,6 @@ class Deployer(object):
             copy_dir(ftp, f, directory, unique_id)
         if install_path is not None:
           copy_dir(ftp, install_path, directory, unique_id, pattern)
-
-
 
 
 
