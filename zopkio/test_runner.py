@@ -157,6 +157,12 @@ class TestRunner(object):
   def fail_count(self):
     return self._failed_count
 
+  def success_count(self):
+    return self._success_count
+
+  def fail_count(self):
+    return self._failed_count
+
   def run(self):
     """
     This is the main executable function that will run the test
