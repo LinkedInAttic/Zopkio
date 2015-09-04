@@ -96,6 +96,7 @@ def main():
                       default="ERROR")
   parser.add_argument("--nopassword", action='store_true', dest="nopassword", help="Disable password prompt")
   parser.add_argument("--user", dest="user", help="user to run the test as (defaults to current user)")
+  parser.add_argument("--localhost_only", action="store_true", dest="localhost_only", help="Perform trial test run on localhost only, bypassing distributed configuration")
   args = parser.parse_args()
 
   # Get output directory.
@@ -122,6 +123,8 @@ def main():
     sys.exit(1)
 
   runtime.set_machines(machines)
+  if args.localhost_only:
+      runtime.set_test_mode(constants.TEST_MODE_LOCALHOST)
   if args.user is not None:
     user = args.user
   else:
