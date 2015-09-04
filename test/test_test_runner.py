@@ -18,11 +18,13 @@
 # under the License.
 
 import os
+import shutil
 import unittest
 
 from zopkio.test_runner import TestRunner
 import zopkio.runtime as runtime
 from samples.sample_ztestsuite import SampleTestSuite
+from .mock import Mock_Deployer
 
 class TestTestRunner(unittest.TestCase):
   FILE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -90,6 +92,185 @@ class TestTestRunner(unittest.TestCase):
     runtime.reset_collector()
     ztestsuite = SampleTestSuite()
     ztestsuite.zopkio()
+
+  def test_copy_logs_empty_default(self):
+    #first set things up
+    runtime.reset_collector()
+    runtime.set_deployer("unittest", Mock_Deployer() )
+    ztestsuite = SampleTestSuite()
+    runtime.set_active_config(ztestsuite)
+    runner = TestRunner(ztestsuite=ztestsuite)
+    #create a temp dir for logs
+    import tempfile
+    logs_dir = tempfile.mkdtemp()
+    runner.set_logs_dir(logs_dir)
+    runner._copy_logs()
+    try:
+      #no logs specified on default, so should not have any files
+     self.assertTrue( os.listdir(logs_dir) == [])
+    except:
+      raise
+    finally:
+      #cleanup
+      shutil.rmtree( logs_dir)
+
+  def __test_copy_log_speced_per_id(self, ztestsuite, localhost_log_file):
+    """
+    base test method containing common code called by public test methods for testing execution
+    of copy of logs based on function signatures
+    """
+    import tempfile
+    runtime.reset_collector()
+    runtime.set_active_config(ztestsuite)
+    #create the log file on "remote" which is actually localhost
+    with open( localhost_log_file, 'wb') as f:
+      f.write("This is a log")
+    runner = TestRunner(ztestsuite=ztestsuite)
+    logs_dir = tempfile.mkdtemp()
+    runner.set_logs_dir(logs_dir)
+    try:
+      runner.run()
+      #no logs specified on default, so should not have any files
+      self.assertEqual( os.listdir(logs_dir), ['ztestsuite.unittest-' + os.path.basename(localhost_log_file)])
+    except:
+      raise
+    finally:
+      #cleanup
+      shutil.rmtree( logs_dir)
+
+  def __test_copy_logs_deprecated(self, ztestsuite, localhost_log_file):
+    """
+    base test method containing common code called by public test methods for testing execution
+    of copy of logs based on deprecated function signatures
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    runtime.reset_collector()
+    runtime.set_active_config(ztestsuite)
+    #create the log file on "remote" which is actually localhost
+    with open( localhost_log_file, 'wb') as f:
+      f.write("This is a log")
+    runner = TestRunner(ztestsuite=ztestsuite)
+    logs_dir = tempfile.mkdtemp()
+    runner.set_logs_dir(logs_dir)
+    try:
+      runner.run()
+      #no logs specified on default, so should not have any files
+      self.assertEqual( os.listdir(logs_dir), ['ztestsuite.unittest-' + os.path.basename(localhost_log_file)])
+    except:
+      raise
+    finally:
+      #cleanup
+      shutil.rmtree( logs_dir)
+
+
+  def test_copy_log_machine_logs_speced_per_id(self):
+    """
+    Create a single log file and set "machine_logs" method to return
+    this file and test that is gets copied as expected
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.machine_logs = lambda unique_id: [localhost_log_file]
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+    finally:
+      shutil.rmtree( localhost_logs_dir)
+
+  def test_copy_log_machine_logs_deprecated(self):
+    """
+    Create a single log file and set "machine_logs" method
+    with DEPRECATED signature to return
+    this file and test that is gets copied as expected
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.machine_logs = lambda : [localhost_log_file]
+      self.__test_copy_logs_deprecated(ztestsuite, localhost_log_file)
+    finally:
+      shutil.rmtree( localhost_logs_dir)
+
+  def test_copy_log_process_logs_speced_per_id(self):
+    """
+    Create a single log file and set "process_logs" method to return
+    this file and test that is gets copied as expected
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.process_logs = lambda unique_id: [localhost_log_file]
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+    finally:
+      shutil.rmtree( localhost_logs_dir)
+
+  def test_copy_log_process_logs_deprecated(self):
+    """
+    Create a single log file and set "process_logs" method
+    with DEPRECATED signature to return
+    this file and test that is gets copied as expected
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.process_logs = lambda : [localhost_log_file]
+      self.__test_copy_logs_deprecated(ztestsuite, localhost_log_file)
+    finally:
+      shutil.rmtree( localhost_logs_dir)
+
+  def test_copy_log_naarad_logs_speced_per_id(self):
+    """
+    Create a single log file and set "naarad_logs" method to return
+    this file and test that is gets copied as expected
+    """    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.naarad_logs = lambda unique_id: [localhost_log_file]
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+    finally:
+      #cleanup
+      shutil.rmtree( localhost_logs_dir)
+
+
+  def test_copy_log_naarad_logs_deprecated(self):
+    """
+    Create a single log file and set "naarad_logs" method
+    with DEPRECATED signature to return
+    this file and test that is gets copied as expected
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.naarad_logs = lambda unique_id: [localhost_log_file]
+      self.__test_copy_logs_deprecated(ztestsuite, localhost_log_file)
+    finally:
+      #cleanup
+      shutil.rmtree( localhost_logs_dir)
 
 
 if __name__ == '__main__':
