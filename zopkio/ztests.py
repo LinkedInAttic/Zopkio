@@ -119,7 +119,7 @@ class ZTestSuite(object):
     :param process_unique_id: the unique id for the process
     :return: filter that matches any file name
     """
-    return "^$"
+    return constants.FILTER_NAME_ALLOW_ALL
 
   def naarad_config(self):
     """

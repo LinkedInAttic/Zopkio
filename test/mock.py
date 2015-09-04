@@ -39,7 +39,7 @@ class Mock_Deployer(Deployer):
       self._proc = subprocess.Popen(["sleep","150"])
       if self._proc is not None:
         self._pid = self._proc.pid
-        self.processes[unique_id] = Process(unique_id=unique_id, servicename=unique_id + "unittest", install_path=None, hostname="localhost" )
+        self.processes[unique_id] = Process(unique_id=unique_id, servicename=unique_id + "-srv", install_path=None, hostname="localhost" )
 
     def stop(self, unique_id, configs=None):
       if self._proc is not None:

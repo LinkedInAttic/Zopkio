@@ -100,7 +100,7 @@ class TestRunner(object):
           return func( unique_id)
         except:
           #backwards compatible signature taking no arguments:
-          return func()
+          return func().get(unique_id, [])
       return helper
 
     def assign_log_methods( method_name):
@@ -114,11 +114,13 @@ class TestRunner(object):
       assign_log_methods( method_name )
 
     if not hasattr( self.dynamic_config_module, "log_patterns"):
-      setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: "^$" ))
+      setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: constants.FILTER_NAME_ALLOW_ALL ))
     else:
       self.dynamic_config_module.log_patterns = wrap( self.dynamic_config_module.log_patterns)
 
     self._output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY") or self.dynamic_config_module.OUTPUT_DIRECTORY
+    self._failed_count = 0
+    self._success_count = 0
 
   def _old_constructor(self, testfile, tests_to_run, config_overrides):
     self.testfile = testfile
@@ -148,6 +150,12 @@ class TestRunner(object):
 
   def set_logs_dir(self, path):
     self._logs_dir = path
+
+  def success_count(self):
+    return self._success_count
+
+  def fail_count(self):
+    return self._failed_count
 
   def run(self):
     """
@@ -220,7 +228,6 @@ class TestRunner(object):
     # analysis.generate_diff_reports()
     self.reporter.data_source.end_time = time.time()
     self.reporter.generate()
-
     if not self.master_config.mapping.get("no-display", False):
       self._display_results()
 
@@ -250,7 +257,7 @@ class TestRunner(object):
         logs = self.dynamic_config_module.process_logs( process.servicename) or []
         logs += self.dynamic_config_module.machine_logs( process.unique_id)
         logs += self.dynamic_config_module.naarad_logs( process.unique_id)
-        pattern = self.dynamic_config_module.log_patterns(process.unique_id) or '^$'
+        pattern = self.dynamic_config_module.log_patterns(process.unique_id) or constants.FILTER_NAME_ALLOW_ALL
         #now copy logs filtered on given pattern to local machine:
         deployer.fetch_logs(process.unique_id, logs, self._logs_dir, pattern)
 
@@ -299,7 +306,7 @@ class TestRunner(object):
         for test in tests:
           try:
             naarad_config_file = self.dynamic_config_module.naarad_config()
-          except TypeError: # Support backwards compatability
+          except TypeError: # Support backwards compatibility
             naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
           test.naarad_config = naarad_config_file
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
@@ -453,7 +460,7 @@ class TestRunner(object):
         self._execute_singletest_verification(test)
 
     if (test.result == constants.FAILED):
-      test.consecutive_failures = test.consecutive_failures + 1
+      test.consecutive_failures += 1
     else:
       test.consecutive_failures = 0
 
@@ -562,8 +569,11 @@ class TestRunner(object):
   def _log_results(self, tests):
     for test in tests:
       logger.info("{0}----{1}".format(test.name, test.result))
-      if test.result == constants.FAILED:
+      if test.result == constants.PASSED:
+        self._success_count += 1
+      else:
         logger.info(traceback.format_exception_only(type(test.exception), test.exception))
+        self._failed_count += 1
 
   def _reset_tests(self):
     for test in self.tests:

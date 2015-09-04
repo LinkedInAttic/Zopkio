@@ -24,7 +24,7 @@ import unittest
 from zopkio.test_runner import TestRunner
 import zopkio.runtime as runtime
 from samples.sample_ztestsuite import SampleTestSuite
-from .mock import Mock_Deployer
+from test.mock import Mock_Deployer
 
 class TestTestRunner(unittest.TestCase):
   FILE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -195,7 +195,7 @@ class TestTestRunner(unittest.TestCase):
     try:
       localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
       ztestsuite = SampleTestSuite(Mock_Deployer())
-      ztestsuite.machine_logs = lambda : [localhost_log_file]
+      ztestsuite.machine_logs = lambda : {"ztestsuite.unittest":[localhost_log_file]}
       self.__test_copy_logs_deprecated(ztestsuite, localhost_log_file)
     finally:
       shutil.rmtree( localhost_logs_dir)
@@ -230,7 +230,7 @@ class TestTestRunner(unittest.TestCase):
     try:
       localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
       ztestsuite = SampleTestSuite(Mock_Deployer())
-      ztestsuite.process_logs = lambda : [localhost_log_file]
+      ztestsuite.process_logs = lambda : {"ztestsuite.unittest-srv":[localhost_log_file]}
       self.__test_copy_logs_deprecated(ztestsuite, localhost_log_file)
     finally:
       shutil.rmtree( localhost_logs_dir)
@@ -266,7 +266,7 @@ class TestTestRunner(unittest.TestCase):
     try:
       localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
       ztestsuite = SampleTestSuite(Mock_Deployer())
-      ztestsuite.naarad_logs = lambda unique_id: [localhost_log_file]
+      ztestsuite.naarad_logs = lambda : {"ztestsuite.unittest":[localhost_log_file]}
       self.__test_copy_logs_deprecated(ztestsuite, localhost_log_file)
     finally:
       #cleanup
