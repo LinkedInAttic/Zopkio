@@ -118,9 +118,6 @@ class SSHDeployer(Deployer):
       # we have not installed this unique_id before and no hostname is provided in the configs so raise an error
       logger.error("hostname was not provided for unique_id: " + unique_id)
       raise DeploymentError("hostname was not provided for unique_id: " + unique_id)
-    if runtime.get_test_mode() == constants.TEST_MODE_LOCALHOST:
-      #override with localhost
-      hostname = "localhost"
 
     env = configs.get("env", {})
     install_path = configs.get('install_path') or self.default_configs.get('install_path')

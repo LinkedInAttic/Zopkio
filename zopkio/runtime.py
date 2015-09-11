@@ -22,7 +22,6 @@ import os
 import time
 
 from zopkio.results_collector import ResultsCollector
-import zopkio.constants as constants
 
 _init_time = time.time()
 _username = None
@@ -33,17 +32,6 @@ _machine_names = defaultdict()
 _deployers = {}
 _collector = ResultsCollector()
 _output_dir = os.path.join(os.getcwd(), time.strftime("zopkio_%Y%m%d_%H%M%S", time.localtime(_init_time)))
-
-
-_test_mode = constants.TEST_MODE_PER_CONFIG
-
-def set_test_mode(new_mode):
-  global _test_mode
-  _test_mode = new_mode
-
-def get_test_mode():
-  global _test_mode
-  return _test_mode
 
 def get_init_time():
   global _init_time
@@ -131,11 +119,7 @@ def set_deployer(service_name, deployer):
   :param deployer:
   :return:
   """
-  if constants.TEST_MODE_LOCALHOST:
-    from zopkio.adhoc_deployer import SSHDeployer
-    _deployers[service_name] = SSHDeployer(service_name)
-  else:
-    _deployers[service_name] = deployer
+  _deployers[service_name] = deployer
 
 
 def get_deployers():
