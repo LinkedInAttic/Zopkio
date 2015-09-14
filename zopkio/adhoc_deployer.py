@@ -111,12 +111,13 @@ class SSHDeployer(Deployer):
       prev_hostname = process.hostname
       if 'hostname' in configs:
         self.uninstall(unique_id, configs)
-        hostname = configs['hostname']
+    if runtime.get_test_mode() == constants.TEST_MODE_LOCALHOST:
+      #override with localhost
+      hostname = "localhost"
     elif 'hostname' in configs:
       hostname = configs['hostname']
     else:
       # we have not installed this unique_id before and no hostname is provided in the configs so raise an error
-      logger.error("hostname was not provided for unique_id: " + unique_id)
       raise DeploymentError("hostname was not provided for unique_id: " + unique_id)
 
     env = configs.get("env", {})
