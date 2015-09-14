@@ -106,17 +106,12 @@ class SSHDeployer(Deployer):
     hostname = None
     is_tarfile = False
     is_zipfile = False
-    if unique_id in self.processes:
-      process = self.processes[unique_id]
-      prev_hostname = process.hostname
-      if 'hostname' in configs:
+    if unique_id in self.processes and  'hostname' in configs:
         self.uninstall(unique_id, configs)
-    if runtime.get_test_mode() == constants.TEST_MODE_LOCALHOST:
-      #override with localhost
-      hostname = "localhost"
+        hostname = configs['hostname']
     elif 'hostname' in configs:
       hostname = configs['hostname']
-    else:
+    elif unique_id not in self.processes:
       # we have not installed this unique_id before and no hostname is provided in the configs so raise an error
       raise DeploymentError("hostname was not provided for unique_id: " + unique_id)
 
