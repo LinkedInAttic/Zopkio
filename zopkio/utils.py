@@ -47,7 +47,7 @@ def check_file_with_exception(filename):
 
 def check_testfile_dir_structure(filename):
   """
-  Checks if the test file has correct directory structure for importing has module
+  Checks if the test file has correct directory structure for importing as module
   Makes sure there is no directory with same testfile name to cause conflict
   """
   dirname =  os.path.splitext(filename)[0]

@@ -38,6 +38,11 @@ class Deployer(object):
   track of the state of deployed applications
   """
   __metaclass__ = ABCMeta
+  _signalnames = {signal.SIGHUP : "HANGING UP ON",
+                  signal.SIGTERM : "TERMINATING",
+                  signal.SIGKILL : "KILLING",
+                  signal.SIGCONT : "RESUMING",
+                  signal.SIGINT : "PAUSING"}
 
   def __init__(self):
     self.processes = {}
@@ -187,8 +192,9 @@ class Deployer(object):
     if pids != constants.PROCESS_NOT_RUNNING_PID:
       pid_str = ' '.join(str(pid) for pid in pids)
       hostname = self.processes[unique_id].hostname
+      msg=  Deployer._signalnames.get(signalno,"SENDING SIGNAL %s TO"%signalno)
       with get_ssh_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ssh:
-        better_exec_command(ssh, "kill -{0} {1}".format(signalno, pid_str), "RESUMING PROCESS {0}".format(unique_id))
+        better_exec_command(ssh, "kill -{0} {1}".format(signalno, pid_str), "{0} PROCESS {1}".format(msg, unique_id))
 
 
   def resume(self, unique_id, configs=None):
@@ -224,6 +230,10 @@ class Deployer(object):
     self._send_signal(unique_id, signal.SIGHUP, configs)
 
   def get_logs(self, unique_id, logs, directory, pattern='^$'):
+    """deprecated name for fetch_logs"""
+    self.fetch_logs(unique_id, logs, directory, pattern)
+
+  def fetch_logs(self, unique_id, logs, directory, pattern='^$'):
     """ Copies logs from the remote host that the process is running on to the provided directory
 
     :Parameter unique_id the unique_id of the process in question

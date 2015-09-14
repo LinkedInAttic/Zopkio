@@ -76,15 +76,16 @@ class SampleTest2(ZTest):
 class SampleTestSuite(ZTestSuite):
   config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ztestsuite_configs")
 
-  def __init__(self):
+  def __init__(self, deployer = None):
     self.ssh = remote_host_helper.sshclient()
     self.ssh.load_system_host_keys()
     self.sample_code_in = None
     self.test0 = SampleTest0()
     self.test1 = SampleTest1(self)
     self.test2 = SampleTest2(self)
-
-
+    self._deployer = deployer
+    if self._deployer is not None:
+      runtime.set_deployer("ztestsuite.unittest.deployer", self._deployer )
 
   def setup_suite(self):
     if os.path.isdir("/tmp/ztestsute"):
@@ -93,10 +94,11 @@ class SampleTestSuite(ZTestSuite):
       os.makedirs(runtime.get_active_config("LOGS_DIRECTORY"))
     if not os.path.isdir(runtime.get_active_config("OUTPUT_DIRECTORY")):
       os.makedirs(runtime.get_active_config("OUTPUT_DIRECTORY"))
-    sample_code = os.path.join(TEST_DIRECTORY, "samples/trivial_program_with_timing")
+    sample_code = os.path.join(TEST_DIRECTORY, "samples","trivial_program_with_timing")
     self.ssh.connect("localhost")
     self.sample_code_in, stdout, stderr = self.ssh.exec_command("python {0}".format(sample_code))
-
+    if self._deployer is not None:
+      self._deployer.start("ztestsuite.unittest")
 
   def teardown_suite(self):
     if self.sample_code_in is not None:
@@ -111,6 +113,8 @@ class SampleTestSuite(ZTestSuite):
         ftp.remove("/tmp/trivial_timed_output.csv")
         ftp.remove("/tmp/trivial_timed_output")
       self.ssh.close()
+    if self._deployer is not None:
+      self._deployer.stop("ztestsuite.unittest")
 
 
   def naarad_config(self):
