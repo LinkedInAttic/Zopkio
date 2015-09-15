@@ -30,7 +30,7 @@ def list_files(directory):
           if not path.isdir(path.join(directory, file))]
 
 setup(
-  name = 'zopkio_pubnub',
+  name = 'zopkio',
   version = __version__,
   description = __doc__,
   long_description = open('README.rst').read(),
