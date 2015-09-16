@@ -22,11 +22,38 @@ import unittest
 
 from zopkio.deployer import Deployer, Process
 from zopkio.remote_host_helper import ParamikoError, better_exec_command, get_ssh_client, copy_dir, get_sftp_client
-from .mock import Mock_Deployer
 
 class TestDeployer(unittest.TestCase):
 
+  class DeployerStub( Deployer):
+    """
+    Test stub class to make a concrete class out of abstract Deployer class that does nothing
+    """
 
+    def install(self, unique_id, configs=None):
+      pass
+
+    def start(self, unique_id, configs=None):
+      pass
+
+    def stop(self, unique_id, configs=None):
+      pass
+
+
+    def uninstall(self, unique_id, configs=None):
+      pass
+
+    def get_pid(self, unique_id, configs=None):
+      pass
+
+    def get_host(self, unique_id):
+      pass
+
+    def get_processes(self):
+      pass
+
+    def kill_all_process(self):
+      pass
 
   def test_better_exec(self):
     """
@@ -43,7 +70,7 @@ class TestDeployer(unittest.TestCase):
     Tests that we can successfully copy logs from a remote host
     :return:
     """
-    minimial_deployer = Mock_Deployer()
+    minimial_deployer = TestDeployer.DeployerStub()
     install_path = '/tmp/test_deployer_get_logs'
     if not os.path.exists(install_path):
       os.mkdir(install_path)
