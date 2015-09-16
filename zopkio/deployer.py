@@ -243,6 +243,18 @@ class Deployer(object):
     """
     hostname = self.processes[unique_id].hostname
     install_path = self.processes[unique_id].install_path
+    self.fetch_logs_from_host(hostname, install_path, unique_id, logs, directory, pattern)
+
+  def fetch_logs_from_host(self, hostname, install_path, prefix, logs, directory, pattern):
+    """ Copies logs from any host on the specified install path
+
+    :Parameter hostname the remote host from where we need to fetch the logs
+    :Parameter install_path path where the app is installed
+    :Parameter prefix prefix used to copy logs. Generall the unique_id of process
+    :Parameter logs a list of logs given by absolute path from the remote host
+    :Parameter directory the local directory to store the copied logs
+    :Parameter pattern a pattern to apply to files to restrict the set of logs copied
+    """
     if hostname is not None:
       with get_sftp_client(hostname, username=runtime.get_username(), password=runtime.get_password()) as ftp:
         for f in logs:
@@ -253,9 +265,9 @@ class Deployer(object):
               logger.error("Log file " + f + " does not exist on " + hostname)
               pass
           else:
-            copy_dir(ftp, f, directory, unique_id, pattern)
+            copy_dir(ftp, f, directory, prefix, pattern)
         if install_path is not None:
-          copy_dir(ftp, install_path, directory, unique_id, pattern)
+          copy_dir(ftp, install_path, directory, prefix, pattern)
 
 
 
