@@ -34,7 +34,6 @@ _collector = ResultsCollector()
 _output_dir = os.path.join(os.getcwd(), time.strftime("zopkio_%Y%m%d_%H%M%S", time.localtime(_init_time)))
 
 def get_init_time():
-  global _init_time
   return _init_time
 
 def set_init_time(time):
@@ -57,7 +56,6 @@ def get_username():
 
   :return: the username of the user running the process (needed for lid)
   """
-  global _username
   return _username
 
 
@@ -66,7 +64,6 @@ def get_password():
 
   :return: the password of the user (needed for lid)
   """
-  global _password
   return _password
 
 
@@ -76,7 +73,6 @@ def get_machine(machine_name):
   :param machine_name:
   :return:
   """
-  global _machine_names
   return _machine_names[machine_name]
 
 
@@ -166,7 +162,10 @@ def get_active_config(config_option, default=None):
   :return: value of config. If key is not in config, then default will be used if default is not set to None. 
   Otherwise, KeyError is thrown.
   """
-  return _active_config.mapping[config_option] if default is None else _active_config.mapping.get(config_option, default)
+  if default == None:
+    return _active_config.mapping[config_option]
+  else:
+    return _active_config.mapping.get(config_option, default)
 
 def get_active_config_name():
   return _active_config.name
@@ -179,13 +178,10 @@ def get_active_config_name():
 def set_active_tests(tests):
   global _active_tests
   for test in tests:
-    try:
-      iteration = iter(test)
-      #if test item is itself iterable:
-      for individual_test in iteration:
+    if isinstance(test, list):
+      for individual_test in test:
         _active_tests[individual_test.name] = individual_test
-    except:
-      #if test item is a single test:
+    else:
       _active_tests[test.name] = test
 
 
