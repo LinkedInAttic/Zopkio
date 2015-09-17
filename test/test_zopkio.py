@@ -27,7 +27,7 @@ class TestZopkioMainRunner(unittest.TestCase):
     try:
       os.chdir(os.path.join(os.path.dirname(__file__),".."))
       sys.args = args
-      print("Running zopkio %s %s", args.testfile, args.nopassword)
+      print("Running 'zopkio %s %s'"%(args.testfile, args.nopassword))
       from zopkio import __main__ as main
       succeeded, failed = main.call_main(args)
     except:
