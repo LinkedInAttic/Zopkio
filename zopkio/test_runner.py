@@ -81,6 +81,27 @@ class TestRunner(object):
       self._new_constuctor(**kwargs)
     elif (len(args) >= 3):
       self._old_constructor(args[0], args[1], args[2])
+    #create methods used for idnetifying various types of logs if
+    #not provided by client, creating them to return an empty list
+    #The functions are wrapped to allow backwards compatability with
+    #an older signature for each function
+    def wrap(func):
+      def helper( unique_id ):
+        try:
+          return func( unique_id)
+        except:
+          #backwards compatible signature taking no arugments:
+          return func()
+      return helper
+
+    def assign_log_methods( method_name):
+      if not hasattr( self.dynamic_config_module, method_name):
+        setattr(self.dynamic_config_module, method_name, wrap(lambda unique_id:  []))
+    for method_name in ("process_logs", "machine_logs", "naarad_logs" ):
+      assign_log_methods( method_name )
+
+    if not hasattr( self.dynamic_config_module, "log_patterns"):
+      setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: "^$" ))
 
   def _old_constructor(self, testfile, tests_to_run, config_overrides):
     self.testfile = testfile
@@ -203,20 +224,15 @@ class TestRunner(object):
     else:
       logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
     utils.makedirs(logs_dir)
+
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
-        logs = []
-        if (hasattr(self.dynamic_config_module, "process_logs")):
-          logs += self.dynamic_config_module.process_logs(process.servicename)
-        if (hasattr(self.dynamic_config_module, "machine_logs")):
-          logs += self.dynamic_config_module.machine_logs().get(process.unique_id, [])
-        if (hasattr(self.dynamic_config_module, "naarad_logs")):
-          logs += self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
-        if hasattr(self.dynamic_config_module, 'log_patterns'):
-          pattern = self.dynamic_config_module.log_patterns().get(process.unique_id, '^$')
-        else:
-          pattern = '^$'
-        deployer.get_logs(process.unique_id, logs, logs_dir, pattern)
+        logs = self.dynamic_config_module.process_logs( process.servicename)
+        logs += self.dynamic_config_module.machine_logs( process.unique_id)
+        logs += self.dynamic_config_module.naarad_logs( process.unique_id)
+        pattern = self.dynamic_config_module.log_patterns(process.unique_id) or '^$'
+        #now copy logs filtered on given pattern to local machine:
+        deployer.fetch_logs(process.unique_id, logs, logs_dir, pattern)
 
   def _execute_performance(self, naarad_obj):
     """

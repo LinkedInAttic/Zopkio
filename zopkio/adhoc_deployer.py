@@ -110,12 +110,8 @@ class SSHDeployer(Deployer):
       process = self.processes[unique_id]
       prev_hostname = process.hostname
       if 'hostname' in configs:
-        if prev_hostname is not configs['hostname']:
-          self.uninstall(unique_id, configs)
-          hostname = configs['hostname']
-        else:
-          self.uninstall(unique_id, configs)
-          hostname = prev_hostname
+        self.uninstall(unique_id, configs)
+        hostname = configs['hostname']
     elif 'hostname' in configs:
       hostname = configs['hostname']
     else:
