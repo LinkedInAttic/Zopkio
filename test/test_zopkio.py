@@ -1,6 +1,7 @@
 import os
 import shutil
 import unittest
+import zopkio.runtime as runtime
 
 class Args:
   def __init__(self):
@@ -41,6 +42,7 @@ class TestZopkioMainRunner(unittest.TestCase):
     Run server client test suites and
     compare to expected outcome on test failures/successes
     """
+    #runtime.reset_all()
     args = Args()
     args.testfile = "./examples/server_client/server_client.py"
     succeeded, failed = self._run_zopkio(args)

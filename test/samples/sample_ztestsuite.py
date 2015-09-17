@@ -84,10 +84,10 @@ class SampleTestSuite(ZTestSuite):
     self.test1 = SampleTest1(self)
     self.test2 = SampleTest2(self)
     self._deployer = deployer
-    if self._deployer is not None:
-      runtime.set_deployer("ztestsuite.unittest.deployer", self._deployer )
 
   def setup_suite(self):
+    if self._deployer is not None:
+      runtime.set_deployer("ztestsuite.unittest.deployer", self._deployer )
     if os.path.isdir("/tmp/ztestsute"):
       shutil.rmtree("/tmp/ztestsuite")
     if not os.path.isdir(runtime.get_active_config("LOGS_DIRECTORY")):
@@ -115,7 +115,6 @@ class SampleTestSuite(ZTestSuite):
       self.ssh.close()
     if self._deployer is not None:
       self._deployer.stop("ztestsuite.unittest")
-
 
   def naarad_config(self):
     return os.path.join(TEST_DIRECTORY, "samples/naarad_config.cfg")

@@ -95,8 +95,7 @@ class TestTestRunner(unittest.TestCase):
 
   def test_copy_logs_empty_default(self):
     #first set things up
-    runtime.reset_collector()
-    runtime.set_deployer("unittest", Mock_Deployer() )
+    runtime.reset_all()
     ztestsuite = SampleTestSuite()
     runtime.set_active_config(ztestsuite)
     runner = TestRunner(ztestsuite=ztestsuite)
@@ -146,7 +145,7 @@ class TestTestRunner(unittest.TestCase):
     #first set things up
     #create a temp dir for logs
     import tempfile
-    runtime.reset_collector()
+    runtime.reset_all()
     runtime.set_active_config(ztestsuite)
     #create the log file on "remote" which is actually localhost
     with open( localhost_log_file, 'wb') as f:

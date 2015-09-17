@@ -121,6 +121,22 @@ def set_deployer(service_name, deployer):
   """
   _deployers[service_name] = deployer
 
+def remove_deployer(service_name):
+  """
+  Remove the deployer with the given name, if it exists
+  :param service_name:  name of deployer to remove
+  """
+  try:
+    del _deployers[service_name]
+  except:
+    pass
+
+def reset_deployers():
+  """
+  Clear all added deployers
+  """
+  global _deployers
+  _deployers = {}
 
 def get_deployers():
   """
@@ -143,6 +159,25 @@ def reset_collector():
   """
   global _collector
   _collector = ResultsCollector()
+
+def reset_all():
+  """
+  Clear relevant globals to start fresh
+  :return:
+  """
+  global _username
+  global _password
+  global _active_config
+  global _active_tests
+  global _machine_names
+  global _deployers
+  reset_deployers()
+  reset_collector()
+  _username = None
+  _password = None
+  _active_config = None
+  _active_tests = {}
+  _machine_names = defaultdict()
 
 ###
 # Methods dealing with configurations

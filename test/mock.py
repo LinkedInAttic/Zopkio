@@ -17,7 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from zopkio.deployer import Deployer, Process
-
+from zopkio import runtime
 
 class Mock_Deployer(Deployer):
     """
@@ -36,6 +36,7 @@ class Mock_Deployer(Deployer):
 
     def start(self, unique_id, configs=None):
       import subprocess
+      runtime.set_deployer("unittest", self)
       self._proc = subprocess.Popen(["sleep","150"])
       if self._proc is not None:
         self._pid = self._proc.pid
