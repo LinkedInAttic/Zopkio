@@ -121,6 +121,11 @@ class ZTestSuite(object):
     """
     return constants.FILTER_NAME_ALLOW_ALL
 
+
+  def should_fetch_logs(self ):
+    #default to always fetch logs for all processes
+    return True
+
   def naarad_config(self):
     """
     This returns the path of the naarad config for use in performance verification

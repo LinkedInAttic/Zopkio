@@ -113,7 +113,7 @@ class TestTestRunner(unittest.TestCase):
       #cleanup
       shutil.rmtree( logs_dir)
 
-  def __test_copy_log_speced_per_id(self, ztestsuite, localhost_log_file):
+  def __test_copy_log_speced_per_id(self, ztestsuite, localhost_log_file, fetch_logs_flag = True):
     """
     base test method containing common code called by public test methods for testing execution
     of copy of logs based on function signatures
@@ -130,14 +130,17 @@ class TestTestRunner(unittest.TestCase):
     try:
       runner.run()
       #no logs specified on default, so should not have any files
-      self.assertEqual( os.listdir(logs_dir), ['ztestsuite.unittest-' + os.path.basename(localhost_log_file)])
+      if fetch_logs_flag:
+        self.assertEqual( os.listdir(logs_dir), ['ztestsuite.unittest-' + os.path.basename(localhost_log_file)])
+      else:
+        self.assertEqual( os.listdir(logs_dir),[])
     except:
       raise
     finally:
       #cleanup
       shutil.rmtree( logs_dir)
 
-  def __test_copy_logs_deprecated(self, ztestsuite, localhost_log_file):
+  def __test_copy_logs_deprecated(self, ztestsuite, localhost_log_file, fetch_logs_flag = True):
     """
     base test method containing common code called by public test methods for testing execution
     of copy of logs based on deprecated function signatures
@@ -156,7 +159,10 @@ class TestTestRunner(unittest.TestCase):
     try:
       runner.run()
       #no logs specified on default, so should not have any files
-      self.assertEqual( os.listdir(logs_dir), ['ztestsuite.unittest-' + os.path.basename(localhost_log_file)])
+      if fetch_logs_flag:
+        self.assertEqual( os.listdir(logs_dir), ['ztestsuite.unittest-' + os.path.basename(localhost_log_file)])
+      else:
+        self.assertEqual( os.listdir(logs_dir),[])
     except:
       raise
     finally:
@@ -178,6 +184,24 @@ class TestTestRunner(unittest.TestCase):
       ztestsuite = SampleTestSuite(Mock_Deployer())
       ztestsuite.machine_logs = lambda unique_id: [localhost_log_file]
       self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+    finally:
+      shutil.rmtree( localhost_logs_dir)
+
+  def test_copy_log_machine_logs_flag_off(self):
+    """
+    Create a single log file and set "machine_logs" method to return
+    this file and test that is gets copied as expected
+    """
+    #first set things up
+    #create a temp dir for logs
+    import tempfile
+    localhost_logs_dir = tempfile.mkdtemp()
+    try:
+      localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
+      ztestsuite = SampleTestSuite(Mock_Deployer())
+      ztestsuite.machine_logs = lambda unique_id: [localhost_log_file]
+      ztestsuite.should_fetch_logs = lambda:False
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file, False)
     finally:
       shutil.rmtree( localhost_logs_dir)
 
