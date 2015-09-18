@@ -122,7 +122,7 @@ class ZTestSuite(object):
     return constants.FILTER_NAME_ALLOW_ALL
 
 
-  def should_fetch_logs(self ):
+  def should_fetch_logs(self):
     #default to always fetch logs for all processes
     return True
 

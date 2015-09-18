@@ -118,9 +118,9 @@ class TestRunner(object):
     else:
       self.dynamic_config_module.log_patterns = wrap( self.dynamic_config_module.log_patterns)
     if not hasattr( self.dynamic_config_module, "should_fetch_logs"):
-      self._should_fetch_logs = True
+      self.should_fetch_logs = True
     else:
-      self._should_fetch_logs = self.dynamic_config_module.should_fetch_logs()
+      self.should_fetch_logs = self.dynamic_config_module.should_fetch_logs()
 
     self._output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY") or self.dynamic_config_module.OUTPUT_DIRECTORY
     self._failed_count = 0
@@ -154,9 +154,6 @@ class TestRunner(object):
 
   def set_logs_dir(self, path):
     self._logs_dir = path
-
-  def set_should_fetch_logs(self, should_fetch):
-    self._should_fetch_logs = should_fetch
 
   def success_count(self):
     return self._success_count
@@ -258,7 +255,7 @@ class TestRunner(object):
     """
     Copy logs from remote machines to local destination
     """
-    if self._should_fetch_logs:
+    if self.should_fetch_logs:
      for deployer in runtime.get_deployers():
         for process in deployer.get_processes():
           logs = self.dynamic_config_module.process_logs( process.servicename) or []
