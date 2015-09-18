@@ -25,6 +25,7 @@ from zopkio.test_runner import TestRunner
 import zopkio.runtime as runtime
 from samples.sample_ztestsuite import SampleTestSuite
 from test.mock import Mock_Deployer
+from zopkio.configobj import Config
 
 class TestTestRunner(unittest.TestCase):
   FILE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -97,7 +98,7 @@ class TestTestRunner(unittest.TestCase):
     #first set things up
     runtime.reset_all()
     ztestsuite = SampleTestSuite()
-    runtime.set_active_config(ztestsuite)
+    runtime.set_active_config(Config("unittestconfig",{}))
     runner = TestRunner(ztestsuite=ztestsuite)
     #create a temp dir for logs
     import tempfile
@@ -120,11 +121,10 @@ class TestTestRunner(unittest.TestCase):
     """
     import tempfile
     runtime.reset_collector()
-    runtime.set_active_config(ztestsuite)
     #create the log file on "remote" which is actually localhost
     with open( localhost_log_file, 'wb') as f:
       f.write("This is a log")
-    runner = TestRunner(ztestsuite=ztestsuite)
+    runner = TestRunner(ztestsuite=ztestsuite, config_overrides={"should_fetch_logs":fetch_logs_flag})
     logs_dir = tempfile.mkdtemp()
     runner.set_logs_dir(logs_dir)
     try:
@@ -149,11 +149,10 @@ class TestTestRunner(unittest.TestCase):
     #create a temp dir for logs
     import tempfile
     runtime.reset_all()
-    runtime.set_active_config(ztestsuite)
     #create the log file on "remote" which is actually localhost
     with open( localhost_log_file, 'wb') as f:
       f.write("This is a log")
-    runner = TestRunner(ztestsuite=ztestsuite)
+    runner = TestRunner(ztestsuite=ztestsuite, should_fetch_logs=fetch_logs_flag)
     logs_dir = tempfile.mkdtemp()
     runner.set_logs_dir(logs_dir)
     try:
