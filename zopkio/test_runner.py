@@ -117,11 +117,7 @@ class TestRunner(object):
       setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: constants.FILTER_NAME_ALLOW_ALL ))
     else:
       self.dynamic_config_module.log_patterns = wrap( self.dynamic_config_module.log_patterns)
-    if not hasattr( self.dynamic_config_module, "should_fetch_logs"):
-      self.should_fetch_logs = True
-    else:
-      self.should_fetch_logs = self.dynamic_config_module.should_fetch_logs()
-
+    self.should_fetch_logs = runtime.get_active_config("should_fetch_logs", True)
     self._output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY") or self.dynamic_config_module.OUTPUT_DIRECTORY
     self._failed_count = 0
     self._success_count = 0
