@@ -117,7 +117,6 @@ class TestRunner(object):
       setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: constants.FILTER_NAME_ALLOW_ALL ))
     else:
       self.dynamic_config_module.log_patterns = wrap( self.dynamic_config_module.log_patterns)
-
     self._output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY") or self.dynamic_config_module.OUTPUT_DIRECTORY
     self._failed_count = 0
     self._success_count = 0
@@ -251,15 +250,16 @@ class TestRunner(object):
     """
     Copy logs from remote machines to local destination
     """
-
-    for deployer in runtime.get_deployers():
-      for process in deployer.get_processes():
-        logs = self.dynamic_config_module.process_logs( process.servicename) or []
-        logs += self.dynamic_config_module.machine_logs( process.unique_id)
-        logs += self.dynamic_config_module.naarad_logs( process.unique_id)
-        pattern = self.dynamic_config_module.log_patterns(process.unique_id) or constants.FILTER_NAME_ALLOW_ALL
-        #now copy logs filtered on given pattern to local machine:
-        deployer.fetch_logs(process.unique_id, logs, self._logs_dir, pattern)
+    should_fetch_logs = runtime.get_active_config("should_fetch_logs", True)
+    if should_fetch_logs:
+     for deployer in runtime.get_deployers():
+        for process in deployer.get_processes():
+          logs = self.dynamic_config_module.process_logs( process.servicename) or []
+          logs += self.dynamic_config_module.machine_logs( process.unique_id)
+          logs += self.dynamic_config_module.naarad_logs( process.unique_id)
+          pattern = self.dynamic_config_module.log_patterns(process.unique_id) or constants.FILTER_NAME_ALLOW_ALL
+          #now copy logs filtered on given pattern to local machine:
+          deployer.fetch_logs(process.unique_id, logs, self._logs_dir, pattern)
 
   def _execute_performance(self, naarad_obj):
     """
