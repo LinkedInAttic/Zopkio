@@ -245,8 +245,9 @@ class Deployer(object):
     install_path = self.processes[unique_id].install_path
     self.fetch_logs_from_host(hostname, install_path, unique_id, logs, directory, pattern)
 
-  def fetch_logs_from_host(self, hostname, install_path, prefix, logs, directory, pattern):
-    """ Copies logs from any host on the specified install path
+  @staticmethod
+  def fetch_logs_from_host(hostname, install_path, prefix, logs, directory, pattern):
+    """ Static method Copies logs from specified host on the specified install path
 
     :Parameter hostname the remote host from where we need to fetch the logs
     :Parameter install_path path where the app is installed
