@@ -182,7 +182,7 @@ class TestTestRunner(unittest.TestCase):
       localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
       ztestsuite = SampleTestSuite(Mock_Deployer())
       ztestsuite.machine_logs = lambda unique_id: [localhost_log_file]
-      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file, False)
     finally:
       shutil.rmtree( localhost_logs_dir)
 
@@ -235,7 +235,7 @@ class TestTestRunner(unittest.TestCase):
       localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
       ztestsuite = SampleTestSuite(Mock_Deployer())
       ztestsuite.process_logs = lambda unique_id: [localhost_log_file]
-      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file, False)
     finally:
       shutil.rmtree( localhost_logs_dir)
 
@@ -269,7 +269,7 @@ class TestTestRunner(unittest.TestCase):
       localhost_log_file = os.path.join(localhost_logs_dir, "unittest.log")
       ztestsuite = SampleTestSuite(Mock_Deployer())
       ztestsuite.naarad_logs = lambda unique_id: [localhost_log_file]
-      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file)
+      self.__test_copy_log_speced_per_id(ztestsuite, localhost_log_file, False)
     finally:
       #cleanup
       shutil.rmtree( localhost_logs_dir)

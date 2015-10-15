@@ -229,11 +229,11 @@ class Deployer(object):
     """
     self._send_signal(unique_id, signal.SIGHUP, configs)
 
-  def get_logs(self, unique_id, logs, directory, pattern=constants.FILTER_NAME_ALLOW_ALL):
+  def get_logs(self, unique_id, logs, directory, pattern=constants.FILTER_NAME_ALLOW_NONE):
     """deprecated name for fetch_logs"""
     self.fetch_logs(unique_id, logs, directory, pattern)
 
-  def fetch_logs(self, unique_id, logs, directory, pattern=constants.FILTER_NAME_ALLOW_ALL):
+  def fetch_logs(self, unique_id, logs, directory, pattern=constants.FILTER_NAME_ALLOW_NONE):
     """ Copies logs from the remote host that the process is running on to the provided directory
 
     :Parameter unique_id the unique_id of the process in question
@@ -265,7 +265,7 @@ class Deployer(object):
               logger.error("Log file " + f + " does not exist on " + hostname)
               pass
           else:
-            copy_dir(ftp, f, directory, prefix, pattern)
+            copy_dir(ftp, f, directory, prefix)
         if install_path is not None:
           copy_dir(ftp, install_path, directory, prefix, pattern)
 
