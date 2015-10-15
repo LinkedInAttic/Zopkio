@@ -58,7 +58,7 @@ class TestDeployer(unittest.TestCase):
     with open(os.path.join(install_path, 'test.foo'), 'w') as f:
       f.write('this is the test foo')
     minimial_deployer.processes['unique_id'] = Process('unique_id', 'service_name', 'localhost', install_path)
-    minimial_deployer.get_logs('unique_id', [os.path.join(install_path, 'test.out')], output_path)
+    minimial_deployer.get_logs('unique_id', [os.path.join(install_path, 'test.out')], output_path, '')
     assert os.path.exists(os.path.join(output_path, "unique_id-test.out"))
     shutil.rmtree(output_path)
     if not os.path.exists(output_path):
