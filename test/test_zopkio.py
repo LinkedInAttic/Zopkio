@@ -47,7 +47,7 @@ class TestZopkioMainRunner(unittest.TestCase):
     args.testfile = "./examples/server_client/server_client.py"
     succeeded, failed = self._run_zopkio(args)
     self.assertTrue( succeeded >= 4)
-    self.assertTrue( failed >= 16)
+    self.assertTrue( failed >= 12)
 
 if __name__ == '__main__':
   unittest.main()

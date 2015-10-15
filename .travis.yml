@@ -24,8 +24,13 @@ before_install:
   - cat /dev/zero | ssh-keygen -q -N ""
   - cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 # install dependencies
-install: "python setup.py install"
+install:
+  - "python setup.py install"
+  - "pip install coverage"
+  - "pip install coveralls"
 # run tests
 script: 
- - python setup.py test
- - zopkio examples/server_client/server_client.py --nopassword
+  - python setup.py test
+  - coverage run --source=zopkio setup.py test
+after_success:
+  - coveralls

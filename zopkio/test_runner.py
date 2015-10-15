@@ -114,7 +114,7 @@ class TestRunner(object):
       assign_log_methods( method_name )
 
     if not hasattr( self.dynamic_config_module, "log_patterns"):
-      setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: constants.FILTER_NAME_ALLOW_ALL ))
+      setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: constants.FILTER_NAME_ALLOW_NONE ))
     else:
       self.dynamic_config_module.log_patterns = wrap( self.dynamic_config_module.log_patterns)
     self._output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY") or self.dynamic_config_module.OUTPUT_DIRECTORY
@@ -257,7 +257,7 @@ class TestRunner(object):
           logs = self.dynamic_config_module.process_logs( process.servicename) or []
           logs += self.dynamic_config_module.machine_logs( process.unique_id)
           logs += self.dynamic_config_module.naarad_logs( process.unique_id)
-          pattern = self.dynamic_config_module.log_patterns(process.unique_id) or constants.FILTER_NAME_ALLOW_ALL
+          pattern = self.dynamic_config_module.log_patterns(process.unique_id) or constants.FILTER_NAME_ALLOW_NONE
           #now copy logs filtered on given pattern to local machine:
           deployer.fetch_logs(process.unique_id, logs, self._logs_dir, pattern)
 
