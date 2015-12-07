@@ -34,6 +34,7 @@ _collector = ResultsCollector()
 _output_dir = os.path.join(os.getcwd(), time.strftime("zopkio_%Y%m%d_%H%M%S", time.localtime(_init_time)))
 
 def get_init_time():
+  global _init_time
   return _init_time
 
 def set_init_time(time):
@@ -56,6 +57,7 @@ def get_username():
 
   :return: the username of the user running the process (needed for lid)
   """
+  global _username
   return _username
 
 
@@ -64,6 +66,7 @@ def get_password():
 
   :return: the password of the user (needed for lid)
   """
+  global _password
   return _password
 
 
@@ -73,6 +76,7 @@ def get_machine(machine_name):
   :param machine_name:
   :return:
   """
+  global _machine_names
   return _machine_names[machine_name]
 
 
@@ -117,6 +121,22 @@ def set_deployer(service_name, deployer):
   """
   _deployers[service_name] = deployer
 
+def remove_deployer(service_name):
+  """
+  Remove the deployer with the given name, if it exists
+  :param service_name:  name of deployer to remove
+  """
+  try:
+    del _deployers[service_name]
+  except:
+    pass
+
+def reset_deployers():
+  """
+  Clear all added deployers
+  """
+  global _deployers
+  _deployers = {}
 
 def get_deployers():
   """
@@ -140,6 +160,25 @@ def reset_collector():
   global _collector
   _collector = ResultsCollector()
 
+def reset_all():
+  """
+  Clear relevant globals to start fresh
+  :return:
+  """
+  global _username
+  global _password
+  global _active_config
+  global _active_tests
+  global _machine_names
+  global _deployers
+  reset_deployers()
+  reset_collector()
+  _username = None
+  _password = None
+  _active_config = None
+  _active_tests = {}
+  _machine_names = defaultdict()
+
 ###
 # Methods dealing with configurations
 ###
@@ -162,10 +201,7 @@ def get_active_config(config_option, default=None):
   :return: value of config. If key is not in config, then default will be used if default is not set to None. 
   Otherwise, KeyError is thrown.
   """
-  if default == None:
-    return _active_config.mapping[config_option]
-  else:
-    return _active_config.mapping.get(config_option, default)
+  return _active_config.mapping[config_option] if default is None else _active_config.mapping.get(config_option, default)
 
 def get_active_config_name():
   return _active_config.name
@@ -178,10 +214,13 @@ def get_active_config_name():
 def set_active_tests(tests):
   global _active_tests
   for test in tests:
-    if isinstance(test, list):
-      for individual_test in test:
+    try:
+      iteration = iter(test)
+      #if test item is itself iterable:
+      for individual_test in iteration:
         _active_tests[individual_test.name] = individual_test
-    else:
+    except:
+      #if test item is a single test:
       _active_tests[test.name] = test
 
 

@@ -1,4 +1,4 @@
-# Copyright 2014 LinkedIn Corp.
+# Copyright 2015 LinkedIn Corp.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -17,25 +17,23 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-Constants that are used in multiple classes
-"""
 import os
 
-PROJECT_ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-WEB_RESOURCE_DIR = os.path.join(PROJECT_ROOT_DIR, "web_resources/")
+LOGS_DIRECTORY = "/tmp/zopkio_zookeeper/logs/"
+OUTPUT_DIRECTORY = "/tmp/zopkio_zookeeper/results/"
 
-PASSED = "passed"
-FAILED = "failed"
-SKIPPED = "skipped"
+def machine_logs():
+  return {
+    "zookeeper1": [os.path.join("/tmp/zookeeper_test1", "zookeeper.out")],
+    "zookeeper2": [os.path.join("/tmp/zookeeper_test2", "zookeeper.out")],
+    "zookeeper3": [os.path.join("/tmp/zookeeper_test3", "zookeeper.out")],
+  }
 
-PROCESS_NOT_RUNNING_PID = None
+def naarad_logs():
+  return {
+    'zookeeper1': [],
+  }
 
-DEFAULT_TEST_PHASE = -1
 
-DEFAULT_ITERATION = 1
-
-CONFIG_SEPARATOR = '='
-MACHINE_SEPARATOR = '='
-
-FILTER_NAME_ALLOW_NONE='^$'
+def naarad_config():
+  return os.path.join(os.path.dirname(os.path.abspath(__file__)), "naarad.cfg")

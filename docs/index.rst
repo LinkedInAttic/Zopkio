@@ -210,11 +210,11 @@ which behaves similarly.
 Test Files
 ----------
 
-Foreach test file, the framework will execute any function with *test* in the
-name and track if the function executes successfully. In addition if there is a
-function ``test_foo`` and a function ``validate_foo``, after all cleanup
-and log collection is done, if ``test_foo`` executed successfully then
-``validate_foo`` will be executed and tested for successful execution if
+For each test file, the framework will execute any function with *test* in the
+name (no matter the case) and track if the function executes successfully. In
+addition if there is a function ``test_foo`` and a function ``validate_foo``,
+after all cleanup and log collection is done, if ``test_foo`` executed successfully
+then ``validate_foo`` will be executed and tested for successful execution if
 it fails, the original test will fail and the logs from the post execution will
 be displayed. Consider a simple test with our server client example::
 
@@ -384,7 +384,7 @@ Test configs are properties which affect how the tests are run. They are specifi
 to the tests test writer and accessible from
 ``runtime.get_config(config_name)`` which will return the stored value or the
 empty string if no property with that name is present. These are the properties
-that can be overrode by the ``config-overrides`` command line flag.
+that can be overridden by the ``config-overrides`` command line flag.
 
 Application configs are properties which affect how the remote services are
 configured, there is not currently a decision as to how we will install these

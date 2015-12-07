@@ -106,25 +106,18 @@ class SSHDeployer(Deployer):
     hostname = None
     is_tarfile = False
     is_zipfile = False
-    if unique_id in self.processes:
-      process = self.processes[unique_id]
-      prev_hostname = process.hostname
-      if 'hostname' in configs:
-        if prev_hostname is not configs['hostname']:
-          self.uninstall(unique_id, configs)
-          hostname = configs['hostname']
-        else:
-          self.uninstall(unique_id, configs)
-          hostname = prev_hostname
+    if unique_id in self.processes and  'hostname' in configs:
+        self.uninstall(unique_id, configs)
+        hostname = configs['hostname']
     elif 'hostname' in configs:
       hostname = configs['hostname']
-    else:
+    elif unique_id not in self.processes:
       # we have not installed this unique_id before and no hostname is provided in the configs so raise an error
-      logger.error("hostname was not provided for unique_id: " + unique_id)
       raise DeploymentError("hostname was not provided for unique_id: " + unique_id)
 
     env = configs.get("env", {})
     install_path = configs.get('install_path') or self.default_configs.get('install_path')
+    pid_file = configs.get('pid_file') or self.default_configs.get('pid_file')
     if install_path is None:
       logger.error("install_path was not provided for unique_id: " + unique_id)
       raise DeploymentError("install_path was not provided for unique_id: " + unique_id)
@@ -201,6 +194,7 @@ class SSHDeployer(Deployer):
           log_output(exec_with_env(ssh, relative_cmd,
                                          msg="Failed to execute post install command: {0}".format(relative_cmd), env=env))
     self.processes[unique_id] = Process(unique_id, self.service_name, hostname, install_path)
+    self.processes[unique_id].pid_file = pid_file
 
   def start(self, unique_id, configs=None):
     """
@@ -244,6 +238,7 @@ class SSHDeployer(Deployer):
     # 2. from Process
     # 3. from Deployer
     start_command = configs.get('start_command') or self.processes[unique_id].start_command or self.default_configs.get('start_command')
+    pid_file = configs.get('pid_file') or self.default_configs.get('pid_file')
     if start_command is None:
       logger.error("start_command was not provided for unique_id: " + unique_id)
       raise DeploymentError("start_command was not provided for unique_id: " + unique_id)
@@ -259,6 +254,9 @@ class SSHDeployer(Deployer):
 
     self.processes[unique_id].start_command = start_command
     self.processes[unique_id].args = args
+    # For cases where user pases it with start command
+    if self.processes[unique_id].pid_file is None:
+      self.processes[unique_id].pid_file = pid_file
 
     if 'delay' in configs:
       time.sleep(configs['delay'])
@@ -363,7 +361,11 @@ class SSHDeployer(Deployer):
     if self.processes[unique_id].start_command is None:
       return constants.PROCESS_NOT_RUNNING_PID
 
-    if 'pid_file' in configs.keys():
+    if self.processes[unique_id].pid_file is not None:
+      with open_remote_file(hostname, self.processes[unique_id].pid_file,
+                            username=runtime.get_username(), password=runtime.get_password()) as pid_file:
+        full_output = pid_file.read()
+    elif 'pid_file' in configs.keys():
       with open_remote_file(hostname, configs['pid_file'],
                             username=runtime.get_username(), password=runtime.get_password()) as pid_file:
         full_output = pid_file.read()
@@ -409,3 +411,13 @@ class SSHDeployer(Deployer):
     :Returns: A list of Processes
     """
     return self.processes.values()
+
+  def kill_all_process(self):
+    """ Terminates all the running processes. By default it is set to false.
+    Users can set to true in config once the method to get_pid is done deterministically
+    either using pid_file or an accurate keyword
+
+    """
+    if (runtime.get_active_config("cleanup_pending_process",False)):
+      for process in self.get_processes():
+        self.terminate(process.unique_id)
