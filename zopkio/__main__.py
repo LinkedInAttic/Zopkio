@@ -96,6 +96,7 @@ def main():
                       default="ERROR")
   parser.add_argument("--nopassword", action='store_true', dest="nopassword", help="Disable password prompt")
   parser.add_argument("--user", dest="user", help="user to run the test as (defaults to current user)")
+  parser.add_argument("--reporter", dest="reporter", help="reporter type that will be use to generate report)")
   args = parser.parse_args()
   try:
     call_main(args)
@@ -144,10 +145,15 @@ def call_main(args):
     ztestsuites = [getattr(testmodule, attr)
                for attr in dir(testmodule)
                if isinstance(getattr(testmodule, attr), ZTestSuite)]
+    # reporter_type = runtime.get_active_config('zopkio_reporter')
+    reporter_type = None
+    if args.reporter is not None:
+        reporter_type = args.reporter
     if len(ztestsuites) > 0: #TODO(jehrlich) intelligently handle multiple test suites
-      test_runner = TestRunner(ztestsuite=ztestsuites[0], testlist=args.test_list, config_overrides=config_overrides)
+      test_runner = TestRunner(ztestsuite=ztestsuites[0], testlist=args.test_list, config_overrides=config_overrides, reporter_type=reporter_type)
     else:
-      test_runner = TestRunner(args.testfile, args.test_list, config_overrides)
+      test_runner = TestRunner(args.testfile, args.test_list, config_overrides, reporter_type=reporter_type)
+
   except BaseException as e:
     print("Error setting up testrunner:\n%s" % traceback.format_exc())
     raise ValueError(e.message)
