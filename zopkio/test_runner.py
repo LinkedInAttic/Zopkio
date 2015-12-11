@@ -32,8 +32,7 @@ from naarad import Naarad
 
 import zopkio.constants as constants
 import zopkio.error_messages as error_messages
-# from zopkio.reporter import Reporter
-from reporters import junit_reporter, html_reporter
+from zopkio.reporters import junit_reporter, html_reporter
 import zopkio.runtime as runtime
 import zopkio.test_runner_helper as test_runner_helper
 import zopkio.utils as utils
@@ -214,7 +213,7 @@ class TestRunner(object):
               if not setup_fail:
                 failure_handler.notify_failure()
               logger.error("{0} failed teardown_suite(). {1}".format(config.name, traceback.format_exc()))
-
+        finally:
             #kill all orphaned process
             if (runtime.get_active_config("cleanup_pending_process",True)):
               for deployer in runtime.get_deployers():
