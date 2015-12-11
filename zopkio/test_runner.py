@@ -78,14 +78,51 @@ class TestRunner(object):
     :param kwargs:
     :return:
     """
-    # if ('reporter_type' in kwargs):
-    #     reporter_type = kwargs['reporter_type']
     if ('ztestsuite' in kwargs):
       self._new_constuctor(**kwargs)
     elif (len(args) >= 3 and 'reporter_type' not in kwargs):
       self._old_constructor(args[0], args[1], args[2])
     elif (len(args) >= 3 and 'reporter_type' in kwargs):
          self._old_constructor(args[0], args[1], args[2], reporter_type=kwargs['reporter_type'])
+    #create logs dir
+    self._logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY") if "LOGS_DIRECTORY" in self.master_config.mapping else \
+      self.dynamic_config_module.LOGS_DIRECTORY
+    try:
+      utils.makedirs(self._logs_dir)
+    except:
+      logger.error("Unable to create logs dir {0};  no logs will be created".format(self._logs_dir))
+      self._logs_dir = None
+    #####
+    #create methods used for identifying various types of logs if
+    #not provided by client, creating them to return an empty list
+    #The functions are wrapped to allow backwards compatibility with
+    #an older signature for each function
+    def wrap(func):
+      def helper( unique_id ):
+        try:
+          return func( unique_id)
+        except:
+          #backwards compatible signature taking no arguments:
+          return func().get(unique_id, [])
+      return helper
+
+    def assign_log_methods( method_name):
+      if not hasattr( self.dynamic_config_module, method_name):
+        setattr(self.dynamic_config_module, method_name,lambda unique_id:  [])
+      else:
+        setattr(self.dynamic_config_module,method_name,
+                wrap(getattr( self.dynamic_config_module, method_name,self.dynamic_config_module)))
+
+    for method_name in ("process_logs", "machine_logs", "naarad_logs" ):
+      assign_log_methods( method_name )
+
+    if not hasattr( self.dynamic_config_module, "log_patterns"):
+      setattr( self.dynamic_config_module, "log_patterns", wrap( lambda unique_id: constants.FILTER_NAME_ALLOW_NONE ))
+    else:
+      self.dynamic_config_module.log_patterns = wrap( self.dynamic_config_module.log_patterns)
+    self._output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY") or self.dynamic_config_module.OUTPUT_DIRECTORY
+    self._failed_count = 0
+    self._success_count = 0
 
   def _old_constructor(self, testfile, tests_to_run, config_overrides, reporter_type=None):
     self.testfile = testfile
@@ -112,6 +149,20 @@ class TestRunner(object):
     self.directory_info = None
     self.reporter = None
 
+  def get_output_dir(self):
+    return self._output_dir
+
+  def get_logs_dir(self):
+    return self._logs_dir
+
+  def set_logs_dir(self, path):
+    self._logs_dir = path
+
+  def success_count(self):
+    return self._success_count
+
+  def fail_count(self):
+    return self._failed_count
 
   def run(self):
     """
@@ -181,7 +232,6 @@ class TestRunner(object):
     # analysis.generate_diff_reports()
     self.reporter.data_source.end_time = time.time()
     self.reporter.generate()
-
     if not self.master_config.mapping.get("no-display", False):
       self._display_results()
 
@@ -205,25 +255,16 @@ class TestRunner(object):
     """
     Copy logs from remote machines to local destination
     """
-    if "LOGS_DIRECTORY" in self.master_config.mapping:
-      logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY")
-    else:
-      logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
-    utils.makedirs(logs_dir)
-    for deployer in runtime.get_deployers():
-      for process in deployer.get_processes():
-        logs = []
-        if (hasattr(self.dynamic_config_module, "process_logs")):
-          logs += self.dynamic_config_module.process_logs(process.servicename)
-        if (hasattr(self.dynamic_config_module, "machine_logs")):
-          logs += self.dynamic_config_module.machine_logs().get(process.unique_id, [])
-        if (hasattr(self.dynamic_config_module, "naarad_logs")):
-          logs += self.dynamic_config_module.naarad_logs().get(process.unique_id, [])
-        if hasattr(self.dynamic_config_module, 'log_patterns'):
-          pattern = self.dynamic_config_module.log_patterns().get(process.unique_id, '^$')
-        else:
-          pattern = '^$'
-        deployer.get_logs(process.unique_id, logs, logs_dir, pattern)
+    should_fetch_logs = runtime.get_active_config("should_fetch_logs", True)
+    if should_fetch_logs:
+     for deployer in runtime.get_deployers():
+        for process in deployer.get_processes():
+          logs = self.dynamic_config_module.process_logs( process.servicename) or []
+          logs += self.dynamic_config_module.machine_logs( process.unique_id)
+          logs += self.dynamic_config_module.naarad_logs( process.unique_id)
+          pattern = self.dynamic_config_module.log_patterns(process.unique_id) or constants.FILTER_NAME_ALLOW_NONE
+          #now copy logs filtered on given pattern to local machine:
+          deployer.fetch_logs(process.unique_id, logs, self._logs_dir, pattern)
 
   def _execute_performance(self, naarad_obj):
     """
@@ -232,20 +273,12 @@ class TestRunner(object):
     :param naarad_obj:
     :return:
     """
-    if "LOGS_DIRECTORY" in self.master_config.mapping:
-      logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY")
-    else:
-      logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
-    if "OUTPUT_DIRECTORY" in self.master_config.mapping:
-      output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY")
-    else:
-      output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
-    naarad_obj.analyze(logs_dir, output_dir)
+    naarad_obj.analyze(self._logs_dir, self._output_dir)
 
     if ('matplotlib' in [tuple_[1] for tuple_ in iter_modules()]) and len(self.configs) > 1:
       prevConfig = self.configs[0]
       if naarad_obj._output_directory is None:
-        naarad_obj._output_directory = output_dir
+        naarad_obj._output_directory = self._output_dir
       for curConfig in self.configs[1:]:
         if not curConfig.naarad_id is None:
           naarad_obj.diff(curConfig.naarad_id, prevConfig.naarad_id)
@@ -276,7 +309,11 @@ class TestRunner(object):
       setup_fail = False
       if not self.master_config.mapping.get("no-perf", False):
         for test in tests:
-          test.naarad_config = self.dynamic_config_module.naarad_config()
+          try:
+            naarad_config_file = self.dynamic_config_module.naarad_config()
+          except TypeError: # Support backwards compatibility
+            naarad_config_file = self.dynamic_config_module.naarad_config(config.mapping, test_name=test.name)
+          test.naarad_config = naarad_config_file
           test.naarad_id = naarad_obj.signal_start(test.naarad_config)
       for test in tests:
         test.start_time = time.time()
@@ -424,7 +461,7 @@ class TestRunner(object):
         self._execute_singletest_verification(test)
 
     if (test.result == constants.FAILED):
-      test.consecutive_failures = test.consecutive_failures + 1
+      test.consecutive_failures += 1
     else:
       test.consecutive_failures = 0
 
@@ -492,7 +529,6 @@ class TestRunner(object):
         if (test.total_number_iterations > 1):
           test.iteration_results[test.current_iteration] = constants.FAILED
 
-
   def compute_total_iterations_per_test(self):
     """
     Factor in loop_all_tests config into iteration count of each test
@@ -543,8 +579,11 @@ class TestRunner(object):
   def _log_results(self, tests):
     for test in tests:
       logger.info("{0}----{1}".format(test.name, test.result))
-      if test.result == constants.FAILED:
+      if test.result == constants.PASSED:
+        self._success_count += 1
+      else:
         logger.info(traceback.format_exception_only(type(test.exception), test.exception))
+        self._failed_count += 1
 
   def _reset_tests(self):
     for test in self.tests:

@@ -98,14 +98,21 @@ def main():
   parser.add_argument("--user", dest="user", help="user to run the test as (defaults to current user)")
   parser.add_argument("--reporter", dest="reporter", help="reporter type that will be use to generate report)")
   args = parser.parse_args()
+  try:
+    call_main(args)
+  except ValueError:
+    #We only sys.exit here, as call_main is used as part of a unit test
+    #and should not exit the system
+    sys.exit(1)
 
+def call_main(args):
   # Get output directory.
   try:
     if args.output_dir is not None:
       runtime.set_output_dir(args.output_dir)
   except ValueError as e:
     print str(e)
-    sys.exit(1)
+    raise
 
   # Set up logging.
   setup_logging(runtime.get_output_dir(), args.log_level, args.console_level)
@@ -120,7 +127,7 @@ def main():
   except ValueError as e:
     logger.error(str(e))
     print("Error in processing command line arguments:\n {0}".format(traceback.format_exc()))
-    sys.exit(1)
+    raise
 
   runtime.set_machines(machines)
   if args.user is not None:
@@ -149,11 +156,12 @@ def main():
 
   except BaseException as e:
     print("Error setting up testrunner:\n%s" % traceback.format_exc())
-    sys.exit(1)
-  print "CONFIG_OVERRIDE: %s" %(config_overrides,)
+    raise ValueError(e.message)
+
   test_runner.run()
 
   logger.info("Exiting zopkio")
+  return test_runner.success_count(), test_runner.fail_count()
 
 if __name__ == "__main__":
   main()

@@ -37,7 +37,7 @@ setup(
   author = 'Joshua Ehrlich',
   author_email = 'jehrlich@linkedin.com,zopkio@googlegroups.com',
   url = 'http://github.com/linkedin/zopkio',
-  download_url = 'https://github.com/linkedin/zopkio/tarball/0.2.3',
+  download_url = 'https://github.com/linkedin/zopkio/tarball/0.2.5',
   license = 'Apache',
   packages = ['zopkio', 'zopkio.web_resources', 'zopkio.reporters'],
   package_dir = { 'zopkio' : 'zopkio'},

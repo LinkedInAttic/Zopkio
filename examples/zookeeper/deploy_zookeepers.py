@@ -26,7 +26,7 @@ zookeper_deployer = None
 
 
 def setup_suite():
-  print "Starting zookeeper"
+  print "Starting zookeeper quorum"
   global zookeper_deployer
   env_dict = {}
 
@@ -43,6 +43,7 @@ def setup_suite():
   runtime.set_deployer("zookeeper", zookeper_deployer)
 
   # Deploy Zookeeper1
+  print "Deploy Zookeeper1"
   zookeper_deployer.install("zookeeper1",
       {"hostname": "localhost",
        "install_path": runtime.get_active_config('zookeeper1_install_path'),
@@ -52,6 +53,7 @@ def setup_suite():
   zookeper_deployer.start("zookeeper1",configs={"sync": True})
 
   # Deploy Zookeeper2
+  print "Deploy Zookeeper2"
   zookeper_deployer.install("zookeeper2",
       {"hostname": "localhost",
        "install_path": runtime.get_active_config('zookeeper2_install_path'),
@@ -61,6 +63,7 @@ def setup_suite():
   zookeper_deployer.start("zookeeper2",configs={"sync": True})
 
   # Deploy Zookeeper3
+  print "Deploy Zookeeper3"
   zookeper_deployer.install("zookeeper3",
       {"hostname": "localhost",
        "install_path": runtime.get_active_config('zookeeper3_install_path'),
@@ -75,4 +78,4 @@ def teardown_suite():
   zookeper_deployer.undeploy("zookeeper1")
   zookeper_deployer.undeploy("zookeeper2")
   zookeper_deployer.undeploy("zookeeper3")
-  print "zookeeper terminated"
+  print "zookeepers terminated"
