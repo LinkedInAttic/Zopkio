@@ -22,7 +22,5 @@ import os
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 properties = {
-  "additional_paths": [
-    ROOT_DIR
-  ],
+  "junit_reporter":True
 }

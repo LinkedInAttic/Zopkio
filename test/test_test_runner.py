@@ -40,6 +40,16 @@ class TestTestRunner(unittest.TestCase):
     test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
     test_runner.run()
 
+  def test_full_run_junit(self):
+    """
+    Tests a full run
+    """
+    runtime.reset_collector()
+    test_file = os.path.join(self.FILE_LOCATION,
+                             "samples/sample_test_junit_reports.py")
+    test_runner = TestRunner(test_file, ["test0", "test1", "test2"], {})
+    test_runner.run()
+
   def test_full_run_parallel(self):
     """
     Tests a full run with parallel tests
