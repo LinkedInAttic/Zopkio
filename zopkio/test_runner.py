@@ -32,7 +32,7 @@ from naarad import Naarad
 
 import zopkio.constants as constants
 import zopkio.error_messages as error_messages
-from zopkio.reporter import Reporter
+from zopkio import html_reporter, junit_reporter
 import zopkio.runtime as runtime
 import zopkio.test_runner_helper as test_runner_helper
 import zopkio.utils as utils
@@ -227,7 +227,7 @@ class TestRunner(object):
     # analysis.generate_diff_reports()
     self.reporter.data_source.end_time = time.time()
     self.reporter.generate()
-    if not self.master_config.mapping.get("no-display", False):
+    if not self.master_config.mapping.get("no-display", False) and not  self.master_config.mapping.get("junit_reporter", False):
       self._display_results()
 
   def _convert_naarad_slas_to_list(self, naarad_sla_obj):
@@ -562,8 +562,16 @@ class TestRunner(object):
 
     :return:
     """
-    reporter = Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
-                        self.directory_info["logs_dir"], self._output_dir)
+    junit_xml_reporter =  self.master_config.mapping.get("junit_reporter", False)
+
+    # default to html
+    if junit_xml_reporter is False:
+      reporter = html_reporter.Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
+                          self.directory_info["logs_dir"], self._output_dir)
+    else:
+      reporter = junit_reporter.Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
+                          self.directory_info["logs_dir"], self._output_dir)
+
     return reporter
 
   def _log_results(self, tests):

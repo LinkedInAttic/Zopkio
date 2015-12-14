@@ -65,7 +65,8 @@ setup(
       'pytz>=2012c',
       'jinja2>=2.7.3',
       'python-dateutil',
-      'kazoo>=1.1'
+      'kazoo>=1.1',
+      'junit_xml>=1.6'
   ],
   entry_points = {
       'console_scripts': [
