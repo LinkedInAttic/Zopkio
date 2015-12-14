@@ -227,7 +227,7 @@ class TestRunner(object):
     # analysis.generate_diff_reports()
     self.reporter.data_source.end_time = time.time()
     self.reporter.generate()
-    if not self.master_config.mapping.get("no-display", False) and not  self.master_config.mapping.get("junit_reporter", False):
+    if self.master_config.mapping.get("display", False) and not  self.master_config.mapping.get("junit_reporter", False):
       self._display_results()
 
   def _convert_naarad_slas_to_list(self, naarad_sla_obj):
@@ -360,7 +360,7 @@ class TestRunner(object):
         logger.debug("{0} failed teardown():\n{1}".format([test.name for test in tests], traceback.format_exc()))
       for test in tests:
         test.end_time = time.time()
-      if not self.master_config.mapping.get("no-display", False):
+      if self.master_config.mapping.get("display", False):
         naarad_obj.signal_stop(test.naarad_id)
       logger.debug("Execution of test: {0} complete".format([test.name for test in tests]))
 
@@ -428,7 +428,7 @@ class TestRunner(object):
         logger.debug(test.name + "failed teardown():\n{0}".format(traceback.format_exc()))
 
       test.end_time = time.time()
-      if not self.master_config.mapping.get("no-display", False):
+      if self.master_config.mapping.get("display", False):
         naarad_obj.signal_stop(test.naarad_id)
       logger.debug("Execution of test: " + test.name + " complete")
 
