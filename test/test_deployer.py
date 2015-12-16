@@ -22,8 +22,12 @@ import unittest
 
 from zopkio.deployer import Deployer, Process
 from zopkio.remote_host_helper import ParamikoError, better_exec_command, get_ssh_client, copy_dir, get_sftp_client
+from .mock import Mock_Deployer
 
 class TestDeployer(unittest.TestCase):
+
+
+
   def test_better_exec(self):
     """
     Tests that the better_exec in the deployer module works and detects failed
@@ -39,7 +43,7 @@ class TestDeployer(unittest.TestCase):
     Tests that we can successfully copy logs from a remote host
     :return:
     """
-    minimial_deployer = Deployer()
+    minimial_deployer = Mock_Deployer()
     install_path = '/tmp/test_deployer_get_logs'
     if not os.path.exists(install_path):
       os.mkdir(install_path)
@@ -54,7 +58,7 @@ class TestDeployer(unittest.TestCase):
     with open(os.path.join(install_path, 'test.foo'), 'w') as f:
       f.write('this is the test foo')
     minimial_deployer.processes['unique_id'] = Process('unique_id', 'service_name', 'localhost', install_path)
-    minimial_deployer.get_logs('unique_id', [os.path.join(install_path, 'test.out')], output_path)
+    minimial_deployer.get_logs('unique_id', [os.path.join(install_path, 'test.out')], output_path, '')
     assert os.path.exists(os.path.join(output_path, "unique_id-test.out"))
     shutil.rmtree(output_path)
     if not os.path.exists(output_path):

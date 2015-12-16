@@ -17,25 +17,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-Constants that are used in multiple classes
-"""
 import os
 
-PROJECT_ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-WEB_RESOURCE_DIR = os.path.join(PROJECT_ROOT_DIR, "web_resources/")
+ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-PASSED = "passed"
-FAILED = "failed"
-SKIPPED = "skipped"
-
-PROCESS_NOT_RUNNING_PID = None
-
-DEFAULT_TEST_PHASE = -1
-
-DEFAULT_ITERATION = 1
-
-CONFIG_SEPARATOR = '='
-MACHINE_SEPARATOR = '='
-
-FILTER_NAME_ALLOW_NONE='^$'
+properties = {
+  "junit_reporter":True
+}

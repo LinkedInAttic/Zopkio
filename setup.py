@@ -34,10 +34,10 @@ setup(
   version = __version__,
   description = __doc__,
   long_description = open('README.rst').read(),
-  author = 'Joshua Ehrlich',
-  author_email = 'jehrlich@linkedin.com,zopkio@googlegroups.com',
+  author = 'Joshua Ehrlich, Arun Venkatraman, John Rusnak',
+  author_email = 'zopkio@googlegroups.com',
   url = 'http://github.com/linkedin/zopkio',
-  download_url = 'https://github.com/linkedin/zopkio/tarball/0.2.1',
+  download_url = 'https://github.com/linkedin/zopkio/tarball/0.2.5',
   license = 'Apache',
   packages = ['zopkio', 'zopkio.web_resources'],
   package_dir = { 'zopkio' : 'zopkio'},
@@ -65,7 +65,8 @@ setup(
       'pytz>=2012c',
       'jinja2>=2.7.3',
       'python-dateutil',
-      'kazoo>=1.1'
+      'kazoo>=1.1',
+      'junit_xml>=1.6'
   ],
   entry_points = {
       'console_scripts': [

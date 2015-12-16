@@ -97,6 +97,35 @@ class ZTestSuite(object):
     """
     return []
 
+  def machine_logs(self, process_unique_id):
+    """
+    Lists the machine logs for the given process
+    :param process_unique_id: the unique id for the process running on the machine
+    :return: empty list by default
+    """
+    return []
+
+  def naarad_logs(self, process_unique_id):
+    """
+    Lists the naarad logs to copy for a given process
+    :param process_unique_id: the unique id for the process running on the machine
+    :return: empty list by default
+    """
+    return []
+
+  def log_patterns(self, process_unique_id):
+    """
+    Return a filter pattern used when fetching logs for a process, applied to the log file name
+    :param process_unique_id: the unique id for the process
+    :return: filter that matches any file name
+    """
+    return constants.FILTER_NAME_ALLOW_NONE
+
+
+  def should_fetch_logs(self):
+    #default to always fetch logs for all processes
+    return True
+
   def naarad_config(self):
     """
     This returns the path of the naarad config for use in performance verification
