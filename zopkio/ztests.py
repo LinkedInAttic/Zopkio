@@ -145,7 +145,7 @@ class ZTestSuite(object):
       ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest) and attr in testlist]
     else:
       ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest)]
-    tests = [Test(name, ztest.test, phase=ztest.phase, iteration=ztest.iteration, validate=ztest.validate)
+    tests = [Test(name, ztest.test, phase=ztest.phase, iteration=ztest.iteration, validate=ztest.validate, setup=ztest.setup, teardown=ztest.teardown)
              for (name, ztest) in ztests]
     return tests
 

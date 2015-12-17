@@ -39,6 +39,11 @@ class Test(object):
     self.function = function
     self.validation_function = kwargs.get("validate", None)
 
+    if 'setup' in kwargs:
+      self.setup = kwargs.get('setup')
+    if 'teardown' in kwargs:
+      self.teardown = kwargs.get('teardown')
+
     self.description = function.__doc__
     if self.validation_function.__doc__  is not None:
       if self.description is not None:
