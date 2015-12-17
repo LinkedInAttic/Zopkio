@@ -36,18 +36,6 @@ class ZTest(object):
   phase = constants.DEFAULT_TEST_PHASE
   iteration = constants.DEFAULT_ITERATION
 
-  def setup(self):
-    """
-    This runs before the test and can be used for test specific setup
-    """
-    pass
-
-  def teardown(self):
-    """
-    This runs after the test and can be used for test specific teardown
-    """
-    pass
-
   def test(self):
     """
     This is the main test function.
@@ -86,6 +74,18 @@ class ZTestSuite(object):
   def teardown_suite(self):
     """
     This runs after all of the tests in the suite for generic teardown
+    """
+    pass
+
+  def setup(self):
+    """
+    This runs before the test and can be used for test specific setup
+    """
+    pass
+
+  def teardown(self):
+    """
+    This runs after the test and can be used for test specific teardown
     """
     pass
 

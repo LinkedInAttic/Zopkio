@@ -60,7 +60,6 @@ class ZooKeeperSuite(ZTestSuite):
          "install_path": "/tmp/zookeeper_test"})
     zookeeper_deployer.start("zookeeper",configs={"sync": True})
 
-
   def teardown_suite(self):
      #Terminate Zookeeper
     zookeeper_deployer = runtime.get_deployer("zookeeper")
