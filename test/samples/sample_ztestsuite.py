@@ -91,6 +91,19 @@ class SampleTest3(ZTest):
   def validate(self):
     assert self.teardown_executed
 
+class SampleTest4(ZTest):
+  """
+  A test without a test function (uses ZTest default)
+  """
+
+  phase = 0
+
+  def setup(self):
+    self.setup_executed = True
+
+  def validate(self):
+    assert self.setup_executed
+
 
 
 class SampleTestSuite(ZTestSuite):
