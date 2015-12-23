@@ -73,6 +73,39 @@ class SampleTest2(ZTest):
     assert 1 == 1
 
 
+class SampleTest3(ZTest):
+  phase = 0
+
+  def setup(self):
+    self.setup_executed = True
+
+  def test(self):
+    """
+    Yay! Docstring!
+    """
+    assert self.setup_executed
+
+  def teardown(self):
+    self.teardown_executed = True
+
+  def validate(self):
+    assert self.teardown_executed
+
+class SampleTest4(ZTest):
+  """
+  A test without a test function (uses ZTest default)
+  """
+
+  phase = 0
+
+  def setup(self):
+    self.setup_executed = True
+
+  def validate(self):
+    assert self.setup_executed
+
+
+
 class SampleTestSuite(ZTestSuite):
   config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ztestsuite_configs")
 
@@ -83,6 +116,7 @@ class SampleTestSuite(ZTestSuite):
     self.test0 = SampleTest0()
     self.test1 = SampleTest1(self)
     self.test2 = SampleTest2(self)
+    self.test3 = SampleTest3()
     self._deployer = deployer
 
   def setup_suite(self):

@@ -36,6 +36,18 @@ class ZTest(object):
   phase = constants.DEFAULT_TEST_PHASE
   iteration = constants.DEFAULT_ITERATION
 
+  def setup(self):
+    """
+    This runs before the test and can be used for test specific setup
+    """
+    pass
+
+  def teardown(self):
+    """
+    This runs after the test and can be used for test specific teardown
+    """
+    pass
+
   def test(self):
     """
     This is the main test function.
@@ -145,7 +157,7 @@ class ZTestSuite(object):
       ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest) and attr in testlist]
     else:
       ztests = [(attr, getattr(self, attr)) for attr in attrs if isinstance(getattr(self, attr), ZTest)]
-    tests = [Test(name, ztest.test, phase=ztest.phase, iteration=ztest.iteration, validate=ztest.validate)
+    tests = [Test(name, ztest.test, phase=ztest.phase, iteration=ztest.iteration, validate=ztest.validate, setup=ztest.setup, teardown=ztest.teardown)
              for (name, ztest) in ztests]
     return tests
 

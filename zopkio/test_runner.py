@@ -316,6 +316,9 @@ class TestRunner(object):
       try:
         if hasattr(self.deployment_module, 'setup'):
           self.deployment_module.setup()
+        for test in tests:
+          if hasattr(test, 'setup'):
+            test.setup()
       except BaseException:
         for test in tests:
           test.result = constants.SKIPPED
@@ -350,6 +353,9 @@ class TestRunner(object):
       try:
         if hasattr(self.deployment_module, 'teardown'):
           self.deployment_module.teardown()
+        for test in tests:
+          if hasattr(test, 'teardown'):
+            test.teardown()
         if not setup_fail:
           failure_handler.notify_success()
       except BaseException:
@@ -389,7 +395,9 @@ class TestRunner(object):
       test.start_time = time.time()
       logger.debug("Setting up test: " + test.name)
       try:
-        if hasattr(self.deployment_module, 'setup'):
+        if hasattr(test, 'setup'):
+          test.setup()
+        elif hasattr(self.deployment_module, 'setup'):
           self.deployment_module.setup()
       except BaseException:
         test.result = constants.SKIPPED
@@ -417,7 +425,9 @@ class TestRunner(object):
 
       logger.debug("Tearing down test: " + test.name)
       try:
-        if hasattr(self.deployment_module, 'teardown'):
+        if (hasattr(test, 'teardown')):
+          test.teardown()
+        elif hasattr(self.deployment_module, 'teardown'):
           self.deployment_module.teardown()
         if not setup_fail:
           failure_handler.notify_success()
